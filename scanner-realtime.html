@@ -1,75 +1,1976 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#020617">
-  <title>Scanner entradas realtime</title>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-  <style>
-    :root{--bg:#020617;--card:#0f172a;--text:#f8fafc;--muted:#aebbd0;--border:rgba(255,255,255,.12);--blue:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626}
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:radial-gradient(circle at top left,rgba(37,99,235,.28),transparent 34%),radial-gradient(circle at bottom right,rgba(22,163,74,.12),transparent 32%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding-bottom:calc(86px + env(safe-area-inset-bottom))}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}.app{max-width:760px;margin:0 auto;padding:14px}.card{background:rgba(15,23,42,.97);border:1px solid var(--border);border-radius:24px;padding:18px;box-shadow:0 22px 60px rgba(0,0,0,.30);margin-bottom:14px}.title{font-size:31px;line-height:1.05;font-weight:950;letter-spacing:-.04em}.subtitle{color:var(--muted);font-size:15px;margin-top:6px;line-height:1.4}.mt{margin-top:14px}input,select{width:100%;min-height:52px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.08);color:white;padding:13px 14px;outline:none}input::placeholder{color:#8795aa}select option{color:#111827}.btn{width:100%;min-height:52px;border:0;border-radius:16px;background:var(--blue);color:white;font-size:16px;font-weight:850;padding:12px 16px}.btn.secondary{background:rgba(255,255,255,.10);border:1px solid var(--border)}.btn.danger{background:var(--bad)}.btn.ok{background:var(--ok)}.btn.small{min-height:42px;font-size:14px;border-radius:13px}.btn:disabled{opacity:.55;cursor:default}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:rgba(255,255,255,.075);border:1px solid var(--border);border-radius:18px;padding:14px 10px;text-align:center}.stat-number{font-size:30px;font-weight:950;line-height:1}.stat-label{font-size:12px;color:var(--muted);margin-top:6px;font-weight:750}.pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 11px;font-size:13px;font-weight:850;border:1px solid var(--border);background:rgba(255,255,255,.08)}.pill.ok{color:#bbf7d0;background:rgba(22,163,74,.18)}.pill.warn{color:#fde68a;background:rgba(217,119,6,.18)}.pill.bad{color:#fecaca;background:rgba(220,38,38,.18)}.pill.salon{color:#bfdbfe;background:rgba(37,99,235,.16)}.pill.palco{color:#fbcfe8;background:rgba(190,24,93,.16)}.notice{margin-top:12px;padding:13px;border-radius:15px;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.45);color:#fde68a;font-size:14px;line-height:1.45}.success{margin-top:12px;padding:13px;border-radius:15px;background:rgba(22,163,74,.14);border:1px solid rgba(22,163,74,.45);color:#bbf7d0;font-size:14px;line-height:1.45}.error-box{margin-top:12px;padding:13px;border-radius:15px;background:rgba(220,38,38,.14);border:1px solid rgba(248,113,113,.45);color:#fecaca;font-size:14px;line-height:1.45}.reader-wrap{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--border);background:#000;min-height:330px}#preview{width:100%;height:min(58vh,520px);object-fit:cover;display:block;background:#000}.scan-frame{pointer-events:none;position:absolute;inset:18%;border:3px solid rgba(255,255,255,.88);border-radius:22px;box-shadow:0 0 0 999px rgba(0,0,0,.28)}.scan-line{position:absolute;left:18%;right:18%;top:50%;height:2px;background:rgba(34,197,94,.95);box-shadow:0 0 20px rgba(34,197,94,.75);animation:scan 1.8s linear infinite}@keyframes scan{0%{top:22%}50%{top:78%}100%{top:22%}}.result-card{border-radius:24px;padding:20px;margin-bottom:14px;border:1px solid var(--border);background:rgba(255,255,255,.06)}.result-card.ok{background:rgba(22,163,74,.16);border-color:rgba(34,197,94,.5)}.result-card.warn{background:rgba(217,119,6,.16);border-color:rgba(245,158,11,.5)}.result-card.bad{background:rgba(220,38,38,.16);border-color:rgba(248,113,113,.5)}.result-main{font-size:28px;font-weight:950;letter-spacing:-.03em}.result-name{margin-top:8px;font-size:20px;font-weight:900}.result-meta{color:var(--muted);margin-top:6px;line-height:1.45;font-size:15px}.ticket-row{padding:13px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.06);margin-top:10px}.ticket-row.used{border-color:rgba(245,158,11,.38);background:rgba(245,158,11,.08)}.ticket-row.pending{border-color:rgba(34,197,94,.38);background:rgba(34,197,94,.08)}.ticket-name{font-weight:950;font-size:17px}.ticket-meta{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.4;word-break:break-word}.ticket-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:rgba(2,6,23,.94);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:6px;z-index:9999}.nav-btn{border:0;background:transparent;color:var(--muted);border-radius:14px;padding:8px 4px;min-height:53px;font-size:11px;font-weight:800}.nav-btn .nav-icon{display:block;font-size:21px;margin-bottom:2px}.nav-btn.active{background:rgba(37,99,235,.18);color:white}.small-text{color:var(--muted);font-size:13px;line-height:1.4}@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}.title{font-size:27px}.reader-wrap{min-height:280px}}
-  </style>
+<title>Control de entradas realtime</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+:root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --ok: #0f766e;
+      --bad: #b91c1c;
+      --warn: #b45309;
+      --blue: #1d4ed8;
+      --bg: #020617;
+      --card: #0f172a;
+      --text: #f8fafc;
+      --muted: #aebbd0;
+      --border: rgba(255,255,255,.12);
+      --blue: #2563eb;
+      --ok: #16a34a;
+      --warn: #d97706;
+      --bad: #dc2626;
+      --palco: #7c2d3e;
+      --salon: #163c67;
+}
+
+* {
+box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+}
+
+    body {
+    html, body {
+margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.28), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(22,163,74,.12), transparent 32%),
+        var(--bg);
+color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 14px 18px;
+      text-align: center;
+    body {
+      padding-bottom: calc(86px + env(safe-area-inset-bottom));
+}
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    button, input, select {
+      font: inherit;
+}
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    button {
+      cursor: pointer;
+}
+
+    main {
+      max-width: 760px;
+      margin: 18px auto;
+      padding: 0 14px 30px;
+    .app {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .hidden {
+      display: none !important;
+}
+
+.card {
+      background: var(--card);
+      background: rgba(15,23,42,.97);
+border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.30);
+margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    .title {
+      font-size: 29px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -.035em;
+}
+
+    input, select, button {
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .mt {
+      margin-top: 14px;
+    }
+
+    input, select {
+width: 100%;
+      font-size: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      min-height: 54px;
+      border-radius: 16px;
+border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+      color: white;
+      padding: 13px 14px;
+      outline: none;
+}
+
+    input, select {
+      background: white;
+    input::placeholder {
+      color: #8795aa;
+}
+
+    button {
+      cursor: pointer;
+      border: none;
+    select option {
+      color: #111827;
+    }
+
+    .btn {
+      width: 100%;
+      min-height: 56px;
+      border: 0;
+      border-radius: 17px;
+background: var(--blue);
+color: white;
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: 850;
+      padding: 13px 16px;
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: default;
+}
+
+    button.secondary {
+      background: #374151;
+    .btn.secondary {
+      background: rgba(255,255,255,.10);
+      border: 1px solid var(--border);
+}
+
+    button.danger {
+    .btn.danger {
+background: var(--bad);
+}
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    .btn.small {
+      min-height: 43px;
+      font-size: 15px;
+      border-radius: 14px;
+}
+
+    .row {
+    .btn.inline {
+      width: auto;
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .grid2 {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+    .hidden {
+      display: none !important;
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.075);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 11px 6px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 27px;
+      font-weight: 950;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .sync-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sync-badge,
+    .mode-badge,
+    .access-zone-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 13px;
+      font-weight: 850;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+    }
+
+    .sync-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .sync-badge.online .sync-dot { background: #22c55e; }
+    .sync-badge.syncing .sync-dot { background: #f59e0b; }
+    .sync-badge.offline .sync-dot { background: #ef4444; }
+
+    .access-zone-badge.patio {
+      color: #bfdbfe;
+      background: rgba(37, 99, 235, .16);
+      border-color: rgba(96, 165, 250, .3);
+    }
+
+    .access-zone-badge.palco {
+      color: #fbcfe8;
+      background: rgba(190, 24, 93, .16);
+      border-color: rgba(244, 114, 182, .3);
+    }
+
+    .access-zone-badge.all {
+      color: #fde68a;
+      background: rgba(217, 119, 6, .16);
+      border-color: rgba(251, 191, 36, .3);
+    }
+
+    .notice {
+      margin-top: 12px;
+      padding: 11px 13px;
+      border-radius: 15px;
+      background: rgba(245,158,11,.14);
+      border: 1px solid rgba(245,158,11,.45);
+      color: #fde68a;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .scanner-wrap {
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: #000;
+      margin-top: 14px;
+}
+
+#reader {
+width: 100%;
+      overflow: hidden;
+      border-radius: 12px;
+      min-height: 410px;
+background: #000;
+}
+
+    .status {
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      font-size: 18px;
+      font-weight: bold;
+    #reader video {
+      object-fit: cover !important;
+      border-radius: 22px;
+    }
+
+    .result {
+      min-height: 69vh;
+      border-radius: 26px;
+      border: 1px solid var(--border);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+text-align: center;
+      border: 2px solid transparent;
+}
+
+    .status.ok {
+      background: #ecfdf5;
+      color: var(--ok);
+      border-color: var(--ok);
+    .result.ok {
+      background: rgba(22,163,74,.23);
+      border-color: rgba(34,197,94,.65);
+}
+
+    .status.bad {
+      background: #fef2f2;
+      color: var(--bad);
+      border-color: var(--bad);
+    .result.duplicate {
+      background: rgba(217,119,6,.24);
+      border-color: rgba(251,191,36,.65);
+}
+
+    .status.warn {
+      background: #fffbeb;
+      color: var(--warn);
+      border-color: var(--warn);
+    .result.invalid,
+    .result.error {
+      background: rgba(220,38,38,.24);
+      border-color: rgba(248,113,113,.65);
+}
+
+    .status.sync {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+      font-size: 14px;
+      padding: 10px;
+    .result-icon {
+      font-size: 68px;
+      line-height: 1;
+      margin-bottom: 10px;
+}
+
+    .ticket-info {
+      font-size: 15px;
+      line-height: 1.45;
+    .result-title {
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: -.04em;
+}
+
+    .ticket-info strong {
+      display: inline-block;
+      min-width: 90px;
+    .result-name {
+      font-size: 23px;
+      font-weight: 850;
+      margin-top: 10px;
+}
+
+    .stats {
+    .zone-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      font-size: 20px;
+      margin-top: 12px;
+      padding: 8px 15px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.25);
+    }
+
+    .zone-badge.palco {
+      background: var(--palco);
+    }
+
+    .zone-badge.salon {
+      background: var(--salon);
+    }
+
+    .seat-grid {
+display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+}
+
+    .stat {
+      background: #f9fafb;
+    .seat-box {
+      background: rgba(255,255,255,.12);
+border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      border-radius: 20px;
+      padding: 15px 10px;
+}
+
+    .stat .num {
+      font-size: 22px;
+      font-weight: bold;
+    .seat-label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+}
+
+    .stat .label {
+      font-size: 12px;
+    .seat-value {
+      font-size: 43px;
+      font-weight: 950;
+      line-height: 1;
+      margin-top: 5px;
+    }
+
+    .time-box {
+      margin-top: 16px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 13px;
+    }
+
+    .time-label {
+color: var(--muted);
+      margin-top: 2px;
+      font-size: 13px;
+      font-weight: 800;
+}
+
+    .small {
+      font-size: 12px;
+    .time-value {
+      font-size: 21px;
+      font-weight: 900;
+      margin-top: 4px;
+    }
+
+    .meta {
+color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 11px;
+      word-break: break-word;
+}
+
+    .log {
+    .confirm-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 13px;
+      border-radius: 999px;
+      padding: 7px 11px;
+font-size: 13px;
+      max-height: 230px;
+      overflow-y: auto;
+      font-weight: 850;
+      border: 1px solid var(--border);
+    }
+
+    .confirm-badge.pending {
+      color: #fde68a;
+      background: rgba(217,119,6,.18);
+}
+
+    .confirm-badge.confirmed {
+      color: #bbf7d0;
+      background: rgba(22,163,74,.18);
+    }
+
+    .confirm-badge.error {
+      color: #fecaca;
+      background: rgba(220,38,38,.18);
+    }
+
+    .search-result,
+.log-item {
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+      padding: 13px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      margin-top: 10px;
+}
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #e5e7eb;
+    .search-name,
+    .log-name {
+      font-weight: 900;
+      font-size: 17px;
+    }
+
+    .search-meta,
+    .log-meta {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .search-actions {
+      margin-top: 10px;
+    }
+
+    .section-title {
+      font-size: 19px;
+      font-weight: 950;
+      margin-bottom: 8px;
+    }
+
+    .dashboard-zone {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .zone-card {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 14px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .zone-card.palco { border-left: 5px solid #a64c61; }
+    .zone-card.salon { border-left: 5px solid #3b82c4; }
+
+    .zone-card-title {
+      font-weight: 950;
+      font-size: 16px;
+    }
+
+    .zone-card-value {
+      font-size: 27px;
+      font-weight: 950;
+      margin-top: 5px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .setting-row:last-child {
+      border-bottom: 0;
+}
+
+    .pill.ok {
+      background: #ccfbf1;
+      color: #115e59;
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(620px, 100%);
+      padding: 9px 10px calc(9px + env(safe-area-inset-bottom));
+      background: rgba(2,6,23,.94);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      z-index: 9999;
+    }
+
+    .nav-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 14px;
+      padding: 8px 4px;
+      min-height: 53px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .nav-btn .nav-icon {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 2px;
+    }
+
+    .nav-btn.active {
+      background: rgba(37,99,235,.18);
+      color: white;
+}
+
+    @media (max-width: 620px) {
+      .row, .stats {
+    .small-text {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 520px) {
+      .grid2,
+      .dashboard-zone {
+grid-template-columns: 1fr;
+}
+
+      header h1 {
+        font-size: 18px;
+      .title {
+        font-size: 26px;
+      }
+
+      .result-title {
+        font-size: 30px;
+      }
+
+      #reader {
+        min-height: 360px;
+}
+}
+</style>
 </head>
+
 <body>
+  <header>
+    <h1>Control de entradas realtime</h1>
+    <p>Sistema nuevo con Firebase · Sin tocar el sistema actual</p>
+  </header>
+
+  <main>
+    <section id="loginCard" class="card">
+      <h2>Acceso</h2>
   <div class="app">
     <section id="loginView" class="card">
-      <div class="title">Scanner entradas</div>
-      <div class="subtitle">Control de acceso realtime para puertas.</div>
-      <div class="mt"><input id="emailInput" type="text" placeholder="patio1" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
-      <div class="small-text mt">No hace falta escribir @graduacion.local</div>
-      <div class="mt"><input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password"></div>
-      <div class="mt"><button id="loginButton" class="btn">Entrar</button></div>
-      <div id="loginMessage"></div>
-    </section>
+      <div class="title">Control de entradas</div>
+      <div class="subtitle">Sistema realtime con Firebase y sincronización al Excel.</div>
+
+      <label for="email">Usuario</label>
+      <input id="email" type="email" placeholder="patio1@graduacion.local" autocomplete="username" />
+      <div class="mt">
+        <input id="emailInput" type="text" placeholder="patio1" autocomplete="username" autocapitalize="none" spellcheck="false">
+      </div>
+
+      <label for="password" style="margin-top:10px;">Contraseña</label>
+      <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password" />
+      <div class="mt">
+        <input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password">
+      </div>
+
+      <button id="loginBtn">Entrar</button>
+      <div class="mt">
+        <button type="button" id="loginButton" class="btn">Entrar</button>
+      </div>
+
+      <p class="small">
+        Usa los usuarios creados en Firebase Authentication.
+      </p>
+      <div class="small-text mt">Usa los usuarios creados en Firebase Authentication.</div>
+</section>
+
+    <section id="appCard" class="hidden">
+      <section class="card">
+        <div class="row">
+          <div>
+            <label>Usuario conectado</label>
+            <div id="currentUser" class="small"></div>
     <main id="mainApp" class="hidden">
-      <section id="scanPage" class="page-view">
-        <section class="card">
-          <div class="ticket-top"><div><div class="title">Escanear</div><div id="userText" class="subtitle"></div></div><span id="zoneBadge" class="pill">Zona</span></div>
-          <div class="reader-wrap mt"><video id="preview" playsinline muted></video><canvas id="canvas" class="hidden"></canvas><div class="scan-frame"></div><div class="scan-line"></div></div>
-          <div class="grid2 mt"><button id="startCameraButton" class="btn">Activar cámara</button><button id="stopCameraButton" class="btn secondary">Pausar</button></div>
-          <div id="scanResult" class="mt"></div>
-        </section>
+      <section id="scannerTab" class="tab-view">
+        <div class="card">
+          <div class="sync-row" style="margin-top:0">
+            <div>
+              <div class="title">Escanear</div>
+              <div id="deviceLabel" class="subtitle"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
+              <div class="mode-badge">MODO REAL</div>
+              <div id="accessZoneBadge" class="access-zone-badge">ZONA</div>
+            </div>
+</div>
+
+          <div>
+            <label for="accessZone">Zona de acceso</label>
+            <select id="accessZone">
+              <option value="PATIO">Patio / Salón principal</option>
+              <option value="PALCO">Palco</option>
+              <option value="TODAS">Todas</option>
+            </select>
+          <div class="stats mt">
+            <div class="stat">
+              <div id="totalStat" class="stat-number">-</div>
+              <div class="stat-label">Total</div>
+            </div>
+            <div class="stat">
+              <div id="usedStat" class="stat-number">-</div>
+              <div class="stat-label">Dentro</div>
+            </div>
+            <div class="stat">
+              <div id="pendingStat" class="stat-number">-</div>
+              <div class="stat-label">Pendientes</div>
+            </div>
+          </div>
+
+          <div class="sync-row">
+            <div id="syncBadge" class="sync-badge syncing">
+              <span class="sync-dot"></span>
+              <span id="syncText">Conectando...</span>
+            </div>
+            <span id="lastSyncText" class="small-text">Firebase realtime</span>
+          </div>
+
+          <div class="scanner-wrap">
+            <div id="reader"></div>
+          </div>
+
+          <div class="grid2 mt">
+            <button type="button" id="startCameraButton" class="btn secondary small">Iniciar cámara</button>
+            <button type="button" id="restartCameraButton" class="btn secondary small">Reiniciar cámara</button>
+</div>
+</div>
       </section>
-      <section id="searchPage" class="page-view hidden"><section class="card"><div class="title">Buscar entrada</div><div class="subtitle">Busca por código, nombre, fila o butaca.</div><div class="mt"><input id="searchInput" type="search" placeholder="Nombre, código, fila 8, butaca 12..."></div><div id="searchResults" class="mt"></div></section></section>
-      <section id="summaryPage" class="page-view hidden"><section class="card"><div class="title">Resumen</div><div class="subtitle">Datos realtime de esta zona.</div><div class="grid3 mt"><div class="stat"><div id="totalStat" class="stat-number">-</div><div class="stat-label">Total</div></div><div class="stat"><div id="usedStat" class="stat-number">-</div><div class="stat-label">Dentro</div></div><div class="stat"><div id="pendingStat" class="stat-number">-</div><div class="stat-label">Pendientes</div></div></div></section><section class="card"><div class="title" style="font-size:22px">Últimos accesos</div><div id="recentLogs" class="mt"></div></section></section>
-      <section id="settingsPage" class="page-view hidden"><section class="card"><div class="title">Ajustes</div><div id="settingsInfo" class="subtitle"></div><div class="mt"><select id="cameraSelect"></select></div><div class="grid2 mt"><button id="reloadButton" class="btn secondary">Recargar datos</button><button id="logoutButton" class="btn danger">Salir</button></div></section></section>
+
+        <button id="logoutBtn" class="secondary">Cerrar sesión</button>
+      <section id="searchTab" class="tab-view hidden">
+        <div class="card">
+          <div class="title">Buscar entrada</div>
+          <div class="subtitle">Busca por nombre, código, zona, fila o butaca.</div>
+          <input id="searchInput" class="mt" type="search" placeholder="Escribe para buscar...">
+          <div id="searchResults" class="mt"></div>
+        </div>
+</section>
+
+      <section class="card">
+        <div class="stats">
+          <div class="stat">
+            <div id="statTotal" class="num">—</div>
+            <div class="label">Total</div>
+      <section id="dashboardTab" class="tab-view hidden">
+        <div class="card">
+          <div class="sync-row" style="margin-top:0">
+            <div>
+              <div class="title">Resumen</div>
+              <div class="subtitle">Estado general del acceso.</div>
+            </div>
+            <button type="button" class="btn secondary small inline" id="refreshDashboardButton">Actualizar</button>
+</div>
+          <div class="stat">
+            <div id="statUsed" class="num">—</div>
+            <div class="label">Validadas</div>
+
+          <div class="stats mt">
+            <div class="stat">
+              <div id="dashTotal" class="stat-number">-</div>
+              <div class="stat-label">Total</div>
+            </div>
+            <div class="stat">
+              <div id="dashUsed" class="stat-number">-</div>
+              <div class="stat-label">Dentro</div>
+            </div>
+            <div class="stat">
+              <div id="dashPending" class="stat-number">-</div>
+              <div class="stat-label">Pendientes</div>
+            </div>
+</div>
+          <div class="stat">
+            <div id="statPending" class="num">—</div>
+            <div class="label">Pendientes</div>
+
+          <div class="dashboard-zone">
+            <div class="zone-card salon">
+              <div class="zone-card-title">SALÓN</div>
+              <div id="dashSalon" class="zone-card-value">-</div>
+              <div id="dashSalonPending" class="small-text"></div>
+            </div>
+            <div class="zone-card palco">
+              <div class="zone-card-title">PALCO</div>
+              <div id="dashPalco" class="zone-card-value">-</div>
+              <div id="dashPalcoPending" class="small-text"></div>
+            </div>
+</div>
+</div>
+        <p class="small">Estas cifras se actualizan en tiempo real desde Firebase.</p>
+      </section>
+
+      <section class="card">
+        <h2>Escáner QR</h2>
+        <div id="reader"></div>
+
+        <button id="startBtn">Iniciar cámara</button>
+        <button id="stopBtn" class="danger" disabled>Detener cámara</button>
+        <div class="card">
+          <div class="section-title">Últimos movimientos</div>
+          <div id="recentLogs"></div>
+        </div>
+</section>
+
+      <section class="card">
+        <h2>Validación manual</h2>
+        <label for="manualCode">Código de entrada</label>
+        <input id="manualCode" type="text" placeholder="EV26-..." />
+        <button id="manualBtn">Validar código</button>
+      </section>
+      <section id="settingsTab" class="tab-view hidden">
+        <div class="card">
+          <div class="title">Ajustes</div>
+          <div class="subtitle">Configuración de este dispositivo.</div>
+
+      <section id="resultBox" class="status hidden"></section>
+      <section id="syncBox" class="status sync hidden"></section>
+          <div class="setting-row mt">
+            <div>
+              <div style="font-weight:900">Usuario</div>
+              <div id="settingsUser" class="small-text"></div>
+            </div>
+          </div>
+
+      <section id="ticketCard" class="card hidden">
+        <h2>Entrada</h2>
+        <div id="ticketInfo" class="ticket-info"></div>
+      </section>
+          <div class="setting-row">
+            <div style="width:100%">
+              <div style="font-weight:900">Zona de acceso</div>
+              <div class="small-text">Patio acepta Salón principal. Palco acepta únicamente Palco.</div>
+              <select id="accessZoneSelect" class="mt">
+                <option value="PATIO">Patio / Salón principal</option>
+                <option value="PALCO">Palco</option>
+                <option value="TODAS">Todas · solo incidencias</option>
+              </select>
+            </div>
+          </div>
+
+      <section class="card">
+        <h2>Últimos accesos</h2>
+        <div id="recentLog" class="log">
+          <p class="small">Aún no hay accesos registrados.</p>
+          <button type="button" class="btn danger mt" id="logoutButton">Cerrar sesión</button>
+</div>
+</section>
     </main>
+
+    <section id="resultView" class="hidden">
+      <div id="resultBox" class="result ok"></div>
+      <div class="grid2 mt">
+        <button type="button" class="btn secondary" id="resultSearchButton">Buscar</button>
+        <button type="button" class="btn" id="nextScanButton">Siguiente</button>
+      </div>
+</section>
+  </main>
   </div>
-  <nav id="bottomNav" class="bottom-nav hidden"><button type="button" id="navScan" class="nav-btn active" data-page="scan"><span class="nav-icon">▣</span>Escanear</button><button type="button" id="navSearch" class="nav-btn" data-page="search"><span class="nav-icon">⌕</span>Buscar</button><button type="button" id="navSummary" class="nav-btn" data-page="summary"><span class="nav-icon">▤</span>Resumen</button><button type="button" id="navSettings" class="nav-btn" data-page="settings"><span class="nav-icon">⚙</span>Ajustes</button></nav>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, runTransaction, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    const SHEETS_SYNC_URL="https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec";
-    const SHEETS_SYNC_SECRET="graduacion-realtime-2026";
-    const firebaseConfig={apiKey:"AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",authDomain:"control-entradas-64826hfgr.firebaseapp.com",projectId:"control-entradas-64826hfgr",storageBucket:"control-entradas-64826hfgr.firebasestorage.app",messagingSenderId:"779578072302",appId:"1:779578072302:web:57216df153bcb2319767ff"};
-    const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-    let currentUser=null,userEmail="",deviceLabel="",allowedZone="ALL",tickets={},recentLogs=[],unsubscribeTickets=null,unsubscribeCheckins=null,stream=null,scanning=false,lastScannedCode="",lastScannedAt=0,selectedCameraId=localStorage.getItem("scanner_camera_id")||"";
-    const loginView=document.getElementById("loginView"),mainApp=document.getElementById("mainApp"),bottomNav=document.getElementById("bottomNav"),video=document.getElementById("preview"),canvas=document.getElementById("canvas"),canvasContext=canvas.getContext("2d",{willReadFrequently:true});
-    document.getElementById("loginButton").addEventListener("click",login);document.getElementById("passwordInput").addEventListener("keydown",e=>{if(e.key==="Enter")login()});document.getElementById("startCameraButton").addEventListener("click",startCamera);document.getElementById("stopCameraButton").addEventListener("click",stopCamera);document.getElementById("logoutButton").addEventListener("click",logout);document.getElementById("reloadButton").addEventListener("click",()=>renderAll());document.getElementById("searchInput").addEventListener("input",renderSearch);document.getElementById("cameraSelect").addEventListener("change",async e=>{selectedCameraId=e.target.value;localStorage.setItem("scanner_camera_id",selectedCameraId);if(scanning)await startCamera()});document.querySelectorAll(".nav-btn[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-    onAuthStateChanged(auth,async user=>{if(!user){currentUser=null;loginView.classList.remove("hidden");mainApp.classList.add("hidden");bottomNav.classList.add("hidden");stopCamera();if(unsubscribeTickets)unsubscribeTickets();if(unsubscribeCheckins)unsubscribeCheckins();unsubscribeTickets=null;unsubscribeCheckins=null;return}currentUser=user;userEmail=(user.email||"").toLowerCase();deviceLabel=userEmail.split("@")[0]||"scanner";allowedZone=getAllowedZoneFromEmail(userEmail);loginView.classList.add("hidden");mainApp.classList.remove("hidden");bottomNav.classList.remove("hidden");document.getElementById("userText").textContent=`${deviceLabel} · ${userEmail}`;document.getElementById("settingsInfo").textContent=`${deviceLabel} · ${userEmail}`;renderZoneBadge();subscribeTickets();subscribeRecentCheckins();showPage("scan");await loadCameras();setTimeout(()=>startCamera().catch(()=>{}),300)});
-    async function login(){let email=document.getElementById("emailInput").value.trim().toLowerCase();const password=document.getElementById("passwordInput").value,button=document.getElementById("loginButton"),message=document.getElementById("loginMessage");if(email&&!email.includes("@"))email=email+"@graduacion.local";if(!email||!password){message.innerHTML='<div class="notice">Introduce usuario y contraseña.</div>';return}button.disabled=true;button.textContent="Entrando...";message.innerHTML="";try{await signInWithEmailAndPassword(auth,email,password)}catch(error){message.innerHTML=`<div class="error-box">No se ha podido iniciar sesión.<br>${escapeHtml(error.message)}</div>`}finally{button.disabled=false;button.textContent="Entrar"}}
-    async function logout(){stopCamera();await signOut(auth)}
-    function getAllowedZoneFromEmail(email){const prefix=String(email||"").split("@")[0].toLowerCase();if(prefix.startsWith("palco"))return"PALCO";if(prefix.startsWith("patio"))return"PATIO";if(prefix.startsWith("admin"))return"ALL";return"ALL"}
-    function renderZoneBadge(){const b=document.getElementById("zoneBadge");if(allowedZone==="PALCO"){b.className="pill palco";b.textContent="PALCO"}else if(allowedZone==="PATIO"){b.className="pill salon";b.textContent="SALÓN PRINCIPAL"}else{b.className="pill ok";b.textContent="TODAS"}}
-    function showPage(page){["scan","search","summary","settings"].forEach(name=>{document.getElementById(name+"Page").classList.toggle("hidden",name!==page);document.getElementById("nav"+capitalize(name)).classList.toggle("active",name===page)});if(page==="search")renderSearch();if(page==="summary")renderSummary();window.scrollTo(0,0)}
-    function capitalize(v){return v.charAt(0).toUpperCase()+v.slice(1)}
-    function subscribeTickets(){if(unsubscribeTickets)unsubscribeTickets();unsubscribeTickets=onSnapshot(collection(db,"tickets"),snap=>{tickets={};snap.forEach(d=>{const data=d.data();tickets[data.codigo||d.id]={...data,codigo:data.codigo||d.id}});renderAll()},error=>{console.error(error);document.getElementById("scanResult").innerHTML=`<div class="error-box">Error leyendo Firebase: ${escapeHtml(error.message)}</div>`})}
-    function subscribeRecentCheckins(){if(unsubscribeCheckins)unsubscribeCheckins();const q=query(collection(db,"checkins"),orderBy("checkin_at","desc"),limit(20));unsubscribeCheckins=onSnapshot(q,snap=>{recentLogs=[];snap.forEach(d=>recentLogs.push(d.data()));renderRecentLogs()},error=>console.error(error))}
-    function renderAll(){renderSummary();renderSearch();renderRecentLogs()}function getVisibleTickets(){return Object.values(tickets).filter(t=>allowedZone==="ALL"||getTicketAccessZone(t)===allowedZone)}
-    function renderSummary(){const v=getVisibleTickets(),total=v.length,used=v.filter(t=>t.usado===true).length;document.getElementById("totalStat").textContent=total||"-";document.getElementById("usedStat").textContent=used;document.getElementById("pendingStat").textContent=Math.max(total-used,0)}
-    function renderRecentLogs(){const c=document.getElementById("recentLogs"),logs=recentLogs.filter(l=>allowedZone==="ALL"||getTicketAccessZone(l)===allowedZone).slice(0,12);c.innerHTML=logs.length?logs.map(l=>`<div class="ticket-row used"><div class="ticket-top"><div><div class="ticket-name">${escapeHtml(l.nombre||"Sin nombre")}</div><div class="ticket-meta">${escapeHtml(l.zona_label||l.zona||"")} · Fila ${escapeHtml(l.fila||"-")} · Butaca ${escapeHtml(l.butaca||"-")}<br>${escapeHtml(formatDate(l.checkin_at||""))}${l.checkin_by?" · "+escapeHtml(l.checkin_by):""}</div></div><span class="pill ok">OK</span></div></div>`).join(""):'<div class="small-text">Todavía no hay accesos registrados.</div>'}
-    function renderSearch(){const c=document.getElementById("searchResults"),q=normalizeSearch(document.getElementById("searchInput").value);if(!q){c.innerHTML='<div class="small-text">Escribe algo para buscar.</div>';return}const results=getVisibleTickets().filter(t=>normalizeSearch([t.codigo,t.nombre,t.email,t.zona,t.zona_label,"fila "+t.fila,"butaca "+t.butaca,t.fila,t.butaca].join(" ")).includes(q)).slice(0,50);if(!results.length){c.innerHTML='<div class="notice">No hay entradas con esa búsqueda.</div>';return}c.innerHTML=results.map(t=>{const z=getTicketAccessZone(t),used=t.usado===true,zoneText=z==="PALCO"?"PALCO":"SALÓN PRINCIPAL",zoneClass=z==="PALCO"?"palco":"salon";return `<div class="ticket-row ${used?"used":"pending"}"><div class="ticket-top"><div><div class="ticket-name">${escapeHtml(t.nombre||"Sin nombre")}</div><div class="ticket-meta">${escapeHtml(t.codigo||"")}<br>Fila ${escapeHtml(t.fila||"-")} · Butaca ${escapeHtml(t.butaca||"-")}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill ${zoneClass}">${zoneText}</span><span class="pill ${used?"warn":"ok"}">${used?"USADA":"PENDIENTE"}</span></div></div>${used?`<div class="ticket-meta mt">Validada: ${escapeHtml(formatDate(t.checkin_at||""))}${t.checkin_by?" · "+escapeHtml(t.checkin_by):""}</div>`:""}<div class="mt"><button class="btn small ${used?"secondary":"ok"}" data-code="${escapeHtml(t.codigo||"")}">${used?"Ver estado":"Validar manualmente"}</button></div></div>`}).join("");c.querySelectorAll("button[data-code]").forEach(b=>b.addEventListener("click",()=>handleCode(b.dataset.code,true)))}
-    async function loadCameras(){try{await navigator.mediaDevices.getUserMedia({video:true});const devices=await navigator.mediaDevices.enumerateDevices(),cameras=devices.filter(d=>d.kind==="videoinput"),select=document.getElementById("cameraSelect");select.innerHTML=cameras.map((cam,i)=>`<option value="${escapeHtml(cam.deviceId)}">${escapeHtml(cam.label||"Cámara "+(i+1))}</option>`).join("");if(selectedCameraId&&cameras.some(c=>c.deviceId===selectedCameraId)){select.value=selectedCameraId}else if(cameras.length){const back=cameras.find(c=>/back|rear|trasera|environment/i.test(c.label));selectedCameraId=(back||cameras[cameras.length-1]).deviceId;select.value=selectedCameraId;localStorage.setItem("scanner_camera_id",selectedCameraId)}stopCamera()}catch(e){console.warn(e)}}
-    async function startCamera(){stopCamera();const constraints={audio:false,video:selectedCameraId?{deviceId:{exact:selectedCameraId}}:{facingMode:{ideal:"environment"}}};stream=await navigator.mediaDevices.getUserMedia(constraints);video.srcObject=stream;await video.play();scanning=true;requestAnimationFrame(scanLoop)}
-    function stopCamera(){scanning=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null}
-    function scanLoop(){if(!scanning||!video.videoWidth||!video.videoHeight){if(scanning)requestAnimationFrame(scanLoop);return}canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvasContext.drawImage(video,0,0,canvas.width,canvas.height);const imageData=canvasContext.getImageData(0,0,canvas.width,canvas.height),result=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:"attemptBoth"});if(result&&result.data)handleCode(result.data,false);requestAnimationFrame(scanLoop)}
-    async function handleCode(rawCode,manual){const code=normalizeCode(rawCode),now=Date.now();if(!code)return;if(!manual&&code===lastScannedCode&&now-lastScannedAt<2500)return;lastScannedCode=code;lastScannedAt=now;document.getElementById("scanResult").innerHTML='<div class="notice">Comprobando entrada...</div>';try{const result=await validateTicketTransaction(code);if(result.status==="OK"){showValidationResult("ok","ACCESO OK",result.ticket);syncSheetAction({action:"checkin",codigo:result.ticket.codigo||code,checkin_at:result.ticket.checkin_at||"",checkin_by:result.ticket.checkin_by||"",checkin_email:result.ticket.checkin_email||""},ok=>{if(!ok)document.getElementById("scanResult").innerHTML+='<div class="notice">⚠️ Entrada validada en Firebase, pero no se ha podido escribir en Excel.</div>'})}else if(result.status==="ALREADY_USED"){showValidationResult("warn","YA USADA",result.ticket)}else if(result.status==="WRONG_ZONE"){showValidationResult("bad","ZONA INCORRECTA",result.ticket,"Esta entrada no corresponde a esta puerta.")}else{document.getElementById("scanResult").innerHTML=`<div class="result-card bad"><div class="result-main">ENTRADA NO VÁLIDA</div><div class="result-meta">${escapeHtml(code)}</div></div>`}}catch(error){document.getElementById("scanResult").innerHTML=`<div class="error-box">Error validando entrada:<br>${escapeHtml(error.message)}</div>`}}
-    async function validateTicketTransaction(code){const ticketRef=doc(db,"tickets",code),checkinRef=doc(db,"checkins",code);return await runTransaction(db,async tx=>{const snap=await tx.get(ticketRef);if(!snap.exists())return{status:"NOT_FOUND"};const ticket=snap.data(),ticketZone=getTicketAccessZone(ticket);if(allowedZone!=="ALL"&&ticketZone!==allowedZone)return{status:"WRONG_ZONE",ticket};if(ticket.usado===true)return{status:"ALREADY_USED",ticket};const nowIso=new Date().toISOString(),updated={usado:true,checkin_at:nowIso,checkin_by:deviceLabel,checkin_uid:currentUser.uid,checkin_email:currentUser.email||"",last_update_source:"scanner_realtime"};tx.update(ticketRef,updated);tx.set(checkinRef,{codigo:ticket.codigo||code,nombre:ticket.nombre||"",zona:ticket.zona||"",zona_label:ticket.zona_label||"",fila:ticket.fila||"",butaca:ticket.butaca||"",tipo_entrada:ticket.tipo_entrada||"",checkin_at:nowIso,checkin_by:deviceLabel,checkin_uid:currentUser.uid,checkin_email:currentUser.email||"",created_at:nowIso});return{status:"OK",ticket:{...ticket,codigo:ticket.codigo||code,...updated}}})}
-    function showValidationResult(kind,mainText,ticket,extraText=""){const zone=getTicketAccessZone(ticket),zoneText=zone==="PALCO"?"PALCO":"SALÓN PRINCIPAL";document.getElementById("scanResult").innerHTML=`<div class="result-card ${kind}"><div class="result-main">${escapeHtml(mainText)}</div><div class="result-name">${escapeHtml(ticket.nombre||"Sin nombre")}</div><div class="result-meta">${escapeHtml(zoneText)} · Fila ${escapeHtml(ticket.fila||"-")} · Butaca ${escapeHtml(ticket.butaca||"-")}<br>${escapeHtml(ticket.codigo||"")}${ticket.checkin_at?"<br>Validada: "+escapeHtml(formatDate(ticket.checkin_at)):""}${ticket.checkin_by?" · "+escapeHtml(ticket.checkin_by):""}${extraText?"<br><br>"+escapeHtml(extraText):""}</div></div>`}
-    function syncSheetAction(params,callback){const cb="__scanner_sync_cb_"+Date.now()+"_"+Math.random().toString(36).slice(2),script=document.createElement("script");window[cb]=res=>{cleanup();callback?.(res&&res.status==="OK",res)};script.onerror=()=>{cleanup();callback?.(false,null)};function cleanup(){try{delete window[cb]}catch(e){}if(script.parentNode)script.parentNode.removeChild(script)}const url=new URL(SHEETS_SYNC_URL);url.searchParams.set("secret",SHEETS_SYNC_SECRET);url.searchParams.set("callback",cb);url.searchParams.set("_",Date.now());for(const k in params){if(Object.prototype.hasOwnProperty.call(params,k))url.searchParams.set(k,params[k]??"")}script.src=url.toString();document.head.appendChild(script)}
-    function normalizeCode(raw){let text=String(raw||"").trim();try{const url=new URL(text),code=url.searchParams.get("code")||url.searchParams.get("codigo");if(code)return code.trim().toUpperCase()}catch(e){}const match=text.match(/EV26-[A-Z0-9-]+/i);if(match)return match[0].toUpperCase();return text.toUpperCase()}function normalizeSearch(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}function getTicketAccessZone(ticket){const raw=String(ticket&&(ticket.zonaId||ticket.zona||ticket.zona_label||"")).toUpperCase();return raw.includes("PALCO")?"PALCO":"PATIO"}function formatDate(value){if(!value)return"";try{return new Date(value).toLocaleString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"})}catch(e){return value}}function escapeHtml(value){return String(value||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
-  </script>
+
+  <nav id="bottomNav" class="bottom-nav hidden">
+    <button type="button" id="navScanner" class="nav-btn active" data-tab="scanner">
+      <span class="nav-icon">▣</span>Escanear
+    </button>
+    <button type="button" id="navSearch" class="nav-btn" data-tab="search">
+      <span class="nav-icon">⌕</span>Buscar
+    </button>
+    <button type="button" id="navDashboard" class="nav-btn" data-tab="dashboard">
+      <span class="nav-icon">▤</span>Resumen
+    </button>
+    <button type="button" id="navSettings" class="nav-btn" data-tab="settings">
+      <span class="nav-icon">⚙</span>Ajustes
+    </button>
+  </nav>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+@@ -366,246 +758,314 @@ <h2>Últimos accesos</h2>
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+    let tickets = {};
+    let currentUser = null;
+    let currentZone = "PATIO";
+let html5QrCode = null;
+    let cameraRunning = false;
+    let processing = false;
+    let scannerStarted = false;
+    let isProcessing = false;
+    let lastCode = "";
+    let lastCodeTime = 0;
+    let currentResultCode = "";
+let unsubscribeTickets = null;
+let unsubscribeCheckins = null;
+    let audioCtx = null;
+
+    const loginCard = document.getElementById("loginCard");
+    const appCard = document.getElementById("appCard");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const currentUserEl = document.getElementById("currentUser");
+    const accessZoneEl = document.getElementById("accessZone");
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const manualCodeInput = document.getElementById("manualCode");
+    const manualBtn = document.getElementById("manualBtn");
+    const REPEAT_BLOCK_MS = 4500;
+
+    const loginView = document.getElementById("loginView");
+    const mainApp = document.getElementById("mainApp");
+    const bottomNav = document.getElementById("bottomNav");
+    const resultView = document.getElementById("resultView");
+const resultBox = document.getElementById("resultBox");
+    const syncBox = document.getElementById("syncBox");
+    const ticketCard = document.getElementById("ticketCard");
+    const ticketInfo = document.getElementById("ticketInfo");
+
+    const statTotal = document.getElementById("statTotal");
+    const statUsed = document.getElementById("statUsed");
+    const statPending = document.getElementById("statPending");
+    const recentLog = document.getElementById("recentLog");
+    document.getElementById("loginButton").addEventListener("click", login);
+    document.getElementById("logoutButton").addEventListener("click", logout);
+    document.getElementById("startCameraButton").addEventListener("click", startScanner);
+    document.getElementById("restartCameraButton").addEventListener("click", restartScanner);
+    document.getElementById("nextScanButton").addEventListener("click", nextScan);
+    document.getElementById("resultSearchButton").addEventListener("click", () => showTab("search"));
+    document.getElementById("refreshDashboardButton").addEventListener("click", renderDashboard);
+    document.getElementById("searchInput").addEventListener("input", renderSearchResults);
+    document.getElementById("accessZoneSelect").addEventListener("change", changeAccessZone);
+
+    document.querySelectorAll(".nav-btn[data-tab]").forEach(button => {
+      button.addEventListener("click", () => showTab(button.dataset.tab));
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        enterMainApp();
+      } else {
+        currentUser = null;
+        loginView.classList.remove("hidden");
+        mainApp.classList.add("hidden");
+        bottomNav.classList.add("hidden");
+        resultView.classList.add("hidden");
+
+        if (unsubscribeTickets) unsubscribeTickets();
+        if (unsubscribeCheckins) unsubscribeCheckins();
+
+        unsubscribeTickets = null;
+        unsubscribeCheckins = null;
+      }
+    });
+
+    async function login() {
+      let email = document.getElementById("emailInput").value.trim().toLowerCase();
+      const password = document.getElementById("passwordInput").value;
+      const button = document.getElementById("loginButton");
+
+      if (email && !email.includes("@")) {
+        email = email + "@graduacion.local";
+      }
+
+if (!email || !password) {
+        showResult("Introduce usuario y contraseña.", "warn");
+        alert("Introduce usuario y contraseña.");
+return;
+}
+
+      loginBtn.disabled = true;
+      button.disabled = true;
+      button.textContent = "Entrando...";
+      unlockAudio();
+
+try {
+await signInWithEmailAndPassword(auth, email, password);
+} catch (error) {
+        showResult("No se ha podido iniciar sesión: " + error.message, "bad");
+        alert("No se ha podido iniciar sesión: " + error.message);
+} finally {
+        loginBtn.disabled = false;
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await stopScanner();
+      await signOut(auth);
+    });
+
+    startBtn.addEventListener("click", startScanner);
+    stopBtn.addEventListener("click", stopScanner);
+
+    manualBtn.addEventListener("click", async () => {
+      const code = normalizeCode(manualCodeInput.value);
+      if (!code) {
+        showResult("Introduce un código.", "warn");
+        return;
+        button.disabled = false;
+        button.textContent = "Entrar";
+}
+    }
+
+      await validateCode(code);
+    });
+    async function logout() {
+      if (!confirm("¿Cerrar sesión?")) return;
+
+    manualCodeInput.addEventListener("keydown", async (event) => {
+      if (event.key === "Enter") {
+        const code = normalizeCode(manualCodeInput.value);
+        if (code) await validateCode(code);
+      }
+    });
+      try {
+        await stopScanner();
+      } catch (error) {}
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginCard.classList.add("hidden");
+        appCard.classList.remove("hidden");
+        currentUserEl.textContent = user.email + " · " + user.uid;
+      await signOut(auth);
+    }
+
+        configureZoneByUser(user.email || "");
+        subscribeStats();
+        subscribeRecentCheckins();
+    function enterMainApp() {
+      loginView.classList.add("hidden");
+      mainApp.classList.remove("hidden");
+      bottomNav.classList.remove("hidden");
+
+      } else {
+        loginCard.classList.remove("hidden");
+        appCard.classList.add("hidden");
+        currentUserEl.textContent = "";
+      document.getElementById("deviceLabel").textContent = currentUser.email;
+      document.getElementById("settingsUser").textContent = currentUser.email + " · " + currentUser.uid;
+
+        if (unsubscribeTickets) unsubscribeTickets();
+        if (unsubscribeCheckins) unsubscribeCheckins();
+      configureZoneByUser(currentUser.email || "");
+      subscribeTickets();
+      subscribeRecentCheckins();
+      showTab("scanner");
+
+        unsubscribeTickets = null;
+        unsubscribeCheckins = null;
+      }
+    });
+      setTimeout(() => startScanner().catch(() => {}), 400);
+    }
+
+function configureZoneByUser(email) {
+const lower = email.toLowerCase();
+
+if (lower.startsWith("palco")) {
+        accessZoneEl.value = "PALCO";
+        accessZoneEl.disabled = true;
+        currentZone = "PALCO";
+        document.getElementById("accessZoneSelect").value = "PALCO";
+        document.getElementById("accessZoneSelect").disabled = true;
+} else if (lower.startsWith("patio")) {
+        accessZoneEl.value = "PATIO";
+        accessZoneEl.disabled = true;
+      } else if (lower.startsWith("admin")) {
+        accessZoneEl.value = "TODAS";
+        accessZoneEl.disabled = false;
+        currentZone = "PATIO";
+        document.getElementById("accessZoneSelect").value = "PATIO";
+        document.getElementById("accessZoneSelect").disabled = true;
+} else {
+        accessZoneEl.value = "PATIO";
+        accessZoneEl.disabled = false;
+        currentZone = "TODAS";
+        document.getElementById("accessZoneSelect").value = "TODAS";
+        document.getElementById("accessZoneSelect").disabled = false;
+}
+
+      renderAccessZone();
+}
+
+    async function startScanner() {
+      if (cameraRunning) return;
+    function changeAccessZone() {
+      currentZone = document.getElementById("accessZoneSelect").value;
+      renderAccessZone();
+      showTab("scanner");
+    }
+
+      html5QrCode = new Html5Qrcode("reader");
+    function renderAccessZone() {
+      const badge = document.getElementById("accessZoneBadge");
+
+      const config = {
+        fps: 10,
+        qrbox: { width: 260, height: 260 },
+        rememberLastUsedCamera: true
+      };
+      badge.textContent =
+        currentZone === "PATIO" ? "PATIO" :
+        currentZone === "PALCO" ? "PALCO" :
+        "TODAS";
+
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          async (decodedText) => {
+            const code = normalizeCode(decodedText);
+            if (code) await validateCode(code);
+          },
+          () => {}
+        );
+
+        cameraRunning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+      badge.className =
+        "access-zone-badge " +
+        (currentZone === "PATIO" ? "patio" :
+         currentZone === "PALCO" ? "palco" :
+         "all");
+    }
+
+      } catch (error) {
+        showResult("No se ha podido iniciar la cámara: " + error.message, "bad");
+      }
+    function showTab(tab) {
+      resultView.classList.add("hidden");
+      mainApp.classList.remove("hidden");
+      bottomNav.classList.remove("hidden");
+
+      ["scanner", "search", "dashboard", "settings"].forEach(name => {
+        document.getElementById(name + "Tab").classList.toggle("hidden", name !== tab);
+        document.getElementById("nav" + capitalize(name)).classList.toggle("active", name === tab);
+      });
+
+      if (tab === "search") renderSearchResults();
+      if (tab === "dashboard") renderDashboard();
+
+      window.scrollTo(0, 0);
+    }
+
+    function capitalize(value) {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    async function startScanner() {
+      if (scannerStarted) return;
+
+      html5QrCode = new Html5Qrcode("reader", {
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+        verbose: false
+      });
+
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 14,
+          disableFlip: true,
+          qrbox: (w, h) => {
+            const size = Math.floor(Math.min(w, h) * 0.88);
+            return { width: size, height: size };
+          }
+        },
+        onScanSuccess,
+        () => {}
+      );
+
+      scannerStarted = true;
+      setSyncStatus("online", "Cámara activa");
+}
+
+async function stopScanner() {
+      if (!html5QrCode || !cameraRunning) return;
+      if (!html5QrCode || !scannerStarted) return;
+
+try {
+await html5QrCode.stop();
+await html5QrCode.clear();
+} catch (error) {}
+
+      cameraRunning = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      html5QrCode = null;
+      scannerStarted = false;
+}
+
+    async function validateCode(rawCode) {
+      if (processing) return;
+    async function restartScanner() {
+      const button = document.getElementById("restartCameraButton");
+      button.disabled = true;
+      button.textContent = "Reiniciando...";
+
+      const user = auth.currentUser;
+      if (!user) {
+        showResult("No hay sesión iniciada.", "bad");
+        return;
+      try {
+        await stopScanner();
+        await new Promise(resolve => setTimeout(resolve, 350));
+        await startScanner();
+      } catch (error) {
+        alert("No se ha podido reiniciar la cámara: " + error.message);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Reiniciar cámara";
+}
+    }
+
+      const code = normalizeCode(rawCode);
+      if (!code) {
+        showResult("Código no válido.", "bad");
+        return;
+      }
+    function onScanSuccess(decodedText) {
+      const code = normalizeCode(decodedText);
+      const now = Date.now();
+
+      if (!code || isProcessing) return;
+      if (code === lastCode && now - lastCodeTime < REPEAT_BLOCK_MS) return;
+
+      processing = true;
+      manualBtn.disabled = true;
+      lastCode = code;
+      lastCodeTime = now;
+      isProcessing = true;
+
+      validateCode(code);
+    }
+
+    async function validateCode(code) {
+      currentResultCode = code;
+
+try {
+        const result = await validateTicketTransaction(code, user);
+        const result = await validateTicketTransaction(code);
+
+if (result.status === "OK") {
+          showResult("ACCESO VALIDADO", "ok");
+          showTicket(result.ticket);
+          vibrateOk();
+          showResult({
+            ...result.ticket,
+            status: "OK",
+            message: "Acceso permitido.",
+            syncState: "pending"
+          });
+
+syncCheckinToSheets(result.ticket);
+
+} else if (result.status === "ALREADY_USED") {
+          showResult("ENTRADA YA USADA", "bad");
+          showTicket(result.ticket);
+          vibrateBad();
+          showResult({
+            ...result.ticket,
+            status: "DUPLICATE",
+            message: "Esta entrada ya había sido utilizada."
+          });
+
+} else if (result.status === "WRONG_ZONE") {
+          showResult("ZONA INCORRECTA: esta entrada es de " + result.ticket.zona_label, "warn");
+          showTicket(result.ticket);
+          vibrateBad();
+
+        } else if (result.status === "NOT_FOUND") {
+          showResult("ENTRADA NO ENCONTRADA", "bad");
+          hideTicket();
+          vibrateBad();
+          const zone = getTicketAccessZone(result.ticket);
+          showResult({
+            ...result.ticket,
+            status: "WRONG_ZONE",
+            message: "Esta entrada corresponde a " + accessZoneLabel(zone) + "."
+          });
+
+        } else {
+          showResult({
+            status: "INVALID",
+            codigo: code,
+            message: "El código no corresponde a ninguna entrada cargada."
+          });
+}
+
+} catch (error) {
+        showResult("Error validando entrada: " + error.message, "bad");
+        vibrateBad();
+      } finally {
+        setTimeout(() => {
+          processing = false;
+          manualBtn.disabled = false;
+        }, 1200);
+        showResult({
+          status: "ERROR",
+          codigo: code,
+          message: "Error validando entrada: " + error.message
+        });
+}
+}
+
+    async function validateTicketTransaction(code, user) {
+    async function validateTicketTransaction(code) {
+const ticketRef = doc(db, "tickets", code);
+const checkinRef = doc(db, "checkins", code);
+      const selectedZone = accessZoneEl.value;
+      const deviceLabel = getDeviceLabel(user.email || "");
+      const deviceLabel = getDeviceLabel(currentUser.email || "");
+
+      return await runTransaction(db, async (transaction) => {
+      return await runTransaction(db, async transaction => {
+const snap = await transaction.get(ticketRef);
+
+if (!snap.exists()) {
+return { status: "NOT_FOUND" };
+}
+
+const ticket = snap.data();
+        const ticketZone = getTicketAccessZone(ticket);
+
+        if (!zoneMatches(selectedZone, ticket.zona)) {
+        if (currentZone !== "TODAS" && currentZone !== ticketZone) {
+return {
+status: "WRONG_ZONE",
+            ticket: ticket
+            ticket
+};
+}
+
+if (ticket.usado === true) {
+return {
+status: "ALREADY_USED",
+            ticket: ticket
+            ticket
+};
+}
+
+@@ -615,8 +1075,8 @@ <h2>Últimos accesos</h2>
+usado: true,
+checkin_at: nowIso,
+checkin_by: deviceLabel,
+          checkin_uid: user.uid,
+          checkin_email: user.email || "",
+          checkin_uid: currentUser.uid,
+          checkin_email: currentUser.email || "",
+last_update_source: "scanner_realtime"
+};
+
+@@ -632,65 +1092,139 @@ <h2>Últimos accesos</h2>
+tipo_entrada: ticket.tipo_entrada || "",
+checkin_at: nowIso,
+checkin_by: deviceLabel,
+          checkin_uid: user.uid,
+          checkin_email: user.email || "",
+          sync_status: "PENDING",
+          sync_at: "",
+          checkin_uid: currentUser.uid,
+          checkin_email: currentUser.email || "",
+created_at: nowIso
+});
+
+        const finalTicket = {
+          ...ticket,
+          ...updatedTicket
+        };
+
+return {
+status: "OK",
+          ticket: finalTicket
+          ticket: {
+            ...ticket,
+            ...updatedTicket
+          }
+};
+});
+}
+
+    function syncCheckinToSheets(ticket) {
+      syncBox.classList.remove("hidden");
+      syncBox.textContent = "Sincronizando con Google Sheets...";
+    function showResult(res) {
+      mainApp.classList.add("hidden");
+      bottomNav.classList.add("hidden");
+      resultView.classList.remove("hidden");
+
+      let css = "error";
+      let icon = "❌";
+      let title = "Entrada no válida";
+
+      if (res.status === "OK") {
+        css = "ok";
+        icon = "✅";
+        title = "Acceso permitido";
+        playSuccess();
+        vibrate([70]);
+      } else if (res.status === "DUPLICATE") {
+        css = "duplicate";
+        icon = "⚠️";
+        title = "Entrada ya utilizada";
+        playWarning();
+        vibrate([120, 70, 120]);
+      } else if (res.status === "WRONG_ZONE") {
+        css = "invalid";
+        icon = "↪️";
+        title = "Zona incorrecta";
+        playError();
+        vibrate([180, 80, 180]);
+      } else {
+        css = "invalid";
+        icon = "❌";
+        title = "Entrada no válida";
+        playError();
+        vibrate([250]);
+      }
+
+      const zoneClass = getTicketAccessZone(res) === "PALCO" ? "palco" : "salon";
+      const zoneText = zoneClass === "palco" ? "PALCO" : "SALÓN PRINCIPAL";
+      const hasSeat = res.fila || res.butaca;
+
+      let confirmation = "";
+      if (res.status === "OK") {
+        confirmation = '<div id="resultConfirmation" class="confirm-badge pending">⏳ Guardando en Excel...</div>';
+      }
+
+      resultBox.className = "result " + css;
+      resultBox.innerHTML = `
+        <div class="result-icon">${icon}</div>
+        <div class="result-title">${escapeHtml(title)}</div>
+        ${res.nombre ? `<div class="result-name">${escapeHtml(res.nombre)}</div>` : ""}
+        ${res.zona ? `<div><span class="zone-badge ${zoneClass}">${escapeHtml(zoneText)}</span></div>` : ""}
+        ${hasSeat ? `
+          <div class="seat-grid">
+            <div class="seat-box">
+              <div class="seat-label">Fila</div>
+              <div class="seat-value">${escapeHtml(res.fila || "-")}</div>
+            </div>
+            <div class="seat-box">
+              <div class="seat-label">Butaca</div>
+              <div class="seat-value">${escapeHtml(res.butaca || "-")}</div>
+            </div>
+          </div>` : ""}
+        ${res.checkin_at ? `
+          <div class="time-box">
+            <div class="time-label">${res.status === "DUPLICATE" ? "Escaneada originalmente" : "Hora de acceso"}</div>
+            <div class="time-value">${escapeHtml(formatDate(res.checkin_at))}</div>
+          </div>` : ""}
+        ${confirmation}
+        <div class="meta">${escapeHtml(res.codigo || currentResultCode || "")}</div>
+        ${res.message ? `<div class="meta">${escapeHtml(res.message)}</div>` : ""}
+      `;
+    }
+
+    function markCurrentResultConfirmed() {
+      const badge = document.getElementById("resultConfirmation");
+      if (badge) {
+        badge.className = "confirm-badge confirmed";
+        badge.textContent = "☁️ Guardado en Excel";
+      }
+    }
+
+    function markCurrentResultSyncError() {
+      const badge = document.getElementById("resultConfirmation");
+      if (badge) {
+        badge.className = "confirm-badge error";
+        badge.textContent = "⚠️ Validado, pero no guardado en Excel";
+      }
+    }
+
+    function nextScan() {
+      currentResultCode = "";
+      isProcessing = false;
+      showTab("scanner");
+    }
+
+    function syncCheckinToSheets(ticket) {
+const callbackName = "__sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+const script = document.createElement("script");
+
+window[callbackName] = function(response) {
+        try {
+          console.log("Sync Sheets:", response);
+        } catch (error) {}
+
+if (response && response.status === "OK") {
+          syncBox.textContent = "Guardado también en Google Sheets.";
+          markCurrentResultConfirmed();
+} else {
+          syncBox.textContent = "Validado en Firebase, pero no se ha podido guardar en Sheets.";
+          markCurrentResultSyncError();
+}
+
+        try {
+          delete window[callbackName];
+        } catch (error) {}
+
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+        cleanup();
+};
+
+script.onerror = function() {
+        syncBox.classList.remove("hidden");
+        syncBox.textContent = "Validado en Firebase, pero ha fallado la sincronización con Sheets.";
+
+        try {
+          delete window[callbackName];
+        } catch (error) {}
+
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+        markCurrentResultSyncError();
+        cleanup();
+};
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch (error) {}
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+const url = new URL(SHEETS_SYNC_URL);
+
+url.searchParams.set("action", "checkin");
+@@ -699,159 +1233,237 @@ <h2>Últimos accesos</h2>
+url.searchParams.set("_", Date.now());
+
+url.searchParams.set("codigo", ticket.codigo || "");
+      url.searchParams.set("nombre", ticket.nombre || "");
+      url.searchParams.set("zona", ticket.zona || "");
+      url.searchParams.set("zona_label", ticket.zona_label || "");
+      url.searchParams.set("fila", ticket.fila || "");
+      url.searchParams.set("butaca", ticket.butaca || "");
+      url.searchParams.set("tipo_entrada", ticket.tipo_entrada || "");
+url.searchParams.set("checkin_at", ticket.checkin_at || "");
+url.searchParams.set("checkin_by", ticket.checkin_by || "");
+url.searchParams.set("checkin_email", ticket.checkin_email || "");
+      url.searchParams.set("checkin_uid", ticket.checkin_uid || "");
+
+script.src = url.toString();
+document.head.appendChild(script);
+}
+
+    function zoneMatches(selectedZone, ticketZone) {
+      const normalized = String(ticketZone || "").toUpperCase();
+    function subscribeTickets() {
+      if (unsubscribeTickets) unsubscribeTickets();
+
+      if (selectedZone === "TODAS") return true;
+      if (selectedZone === "PALCO") return normalized === "PALCO";
+      if (selectedZone === "PATIO") return normalized === "SALON" || normalized === "PATIO";
+      unsubscribeTickets = onSnapshot(collection(db, "tickets"), snapshot => {
+        tickets = {};
+
+      return false;
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          tickets[data.codigo || docSnap.id] = {
+            ...data,
+            codigo: data.codigo || docSnap.id
+          };
+        });
+
+        renderStats();
+        renderSearchResults();
+        renderDashboard();
+        setSyncStatus("online", "Sincronizado");
+      }, error => {
+        setSyncStatus("offline", "Error Firebase");
+        console.error(error);
+      });
+}
+
+    function normalizeCode(value) {
+      const text = String(value || "").trim();
+    function subscribeRecentCheckins() {
+      if (unsubscribeCheckins) unsubscribeCheckins();
+
+      try {
+        const url = new URL(text);
+        const code = url.searchParams.get("code") || url.searchParams.get("codigo");
+        if (code) return code.trim().toUpperCase();
+      } catch (error) {}
+      const q = query(
+        collection(db, "checkins"),
+        orderBy("checkin_at", "desc"),
+        limit(12)
+      );
+
+      const match = text.match(/EV26-[A-Z0-9-]+/i);
+      if (match) return match[0].toUpperCase();
+      unsubscribeCheckins = onSnapshot(q, snapshot => {
+        const logs = [];
+
+      return text.toUpperCase();
+    }
+        snapshot.forEach(docSnap => {
+          logs.push(docSnap.data());
+        });
+
+    function getDeviceLabel(email) {
+      const clean = String(email || "").toLowerCase();
+        renderRecentLogs(logs);
+      }, error => {
+        console.error(error);
+      });
+    }
+
+      if (clean.includes("@")) {
+        return clean.split("@")[0];
+      }
+    function renderStats() {
+      const values = Object.values(tickets);
+      const total = values.length;
+      const used = values.filter(t => t.usado === true).length;
+
+      return clean || "scanner";
+      document.getElementById("totalStat").textContent = total || "-";
+      document.getElementById("usedStat").textContent = used;
+      document.getElementById("pendingStat").textContent = Math.max(total - used, 0);
+}
+
+    function showResult(message, type) {
+      resultBox.textContent = message;
+      resultBox.className = "status " + type;
+      resultBox.classList.remove("hidden");
+    }
+    function renderDashboard() {
+      const values = Object.values(tickets);
+      const total = values.length;
+      const used = values.filter(t => t.usado === true).length;
+
+    function showTicket(ticket) {
+      ticketCard.classList.remove("hidden");
+      const salon = values.filter(t => getTicketAccessZone(t) === "PATIO");
+      const palco = values.filter(t => getTicketAccessZone(t) === "PALCO");
+
+      ticketInfo.innerHTML = `
+        <p><strong>Nombre:</strong> ${escapeHtml(ticket.nombre || "")}</p>
+        <p><strong>Zona:</strong> ${escapeHtml(ticket.zona_label || ticket.zona || "")}</p>
+        <p><strong>Fila:</strong> ${escapeHtml(ticket.fila || "")}</p>
+        <p><strong>Butaca:</strong> ${escapeHtml(ticket.butaca || "")}</p>
+        <p><strong>Código:</strong> ${escapeHtml(ticket.codigo || "")}</p>
+        <p><strong>Usado:</strong> ${ticket.usado ? "Sí" : "No"}</p>
+        ${ticket.checkin_at ? `<p><strong>Hora:</strong> ${escapeHtml(formatDate(ticket.checkin_at))}</p>` : ""}
+        ${ticket.checkin_by ? `<p><strong>Validado por:</strong> ${escapeHtml(ticket.checkin_by)}</p>` : ""}
+      `;
+      const salonUsed = salon.filter(t => t.usado === true).length;
+      const palcoUsed = palco.filter(t => t.usado === true).length;
+
+      document.getElementById("dashTotal").textContent = total || "-";
+      document.getElementById("dashUsed").textContent = used;
+      document.getElementById("dashPending").textContent = Math.max(total - used, 0);
+
+      document.getElementById("dashSalon").textContent = `${salonUsed} / ${salon.length}`;
+      document.getElementById("dashSalonPending").textContent = `${salon.length - salonUsed} pendientes`;
+
+      document.getElementById("dashPalco").textContent = `${palcoUsed} / ${palco.length}`;
+      document.getElementById("dashPalcoPending").textContent = `${palco.length - palcoUsed} pendientes`;
+}
+
+    function hideTicket() {
+      ticketCard.classList.add("hidden");
+      ticketInfo.innerHTML = "";
+    function renderRecentLogs(logs = []) {
+      const container = document.getElementById("recentLogs");
+
+      if (!logs.length) {
+        container.innerHTML = '<div class="small-text">Todavía no hay movimientos registrados.</div>';
+        return;
+      }
+
+      container.innerHTML = logs.map(log => `
+        <div class="log-item">
+          <div class="log-name">${escapeHtml(log.nombre || "Sin nombre")}</div>
+          <div class="log-meta">
+            ${escapeHtml(log.zona_label || log.zona || "")}
+            · Fila ${escapeHtml(log.fila || "")}
+            · Butaca ${escapeHtml(log.butaca || "")}<br>
+            ${escapeHtml(formatDate(log.checkin_at || ""))}
+            · ${escapeHtml(log.checkin_by || "")}
+          </div>
+        </div>
+      `).join("");
+}
+
+    function subscribeStats() {
+      if (unsubscribeTickets) unsubscribeTickets();
+    function renderSearchResults() {
+      const container = document.getElementById("searchResults");
+      const input = document.getElementById("searchInput");
+
+      unsubscribeTickets = onSnapshot(collection(db, "tickets"), (snapshot) => {
+        let total = 0;
+        let used = 0;
+      if (!container || !input) return;
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          total++;
+      const q = normalizeSearch(input.value);
+
+          if (data.usado === true) {
+            used++;
+          }
+        });
+      if (!q) {
+        container.innerHTML = '<div class="small-text">Escribe parte del nombre, código, zona, fila o butaca.</div>';
+        return;
+      }
+
+      const results = Object.values(tickets)
+        .filter(ticket => {
+          const haystack = normalizeSearch([
+            ticket.codigo,
+            ticket.nombre,
+            ticket.zona,
+            ticket.zona_label,
+            "fila " + ticket.fila,
+            "butaca " + ticket.butaca,
+            ticket.fila,
+            ticket.butaca
+          ].join(" "));
+
+          return haystack.includes(q);
+        })
+        .slice(0, 35);
+
+      if (!results.length) {
+        container.innerHTML = '<div class="notice">No se ha encontrado ninguna entrada.</div>';
+        return;
+      }
+
+      container.innerHTML = results.map(ticket => `
+        <div class="search-result">
+          <div class="search-name">${escapeHtml(ticket.nombre || "Sin nombre")}</div>
+          <div class="search-meta">
+            ${escapeHtml(ticket.zona_label || ticket.zona || "")}
+            · Fila ${escapeHtml(ticket.fila || "")}
+            · Butaca ${escapeHtml(ticket.butaca || "")}<br>
+            ${escapeHtml(ticket.codigo || "")}<br>
+            ${ticket.usado ? "⚠️ Utilizada" : "✅ Disponible"}
+            ${ticket.checkin_at ? " · " + escapeHtml(formatDate(ticket.checkin_at)) : ""}
+            ${ticket.checkin_by ? " · " + escapeHtml(ticket.checkin_by) : ""}
+          </div>
+          <div class="search-actions">
+            <button type="button" class="btn small ${ticket.usado ? "secondary" : ""}" data-code="${escapeHtml(ticket.codigo || "")}">
+              ${ticket.usado ? "Ver estado" : "Registrar acceso"}
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+        statTotal.textContent = total;
+        statUsed.textContent = used;
+        statPending.textContent = total - used;
+      }, (error) => {
+        showResult("No se pueden cargar estadísticas: " + error.message, "bad");
+      container.querySelectorAll("button[data-code]").forEach(button => {
+        button.addEventListener("click", () => {
+          const code = button.dataset.code;
+          isProcessing = true;
+          validateCode(code);
+        });
+});
+}
+
+    function subscribeRecentCheckins() {
+      if (unsubscribeCheckins) unsubscribeCheckins();
+    function setSyncStatus(state, text) {
+      const badge = document.getElementById("syncBadge");
+      if (!badge) return;
+
+      const q = query(
+        collection(db, "checkins"),
+        orderBy("checkin_at", "desc"),
+        limit(12)
+      );
+      badge.className = "sync-badge " + state;
+      document.getElementById("syncText").textContent = text;
+    }
+
+      unsubscribeCheckins = onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          recentLog.innerHTML = '<p class="small">Aún no hay accesos registrados.</p>';
+          return;
+        }
+    function normalizeCode(raw) {
+      let text = String(raw || "").trim();
+
+        const items = [];
+      try {
+        const url = new URL(text);
+        const code = url.searchParams.get("code") || url.searchParams.get("codigo");
+        if (code) return code.trim().toUpperCase();
+      } catch (error) {}
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+      const match = text.match(/EV26-[A-Z0-9-]+/i);
+      if (match) return match[0].toUpperCase();
+
+          items.push(`
+            <div class="log-item">
+              <span class="pill ok">OK</span>
+              <strong>${escapeHtml(data.nombre || "")}</strong><br>
+              <span class="small">
+                ${escapeHtml(data.zona_label || data.zona || "")}
+                · Fila ${escapeHtml(data.fila || "")}
+                · Butaca ${escapeHtml(data.butaca || "")}
+                · ${escapeHtml(formatDate(data.checkin_at || ""))}
+                · ${escapeHtml(data.checkin_by || "")}
+              </span>
+            </div>
+          `);
+        });
+      return text.toUpperCase();
+    }
+
+        recentLog.innerHTML = items.join("");
+      }, () => {
+        recentLog.innerHTML = '<p class="small">No se pueden cargar últimos accesos.</p>';
+      });
+    function normalizeSearch(value) {
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function getTicketAccessZone(ticket) {
+      const raw = String(ticket && (ticket.zonaId || ticket.zona || "")).toUpperCase();
+      return raw.includes("PALCO") ? "PALCO" : "PATIO";
+    }
+
+    function accessZoneLabel(zone) {
+      if (zone === "PATIO") return "Salón principal";
+      if (zone === "PALCO") return "Palco";
+      return "Todas";
+    }
+
+    function getDeviceLabel(email) {
+      const clean = String(email || "").toLowerCase();
+      return clean.includes("@") ? clean.split("@")[0] : clean || "scanner";
+}
+
+function formatDate(value) {
+if (!value) return "";
+
+try {
+const date = new Date(value);
+
+return date.toLocaleString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+hour: "2-digit",
+minute: "2-digit",
+          second: "2-digit",
+          day: "2-digit",
+          month: "2-digit"
+          second: "2-digit"
+});
+} catch (error) {
+return value;
+@@ -867,16 +1479,50 @@ <h2>Últimos accesos</h2>
+.replace(/'/g, "&#039;");
+}
+
+    function vibrateOk() {
+      if (navigator.vibrate) {
+        navigator.vibrate([80]);
+      }
+    function vibrate(pattern) {
+      try { navigator.vibrate?.(pattern); } catch (error) {}
+}
+
+    function vibrateBad() {
+      if (navigator.vibrate) {
+        navigator.vibrate([150, 80, 150]);
+      }
+    function unlockAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+      } catch (error) {}
+    }
+
+    function tone(frequency, duration, volume = .22) {
+      try {
+        unlockAudio();
+        if (!audioCtx) return;
+
+        const oscillator = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = "sine";
+        gain.gain.value = volume;
+
+        oscillator.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscillator.start();
+        gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + duration);
+        oscillator.stop(audioCtx.currentTime + duration);
+      } catch (error) {}
+    }
+
+    function playSuccess() {
+      tone(880, .13);
+      setTimeout(() => tone(1175, .16), 120);
+    }
+
+    function playWarning() {
+      tone(520, .2);
+      setTimeout(() => tone(420, .25), 180);
+    }
+
+    function playError() {
+      tone(250, .34, .25);
+}
+</script>
 </body>
-</html>
