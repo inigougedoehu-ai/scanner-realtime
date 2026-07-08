@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#020617">
+  <title>Admin entradas realtime</title>
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --text: #f8fafc;
+      --muted: #aebbd0;
+      --border: rgba(255,255,255,.12);
+      --blue: #2563eb;
+      --ok: #16a34a;
+      --warn: #d97706;
+      --bad: #dc2626;
+      --palco: #7c2d3e;
+      --salon: #163c67;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.28), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(22,163,74,.12), transparent 32%),
+        var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      padding-bottom: 28px;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .card {
+      background: rgba(15,23,42,.97);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.30);
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-size: 31px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .mt {
+      margin-top: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+      color: white;
+      padding: 13px 14px;
+      outline: none;
+    }
+
+    select option {
+      color: #111827;
+    }
+
+    input::placeholder {
+      color: #8795aa;
+    }
+
+    .btn {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--blue);
+      color: white;
+      font-size: 16px;
+      font-weight: 850;
+      padding: 12px 16px;
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,.10);
+      border: 1px solid var(--border);
+    }
+
+    .btn.danger {
+      background: var(--bad);
+    }
+
+    .btn.small {
+      min-height: 38px;
+      font-size: 14px;
+      border-radius: 13px;
+    }
+
+    .btn.inline {
+      width: auto;
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .grid4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.075);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-weight: 750;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.09);
+      overflow: hidden;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #60a5fa);
+      border-radius: 999px;
+      transition: width .25s;
+    }
+
+    .sync-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 13px;
+      font-weight: 850;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .badge.online .dot {
+      background: #22c55e;
+    }
+
+    .badge.warn .dot {
+      background: #f59e0b;
+    }
+
+    .badge.bad .dot {
+      background: #ef4444;
+    }
+
+    .zone-card {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 15px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .zone-card.salon {
+      border-left: 5px solid #3b82c4;
+    }
+
+    .zone-card.palco {
+      border-left: 5px solid #a64c61;
+    }
+
+    .zone-title {
+      font-size: 17px;
+      font-weight: 950;
+    }
+
+    .zone-value {
+      font-size: 28px;
+      font-weight: 950;
+      margin-top: 5px;
+    }
+
+    .small-text {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1.4fr .8fr .8fr;
+      gap: 10px;
+    }
+
+    .ticket-list {
+      max-height: 590px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .ticket-row,
+    .log-item {
+      padding: 13px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      margin-top: 10px;
+    }
+
+    .ticket-row.used {
+      border-color: rgba(245,158,11,.38);
+      background: rgba(245,158,11,.08);
+    }
+
+    .ticket-row.pending {
+      border-color: rgba(34,197,94,.38);
+      background: rgba(34,197,94,.08);
+    }
+
+    .ticket-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .ticket-name {
+      font-weight: 950;
+      font-size: 17px;
+    }
+
+    .ticket-meta {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+      white-space: nowrap;
+    }
+
+    .pill.ok {
+      color: #bbf7d0;
+      background: rgba(22,163,74,.18);
+    }
+
+    .pill.warn {
+      color: #fde68a;
+      background: rgba(217,119,6,.18);
+    }
+
+    .pill.salon {
+      color: #bfdbfe;
+      background: rgba(37,99,235,.16);
+    }
+
+    .pill.palco {
+      color: #fbcfe8;
+      background: rgba(190,24,93,.16);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .actions .btn {
+      width: auto;
+    }
+
+    .notice {
+      margin-top: 12px;
+      padding: 11px 13px;
+      border-radius: 15px;
+      background: rgba(245,158,11,.14);
+      border: 1px solid rgba(245,158,11,.45);
+      color: #fde68a;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .success {
+      margin-top: 12px;
+      padding: 11px 13px;
+      border-radius: 15px;
+      background: rgba(22,163,74,.14);
+      border: 1px solid rgba(22,163,74,.45);
+      color: #bbf7d0;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 800px) {
+      .grid4,
+      .grid3,
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .grid2 {
+        grid-template-columns: 1fr;
+      }
+
+      .title {
+        font-size: 27px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <section id="loginView" class="card">
+      <div class="title">Admin entradas</div>
+      <div class="subtitle">Panel realtime de control de accesos.</div>
+
+      <div class="mt">
+        <input id="emailInput" type="email" placeholder="admin@graduacion.local" autocomplete="username">
+      </div>
+
+      <div class="mt">
+        <input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password">
+      </div>
+
+      <div class="mt">
+        <button id="loginButton" class="btn">Entrar</button>
+      </div>
+
+      <div class="small-text mt">Solo debería usarse con el usuario admin.</div>
+    </section>
+
+    <main id="mainApp" class="hidden">
+      <section class="card">
+        <div class="sync-row">
+          <div>
+            <div class="title">Panel admin</div>
+            <div id="adminUser" class="subtitle"></div>
+          </div>
+
+          <div id="connectionBadge" class="badge warn">
+            <span class="dot"></span>
+            <span id="connectionText">Conectando...</span>
+          </div>
+        </div>
+
+        <div class="grid4 mt">
+          <div class="stat">
+            <div id="totalStat" class="stat-number">-</div>
+            <div class="stat-label">Total entradas</div>
+          </div>
+          <div class="stat">
+            <div id="usedStat" class="stat-number">-</div>
+            <div class="stat-label">Dentro</div>
+          </div>
+          <div class="stat">
+            <div id="pendingStat" class="stat-number">-</div>
+            <div class="stat-label">Pendientes</div>
+          </div>
+          <div class="stat">
+            <div id="percentStat" class="stat-number">-</div>
+            <div class="stat-label">% completado</div>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </section>
+
+      <section class="grid2">
+        <div class="zone-card salon">
+          <div class="zone-title">SALÓN PRINCIPAL</div>
+          <div id="salonValue" class="zone-value">-</div>
+          <div id="salonPending" class="small-text"></div>
+        </div>
+
+        <div class="zone-card palco">
+          <div class="zone-title">PALCO</div>
+          <div id="palcoValue" class="zone-value">-</div>
+          <div id="palcoPending" class="small-text"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Validación manual</div>
+        <div class="grid2">
+          <input id="manualCodeInput" type="text" placeholder="EV26-...">
+          <button id="manualValidateButton" class="btn">Validar entrada</button>
+        </div>
+        <div id="manualResult"></div>
+      </section>
+
+      <section class="card">
+        <div class="sync-row">
+          <div>
+            <div class="section-title">Entradas</div>
+            <div id="ticketCountText" class="small-text">Cargando...</div>
+          </div>
+
+          <div class="actions">
+            <button id="exportButton" class="btn secondary small">Exportar CSV</button>
+            <button id="logoutButton" class="btn danger small">Cerrar sesión</button>
+          </div>
+        </div>
+
+        <div class="filters mt">
+          <input id="searchInput" type="search" placeholder="Buscar por nombre, código, fila, butaca...">
+
+          <select id="zoneFilter">
+            <option value="ALL">Todas las zonas</option>
+            <option value="PATIO">Salón principal</option>
+            <option value="PALCO">Palco</option>
+          </select>
+
+          <select id="statusFilter">
+            <option value="ALL">Todos los estados</option>
+            <option value="PENDING">Pendientes</option>
+            <option value="USED">Usadas</option>
+          </select>
+        </div>
+
+        <div id="ticketList" class="ticket-list mt"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Últimos accesos</div>
+        <div id="recentLogs"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      runTransaction,
+      collection,
+      query,
+      orderBy,
+      limit,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const ADMIN_EMAIL = "admin@graduacion.local";
+
+    const SHEETS_SYNC_URL = "https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec";
+    const SHEETS_SYNC_SECRET = "graduacion-realtime-2026";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",
+      authDomain: "control-entradas-64826hfgr.firebaseapp.com",
+      projectId: "control-entradas-64826hfgr",
+      storageBucket: "control-entradas-64826hfgr.firebasestorage.app",
+      messagingSenderId: "779578072302",
+      appId: "1:779578072302:web:57216df153bcb2319767ff"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let tickets = {};
+    let recentLogs = [];
+    let unsubscribeTickets = null;
+    let unsubscribeCheckins = null;
+
+    const loginView = document.getElementById("loginView");
+    const mainApp = document.getElementById("mainApp");
+
+    document.getElementById("loginButton").addEventListener("click", login);
+    document.getElementById("logoutButton").addEventListener("click", logout);
+    document.getElementById("manualValidateButton").addEventListener("click", manualValidate);
+    document.getElementById("manualCodeInput").addEventListener("keydown", event => {
+      if (event.key === "Enter") manualValidate();
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderTicketList);
+    document.getElementById("zoneFilter").addEventListener("change", renderTicketList);
+    document.getElementById("statusFilter").addEventListener("change", renderTicketList);
+    document.getElementById("exportButton").addEventListener("click", exportCsv);
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        currentUser = null;
+        loginView.classList.remove("hidden");
+        mainApp.classList.add("hidden");
+
+        if (unsubscribeTickets) unsubscribeTickets();
+        if (unsubscribeCheckins) unsubscribeCheckins();
+
+        unsubscribeTickets = null;
+        unsubscribeCheckins = null;
+        return;
+      }
+
+      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL) {
+        alert("Este panel solo está permitido para admin@graduacion.local.");
+        await signOut(auth);
+        return;
+      }
+
+      currentUser = user;
+      loginView.classList.add("hidden");
+      mainApp.classList.remove("hidden");
+      document.getElementById("adminUser").textContent = user.email + " · " + user.uid;
+
+      subscribeTickets();
+      subscribeRecentCheckins();
+    });
+
+    async function login() {
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value;
+      const button = document.getElementById("loginButton");
+
+      if (!email || !password) {
+        alert("Introduce usuario y contraseña.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Entrando...";
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        alert("No se ha podido iniciar sesión: " + error.message);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Entrar";
+      }
+    }
+
+    async function logout() {
+      await signOut(auth);
+    }
+
+    function subscribeTickets() {
+      setConnection("warn", "Cargando datos...");
+
+      if (unsubscribeTickets) unsubscribeTickets();
+
+      unsubscribeTickets = onSnapshot(collection(db, "tickets"), snapshot => {
+        tickets = {};
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          tickets[data.codigo || docSnap.id] = {
+            ...data,
+            codigo: data.codigo || docSnap.id
+          };
+        });
+
+        setConnection("online", "Realtime activo");
+        renderAll();
+
+      }, error => {
+        console.error(error);
+        setConnection("bad", "Error Firebase");
+      });
+    }
+
+    function subscribeRecentCheckins() {
+      if (unsubscribeCheckins) unsubscribeCheckins();
+
+      const q = query(
+        collection(db, "checkins"),
+        orderBy("checkin_at", "desc"),
+        limit(20)
+      );
+
+      unsubscribeCheckins = onSnapshot(q, snapshot => {
+        recentLogs = [];
+
+        snapshot.forEach(docSnap => {
+          recentLogs.push(docSnap.data());
+        });
+
+        renderRecentLogs();
+
+      }, error => {
+        console.error(error);
+      });
+    }
+
+    function renderAll() {
+      renderStats();
+      renderTicketList();
+    }
+
+    function renderStats() {
+      const values = Object.values(tickets);
+      const total = values.length;
+      const used = values.filter(t => t.usado === true).length;
+      const pending = Math.max(total - used, 0);
+      const percent = total ? Math.round((used / total) * 100) : 0;
+
+      const salon = values.filter(t => getTicketAccessZone(t) === "PATIO");
+      const palco = values.filter(t => getTicketAccessZone(t) === "PALCO");
+
+      const salonUsed = salon.filter(t => t.usado === true).length;
+      const palcoUsed = palco.filter(t => t.usado === true).length;
+
+      document.getElementById("totalStat").textContent = total || "-";
+      document.getElementById("usedStat").textContent = used;
+      document.getElementById("pendingStat").textContent = pending;
+      document.getElementById("percentStat").textContent = percent + "%";
+      document.getElementById("progressBar").style.width = percent + "%";
+
+      document.getElementById("salonValue").textContent = `${salonUsed} / ${salon.length}`;
+      document.getElementById("salonPending").textContent = `${salon.length - salonUsed} pendientes`;
+
+      document.getElementById("palcoValue").textContent = `${palcoUsed} / ${palco.length}`;
+      document.getElementById("palcoPending").textContent = `${palco.length - palcoUsed} pendientes`;
+    }
+
+    function renderTicketList() {
+      const container = document.getElementById("ticketList");
+      const q = normalizeSearch(document.getElementById("searchInput").value);
+      const zoneFilter = document.getElementById("zoneFilter").value;
+      const statusFilter = document.getElementById("statusFilter").value;
+
+      let values = Object.values(tickets);
+
+      if (zoneFilter !== "ALL") {
+        values = values.filter(t => getTicketAccessZone(t) === zoneFilter);
+      }
+
+      if (statusFilter === "USED") {
+        values = values.filter(t => t.usado === true);
+      }
+
+      if (statusFilter === "PENDING") {
+        values = values.filter(t => t.usado !== true);
+      }
+
+      if (q) {
+        values = values.filter(ticket => {
+          const haystack = normalizeSearch([
+            ticket.codigo,
+            ticket.nombre,
+            ticket.email,
+            ticket.zona,
+            ticket.zona_label,
+            "fila " + ticket.fila,
+            "butaca " + ticket.butaca,
+            ticket.fila,
+            ticket.butaca,
+            ticket.checkin_by
+          ].join(" "));
+
+          return haystack.includes(q);
+        });
+      }
+
+      values.sort((a, b) => {
+        if ((a.usado === true) !== (b.usado === true)) {
+          return a.usado === true ? 1 : -1;
+        }
+
+        return String(a.nombre || "").localeCompare(String(b.nombre || ""), "es");
+      });
+
+      document.getElementById("ticketCountText").textContent =
+        `${values.length} entradas mostradas de ${Object.keys(tickets).length}`;
+
+      if (!values.length) {
+        container.innerHTML = '<div class="notice">No hay entradas con esos filtros.</div>';
+        return;
+      }
+
+      container.innerHTML = values.slice(0, 300).map(ticket => {
+        const zone = getTicketAccessZone(ticket);
+        const used = ticket.usado === true;
+        const zoneText = zone === "PALCO" ? "PALCO" : "SALÓN PRINCIPAL";
+        const zoneClass = zone === "PALCO" ? "palco" : "salon";
+
+        return `
+          <div class="ticket-row ${used ? "used" : "pending"}">
+            <div class="ticket-top">
+              <div>
+                <div class="ticket-name">${escapeHtml(ticket.nombre || "Sin nombre")}</div>
+                <div class="ticket-meta">
+                  ${escapeHtml(ticket.codigo || "")}<br>
+                  Fila ${escapeHtml(ticket.fila || "-")} · Butaca ${escapeHtml(ticket.butaca || "-")}
+                  ${ticket.email ? `<br>${escapeHtml(ticket.email)}` : ""}
+                </div>
+              </div>
+
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+                <span class="pill ${zoneClass}">${zoneText}</span>
+                <span class="pill ${used ? "warn" : "ok"}">${used ? "USADA" : "PENDIENTE"}</span>
+              </div>
+            </div>
+
+            ${used ? `
+              <div class="ticket-meta mt">
+                Validada: ${escapeHtml(formatDate(ticket.checkin_at || ""))}
+                ${ticket.checkin_by ? " · " + escapeHtml(ticket.checkin_by) : ""}
+              </div>
+            ` : ""}
+
+            <div class="actions">
+              <button class="btn small ${used ? "secondary" : ""}" data-code="${escapeHtml(ticket.codigo || "")}">
+                ${used ? "Ver estado" : "Validar manualmente"}
+              </button>
+              ${ticket.pdf_url ? `<a class="btn secondary small" href="${escapeHtml(ticket.pdf_url)}" target="_blank" style="text-decoration:none">Abrir PDF</a>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      container.querySelectorAll("button[data-code]").forEach(button => {
+        button.addEventListener("click", () => {
+          document.getElementById("manualCodeInput").value = button.dataset.code;
+          manualValidate();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    function renderRecentLogs() {
+      const container = document.getElementById("recentLogs");
+
+      if (!recentLogs.length) {
+        container.innerHTML = '<div class="small-text">Todavía no hay accesos registrados.</div>';
+        return;
+      }
+
+      container.innerHTML = recentLogs.map(log => `
+        <div class="log-item">
+          <div class="ticket-top">
+            <div>
+              <div class="ticket-name">${escapeHtml(log.nombre || "Sin nombre")}</div>
+              <div class="ticket-meta">
+                ${escapeHtml(log.zona_label || log.zona || "")}
+                · Fila ${escapeHtml(log.fila || "-")}
+                · Butaca ${escapeHtml(log.butaca || "-")}<br>
+                ${escapeHtml(formatDate(log.checkin_at || ""))}
+                ${log.checkin_by ? " · " + escapeHtml(log.checkin_by) : ""}
+              </div>
+            </div>
+            <span class="pill ok">OK</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function manualValidate() {
+      const input = document.getElementById("manualCodeInput");
+      const code = normalizeCode(input.value);
+      const resultBox = document.getElementById("manualResult");
+
+      if (!code) {
+        resultBox.innerHTML = '<div class="notice">Introduce un código.</div>';
+        return;
+      }
+
+      resultBox.innerHTML = '<div class="notice">Validando...</div>';
+
+      try {
+        const result = await validateTicketTransaction(code);
+
+        if (result.status === "OK") {
+          resultBox.innerHTML = `
+            <div class="success">
+              ✅ Acceso validado: ${escapeHtml(result.ticket.nombre || "")}
+              · Fila ${escapeHtml(result.ticket.fila || "-")}
+              · Butaca ${escapeHtml(result.ticket.butaca || "-")}
+              <br>Guardando en Excel...
+            </div>
+          `;
+
+          syncCheckinToSheets(result.ticket, ok => {
+            resultBox.innerHTML = ok
+              ? `<div class="success">✅ Acceso validado y guardado en Excel.</div>`
+              : `<div class="notice">⚠️ Acceso validado en Firebase, pero no guardado en Excel.</div>`;
+          });
+
+        } else if (result.status === "ALREADY_USED") {
+          resultBox.innerHTML = `
+            <div class="notice">
+              ⚠️ Entrada ya utilizada.<br>
+              ${escapeHtml(result.ticket.nombre || "")}
+              ${result.ticket.checkin_at ? "<br>" + escapeHtml(formatDate(result.ticket.checkin_at)) : ""}
+              ${result.ticket.checkin_by ? " · " + escapeHtml(result.ticket.checkin_by) : ""}
+            </div>
+          `;
+
+        } else if (result.status === "NOT_FOUND") {
+          resultBox.innerHTML = `<div class="notice">❌ Entrada no encontrada.</div>`;
+
+        } else {
+          resultBox.innerHTML = `<div class="notice">❌ No se ha podido validar.</div>`;
+        }
+
+      } catch (error) {
+        resultBox.innerHTML = `<div class="notice">❌ Error: ${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    async function validateTicketTransaction(code) {
+      const ticketRef = doc(db, "tickets", code);
+      const checkinRef = doc(db, "checkins", code);
+      const deviceLabel = "admin";
+
+      return await runTransaction(db, async transaction => {
+        const snap = await transaction.get(ticketRef);
+
+        if (!snap.exists()) {
+          return { status: "NOT_FOUND" };
+        }
+
+        const ticket = snap.data();
+
+        if (ticket.usado === true) {
+          return {
+            status: "ALREADY_USED",
+            ticket
+          };
+        }
+
+        const nowIso = new Date().toISOString();
+
+        const updatedTicket = {
+          usado: true,
+          checkin_at: nowIso,
+          checkin_by: deviceLabel,
+          checkin_uid: currentUser.uid,
+          checkin_email: currentUser.email || "",
+          last_update_source: "admin_realtime"
+        };
+
+        transaction.update(ticketRef, updatedTicket);
+
+        transaction.set(checkinRef, {
+          codigo: ticket.codigo || code,
+          nombre: ticket.nombre || "",
+          zona: ticket.zona || "",
+          zona_label: ticket.zona_label || "",
+          fila: ticket.fila || "",
+          butaca: ticket.butaca || "",
+          tipo_entrada: ticket.tipo_entrada || "",
+          checkin_at: nowIso,
+          checkin_by: deviceLabel,
+          checkin_uid: currentUser.uid,
+          checkin_email: currentUser.email || "",
+          created_at: nowIso
+        });
+
+        return {
+          status: "OK",
+          ticket: {
+            ...ticket,
+            ...updatedTicket
+          }
+        };
+      });
+    }
+
+    function syncCheckinToSheets(ticket, callback) {
+      const callbackName = "__admin_sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+
+      window[callbackName] = function(response) {
+        cleanup();
+        callback?.(response && response.status === "OK");
+      };
+
+      script.onerror = function() {
+        cleanup();
+        callback?.(false);
+      };
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch (error) {}
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      const url = new URL(SHEETS_SYNC_URL);
+
+      url.searchParams.set("action", "checkin");
+      url.searchParams.set("secret", SHEETS_SYNC_SECRET);
+      url.searchParams.set("callback", callbackName);
+      url.searchParams.set("_", Date.now());
+
+      url.searchParams.set("codigo", ticket.codigo || "");
+      url.searchParams.set("checkin_at", ticket.checkin_at || "");
+      url.searchParams.set("checkin_by", ticket.checkin_by || "");
+      url.searchParams.set("checkin_email", ticket.checkin_email || "");
+
+      script.src = url.toString();
+      document.head.appendChild(script);
+    }
+
+    function exportCsv() {
+      const values = Object.values(tickets);
+
+      const headers = [
+        "codigo",
+        "nombre",
+        "email",
+        "zona",
+        "fila",
+        "butaca",
+        "usado",
+        "checkin_at",
+        "checkin_by"
+      ];
+
+      const rows = values.map(t => [
+        t.codigo || "",
+        t.nombre || "",
+        t.email || "",
+        t.zona_label || t.zona || "",
+        t.fila || "",
+        t.butaca || "",
+        t.usado === true ? "TRUE" : "FALSE",
+        t.checkin_at || "",
+        t.checkin_by || ""
+      ]);
+
+      const csv = [
+        headers,
+        ...rows
+      ].map(row => row.map(csvEscape).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "estado_entradas_realtime.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(value) {
+      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
+    }
+
+    function setConnection(state, text) {
+      const badge = document.getElementById("connectionBadge");
+
+      badge.className = "badge " + state;
+      document.getElementById("connectionText").textContent = text;
+    }
+
+    function normalizeCode(raw) {
+      let text = String(raw || "").trim();
+
+      try {
+        const url = new URL(text);
+        const code = url.searchParams.get("code") || url.searchParams.get("codigo");
+        if (code) return code.trim().toUpperCase();
+      } catch (error) {}
+
+      const match = text.match(/EV26-[A-Z0-9-]+/i);
+      if (match) return match[0].toUpperCase();
+
+      return text.toUpperCase();
+    }
+
+    function normalizeSearch(value) {
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function getTicketAccessZone(ticket) {
+      const raw = String(ticket && (ticket.zonaId || ticket.zona || "")).toUpperCase();
+      return raw.includes("PALCO") ? "PALCO" : "PATIO";
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+
+      try {
+        const date = new Date(value);
+        return date.toLocaleString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        });
+      } catch (error) {
+        return value;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
