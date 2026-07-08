@@ -34,19 +34,11 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    body {
-      padding-bottom: calc(86px + env(safe-area-inset-bottom));
-    }
-
+    body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
 
-    .app {
-      max-width: 1050px;
-      margin: 0 auto;
-      padding: 14px;
-    }
-
+    .app { max-width: 1050px; margin: 0 auto; padding: 14px; }
     .hidden { display: none !important; }
 
     .card {
@@ -58,20 +50,8 @@
       margin-bottom: 14px;
     }
 
-    .title {
-      font-size: 31px;
-      line-height: 1.05;
-      font-weight: 950;
-      letter-spacing: -.04em;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 15px;
-      margin-top: 6px;
-      line-height: 1.4;
-    }
-
+    .title { font-size: 31px; line-height: 1.05; font-weight: 950; letter-spacing: -.04em; }
+    .subtitle { color: var(--muted); font-size: 15px; margin-top: 6px; line-height: 1.4; }
     .mt { margin-top: 14px; }
 
     input, select {
@@ -100,42 +80,15 @@
       padding: 12px 16px;
     }
 
-    .btn.secondary {
-      background: rgba(255,255,255,.10);
-      border: 1px solid var(--border);
-    }
-
+    .btn.secondary { background: rgba(255,255,255,.10); border: 1px solid var(--border); }
     .btn.danger { background: var(--bad); }
     .btn.warn { background: var(--warn); }
+    .btn.small { min-height: 38px; font-size: 14px; border-radius: 13px; }
+    .btn.inline { width: auto; padding-left: 18px; padding-right: 18px; }
+    .btn:disabled { opacity: .55; cursor: default; }
 
-    .btn.small {
-      min-height: 38px;
-      font-size: 14px;
-      border-radius: 13px;
-    }
-
-    .btn.inline {
-      width: auto;
-      padding-left: 18px;
-      padding-right: 18px;
-    }
-
-    .btn:disabled {
-      opacity: .55;
-      cursor: default;
-    }
-
-    .grid2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .grid4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 
     .stat {
       background: rgba(255,255,255,.075);
@@ -145,18 +98,8 @@
       text-align: center;
     }
 
-    .stat-number {
-      font-size: 32px;
-      font-weight: 950;
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-      font-weight: 750;
-    }
+    .stat-number { font-size: 32px; font-weight: 950; line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 750; }
 
     .progress-wrap {
       width: 100%;
@@ -176,13 +119,7 @@
       transition: width .25s;
     }
 
-    .sync-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .sync-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 
     .badge, .pill {
       display: inline-flex;
@@ -196,86 +133,28 @@
       background: rgba(255,255,255,.08);
     }
 
-    .dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #94a3b8;
-    }
-
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
     .badge.online .dot { background: #22c55e; }
     .badge.warn .dot { background: #f59e0b; }
     .badge.bad .dot { background: #ef4444; }
 
-    .pill.ok {
-      color: #bbf7d0;
-      background: rgba(22,163,74,.18);
-    }
+    .pill.ok { color: #bbf7d0; background: rgba(22,163,74,.18); }
+    .pill.warn { color: #fde68a; background: rgba(217,119,6,.18); }
+    .pill.bad { color: #fecaca; background: rgba(220,38,38,.18); }
+    .pill.salon { color: #bfdbfe; background: rgba(37,99,235,.16); }
+    .pill.palco { color: #fbcfe8; background: rgba(190,24,93,.16); }
 
-    .pill.warn {
-      color: #fde68a;
-      background: rgba(217,119,6,.18);
-    }
-
-    .pill.bad {
-      color: #fecaca;
-      background: rgba(220,38,38,.18);
-    }
-
-    .pill.salon {
-      color: #bfdbfe;
-      background: rgba(37,99,235,.16);
-    }
-
-    .pill.palco {
-      color: #fbcfe8;
-      background: rgba(190,24,93,.16);
-    }
-
-    .zone-card {
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      padding: 15px;
-      background: rgba(255,255,255,.07);
-    }
-
+    .zone-card { border-radius: 18px; border: 1px solid var(--border); padding: 15px; background: rgba(255,255,255,.07); }
     .zone-card.salon { border-left: 5px solid #3b82c4; }
     .zone-card.palco { border-left: 5px solid #a64c61; }
+    .zone-title { font-size: 17px; font-weight: 950; }
+    .zone-value { font-size: 28px; font-weight: 950; margin-top: 5px; }
 
-    .zone-title {
-      font-size: 17px;
-      font-weight: 950;
-    }
+    .small-text { color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .section-title { font-size: 20px; font-weight: 950; margin-bottom: 10px; }
 
-    .zone-value {
-      font-size: 28px;
-      font-weight: 950;
-      margin-top: 5px;
-    }
-
-    .small-text {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 950;
-      margin-bottom: 10px;
-    }
-
-    .filters {
-      display: grid;
-      grid-template-columns: 1.4fr .8fr .8fr;
-      gap: 10px;
-    }
-
-    .ticket-list {
-      max-height: 590px;
-      overflow: auto;
-      padding-right: 2px;
-    }
+    .filters { display: grid; grid-template-columns: 1.4fr .8fr .8fr; gap: 10px; }
+    .ticket-list { max-height: 590px; overflow: auto; padding-right: 2px; }
 
     .ticket-row, .log-item {
       padding: 13px;
@@ -285,44 +164,14 @@
       margin-top: 10px;
     }
 
-    .ticket-row.used {
-      border-color: rgba(245,158,11,.38);
-      background: rgba(245,158,11,.08);
-    }
+    .ticket-row.used { border-color: rgba(245,158,11,.38); background: rgba(245,158,11,.08); }
+    .ticket-row.pending { border-color: rgba(34,197,94,.38); background: rgba(34,197,94,.08); }
 
-    .ticket-row.pending {
-      border-color: rgba(34,197,94,.38);
-      background: rgba(34,197,94,.08);
-    }
+    .ticket-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+    .ticket-name { font-weight: 950; font-size: 17px; }
+    .ticket-meta { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; word-break: break-word; }
 
-    .ticket-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-
-    .ticket-name {
-      font-weight: 950;
-      font-size: 17px;
-    }
-
-    .ticket-meta {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-
+    .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .actions .btn { width: auto; }
 
     .notice {
@@ -385,22 +234,11 @@
       font-weight: 800;
     }
 
-    .nav-btn .nav-icon {
-      display: block;
-      font-size: 21px;
-      margin-bottom: 2px;
-    }
-
-    .nav-btn.active {
-      background: rgba(37,99,235,.18);
-      color: white;
-    }
+    .nav-btn .nav-icon { display: block; font-size: 21px; margin-bottom: 2px; }
+    .nav-btn.active { background: rgba(37,99,235,.18); color: white; }
 
     @media (max-width: 800px) {
-      .grid4, .filters, .grid2 {
-        grid-template-columns: 1fr;
-      }
-
+      .grid4, .filters, .grid2 { grid-template-columns: 1fr; }
       .title { font-size: 27px; }
     }
   </style>
@@ -411,19 +249,9 @@
     <section id="loginView" class="card">
       <div class="title">Admin entradas</div>
       <div class="subtitle">Panel realtime de control de accesos.</div>
-
-      <div class="mt">
-        <input id="emailInput" type="email" placeholder="admin@graduacion.local" autocomplete="username">
-      </div>
-
-      <div class="mt">
-        <input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password">
-      </div>
-
-      <div class="mt">
-        <button id="loginButton" class="btn">Entrar</button>
-      </div>
-
+      <div class="mt"><input id="emailInput" type="email" placeholder="admin@graduacion.local" autocomplete="username"></div>
+      <div class="mt"><input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password"></div>
+      <div class="mt"><button id="loginButton" class="btn">Entrar</button></div>
       <div class="small-text mt">Solo debería usarse con el usuario admin.</div>
     </section>
 
@@ -435,82 +263,37 @@
               <div class="title">Resumen</div>
               <div id="adminUser" class="subtitle"></div>
             </div>
-
-            <div id="connectionBadge" class="badge warn">
-              <span class="dot"></span>
-              <span id="connectionText">Conectando...</span>
-            </div>
+            <div id="connectionBadge" class="badge warn"><span class="dot"></span><span id="connectionText">Conectando...</span></div>
           </div>
 
           <div class="grid4 mt">
-            <div class="stat">
-              <div id="totalStat" class="stat-number">-</div>
-              <div class="stat-label">Total entradas</div>
-            </div>
-            <div class="stat">
-              <div id="usedStat" class="stat-number">-</div>
-              <div class="stat-label">Dentro</div>
-            </div>
-            <div class="stat">
-              <div id="pendingStat" class="stat-number">-</div>
-              <div class="stat-label">Pendientes</div>
-            </div>
-            <div class="stat">
-              <div id="percentStat" class="stat-number">-</div>
-              <div class="stat-label">% completado</div>
-            </div>
+            <div class="stat"><div id="totalStat" class="stat-number">-</div><div class="stat-label">Total entradas</div></div>
+            <div class="stat"><div id="usedStat" class="stat-number">-</div><div class="stat-label">Dentro</div></div>
+            <div class="stat"><div id="pendingStat" class="stat-number">-</div><div class="stat-label">Pendientes</div></div>
+            <div class="stat"><div id="percentStat" class="stat-number">-</div><div class="stat-label">% completado</div></div>
           </div>
-
-          <div class="progress-wrap">
-            <div id="progressBar" class="progress-bar"></div>
-          </div>
+          <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
         </section>
 
         <section class="grid2">
-          <div class="zone-card salon">
-            <div class="zone-title">SALÓN PRINCIPAL</div>
-            <div id="salonValue" class="zone-value">-</div>
-            <div id="salonPending" class="small-text"></div>
-          </div>
-
-          <div class="zone-card palco">
-            <div class="zone-title">PALCO</div>
-            <div id="palcoValue" class="zone-value">-</div>
-            <div id="palcoPending" class="small-text"></div>
-          </div>
+          <div class="zone-card salon"><div class="zone-title">SALÓN PRINCIPAL</div><div id="salonValue" class="zone-value">-</div><div id="salonPending" class="small-text"></div></div>
+          <div class="zone-card palco"><div class="zone-title">PALCO</div><div id="palcoValue" class="zone-value">-</div><div id="palcoPending" class="small-text"></div></div>
         </section>
 
-        <section class="card">
-          <div class="section-title">Últimos accesos</div>
-          <div id="recentLogsSummary"></div>
-        </section>
+        <section class="card"><div class="section-title">Últimos accesos</div><div id="recentLogsSummary"></div></section>
       </section>
 
       <section id="ticketsPage" class="page-view hidden">
         <section class="card">
           <div class="sync-row">
-            <div>
-              <div class="title">Entradas</div>
-              <div id="ticketCountText" class="subtitle">Cargando...</div>
-            </div>
-
+            <div><div class="title">Entradas</div><div id="ticketCountText" class="subtitle">Cargando...</div></div>
             <button id="exportButton" class="btn secondary small inline">Exportar CSV</button>
           </div>
 
           <div class="filters mt">
             <input id="searchInput" type="search" placeholder="Buscar por nombre, código, fila, butaca...">
-
-            <select id="zoneFilter">
-              <option value="ALL">Todas las zonas</option>
-              <option value="PATIO">Salón principal</option>
-              <option value="PALCO">Palco</option>
-            </select>
-
-            <select id="statusFilter">
-              <option value="ALL">Todos los estados</option>
-              <option value="PENDING">Pendientes</option>
-              <option value="USED">Usadas</option>
-            </select>
+            <select id="zoneFilter"><option value="ALL">Todas las zonas</option><option value="PATIO">Salón principal</option><option value="PALCO">Palco</option></select>
+            <select id="statusFilter"><option value="ALL">Todos los estados</option><option value="PENDING">Pendientes</option><option value="USED">Usadas</option></select>
           </div>
 
           <div id="ticketList" class="ticket-list mt"></div>
@@ -521,121 +304,52 @@
         <section class="card">
           <div class="title">Validación manual</div>
           <div class="subtitle">Permite registrar una entrada sin cámara desde el panel admin.</div>
-
-          <div class="grid2 mt">
-            <input id="manualCodeInput" type="text" placeholder="EV26-...">
-            <button id="manualValidateButton" class="btn">Validar entrada</button>
-          </div>
-
+          <div class="grid2 mt"><input id="manualCodeInput" type="text" placeholder="EV26-..."><button id="manualValidateButton" class="btn">Validar entrada</button></div>
           <div id="manualResult"></div>
         </section>
-
-        <section class="card">
-          <div class="section-title">Últimos accesos</div>
-          <div id="recentLogsManual"></div>
-        </section>
+        <section class="card"><div class="section-title">Últimos accesos</div><div id="recentLogsManual"></div></section>
       </section>
 
       <section id="resetPage" class="page-view hidden">
         <section class="card">
           <div class="title">Reiniciar accesos</div>
-          <div class="subtitle">
-            Esta página borra accesos en Firebase y en el Excel. Úsala solo para pruebas o incidencias.
-          </div>
-
-          <div class="danger-box">
-            ⚠️ Hay dos niveles:
-            <br><br>
-            <strong>Reiniciar una entrada</strong>: deja una entrada concreta como no usada.
-            <br>
-            <strong>Reiniciar todo</strong>: borra todos los accesos registrados en Firebase y limpia usado, checkin_at y checkin_by en Excel.
-          </div>
+          <div class="subtitle">Esta página borra accesos en Firebase y en el Excel. Úsala solo para pruebas o incidencias.</div>
+          <div class="danger-box">⚠️ Hay dos niveles:<br><br><strong>Reiniciar una entrada</strong>: deja una entrada concreta como no usada.<br><strong>Reiniciar todo</strong>: borra todos los accesos registrados en Firebase y limpia usado, checkin_at y checkin_by en Excel.</div>
         </section>
 
         <section class="card">
           <div class="section-title">Reiniciar una entrada</div>
-
-          <div class="grid2">
-            <input id="resetSingleCodeInput" type="text" placeholder="EV26-...">
-            <input id="resetSinglePinInput" type="password" placeholder="Clave de reinicio">
-          </div>
-
+          <div class="grid2"><input id="resetSingleCodeInput" type="text" placeholder="EV26-..."><input id="resetSinglePinInput" type="password" placeholder="Clave de reinicio"></div>
           <button id="resetSingleButton" class="btn warn mt">Reiniciar esta entrada</button>
           <div id="resetSingleResult"></div>
         </section>
 
         <section class="card">
           <div class="section-title">Reiniciar todos los accesos</div>
-
-          <div class="danger-box">
-            Esta acción dejará todas las entradas como no usadas.
-            <br><br>
-            Se borrarán:
-            <br>
-            - usado, checkin_at, checkin_by del Excel.
-            <br>
-            - Estado usado de todos los tickets en Firebase.
-            <br>
-            - Registros de la colección checkins.
-          </div>
-
-          <div class="grid2 mt">
-            <input id="resetAllPinInput" type="password" placeholder="Clave de reinicio">
-            <input id="resetAllConfirmInput" type="text" placeholder="Escribe REINICIAR TODO">
-          </div>
-
+          <div class="danger-box">Esta acción dejará todas las entradas como no usadas.<br><br>Se borrarán:<br>- usado, checkin_at, checkin_by del Excel.<br>- Estado usado de todos los tickets en Firebase.<br>- Registros de la colección checkins.</div>
+          <div class="grid2 mt"><input id="resetAllPinInput" type="password" placeholder="Clave de reinicio"><input id="resetAllConfirmInput" type="text" placeholder="Escribe REINICIAR TODO"></div>
           <button id="resetAllButton" class="btn danger mt">Reiniciar absolutamente todo</button>
           <div id="resetAllResult"></div>
         </section>
 
-        <section class="card">
-          <div class="section-title">Sesión</div>
-          <button id="logoutButton" class="btn danger">Cerrar sesión</button>
-        </section>
+        <section class="card"><div class="section-title">Sesión</div><button id="logoutButton" class="btn danger">Cerrar sesión</button></section>
       </section>
     </main>
   </div>
 
   <nav id="bottomNav" class="bottom-nav hidden">
-    <button type="button" id="navSummary" class="nav-btn active" data-page="summary">
-      <span class="nav-icon">▤</span>Resumen
-    </button>
-    <button type="button" id="navTickets" class="nav-btn" data-page="tickets">
-      <span class="nav-icon">⌕</span>Entradas
-    </button>
-    <button type="button" id="navManual" class="nav-btn" data-page="manual">
-      <span class="nav-icon">＋</span>Manual
-    </button>
-    <button type="button" id="navReset" class="nav-btn" data-page="reset">
-      <span class="nav-icon">⚠</span>Reiniciar
-    </button>
+    <button type="button" id="navSummary" class="nav-btn active" data-page="summary"><span class="nav-icon">▤</span>Resumen</button>
+    <button type="button" id="navTickets" class="nav-btn" data-page="tickets"><span class="nav-icon">⌕</span>Entradas</button>
+    <button type="button" id="navManual" class="nav-btn" data-page="manual"><span class="nav-icon">＋</span>Manual</button>
+    <button type="button" id="navReset" class="nav-btn" data-page="reset"><span class="nav-icon">⚠</span>Reiniciar</button>
   </nav>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-    import {
-      getFirestore,
-      doc,
-      runTransaction,
-      collection,
-      query,
-      orderBy,
-      limit,
-      onSnapshot,
-      getDocs,
-      writeBatch
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, doc, runTransaction, collection, query, orderBy, limit, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const ADMIN_EMAIL = "admin@graduacion.local";
-
     const SHEETS_SYNC_URL = "https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec";
     const SHEETS_SYNC_SECRET = "graduacion-realtime-2026";
 
@@ -669,21 +383,12 @@
     document.getElementById("resetSingleButton").addEventListener("click", resetSingleTicket);
     document.getElementById("resetAllButton").addEventListener("click", resetAllAccesses);
 
-    document.getElementById("manualCodeInput").addEventListener("keydown", event => {
-      if (event.key === "Enter") manualValidate();
-    });
-
-    document.getElementById("resetSingleCodeInput").addEventListener("keydown", event => {
-      if (event.key === "Enter") resetSingleTicket();
-    });
-
+    document.getElementById("manualCodeInput").addEventListener("keydown", event => { if (event.key === "Enter") manualValidate(); });
+    document.getElementById("resetSingleCodeInput").addEventListener("keydown", event => { if (event.key === "Enter") resetSingleTicket(); });
     document.getElementById("searchInput").addEventListener("input", renderTicketList);
     document.getElementById("zoneFilter").addEventListener("change", renderTicketList);
     document.getElementById("statusFilter").addEventListener("change", renderTicketList);
-
-    document.querySelectorAll(".nav-btn[data-page]").forEach(button => {
-      button.addEventListener("click", () => showPage(button.dataset.page));
-    });
+    document.querySelectorAll(".nav-btn[data-page]").forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
@@ -691,10 +396,8 @@
         loginView.classList.remove("hidden");
         mainApp.classList.add("hidden");
         bottomNav.classList.add("hidden");
-
         if (unsubscribeTickets) unsubscribeTickets();
         if (unsubscribeCheckins) unsubscribeCheckins();
-
         unsubscribeTickets = null;
         unsubscribeCheckins = null;
         return;
@@ -710,9 +413,7 @@
       loginView.classList.add("hidden");
       mainApp.classList.remove("hidden");
       bottomNav.classList.remove("hidden");
-
       document.getElementById("adminUser").textContent = user.email + " · " + user.uid;
-
       subscribeTickets();
       subscribeRecentCheckins();
       showPage("summary");
@@ -722,96 +423,52 @@
       const email = document.getElementById("emailInput").value.trim();
       const password = document.getElementById("passwordInput").value;
       const button = document.getElementById("loginButton");
-
-      if (!email || !password) {
-        alert("Introduce usuario y contraseña.");
-        return;
-      }
-
+      if (!email || !password) { alert("Introduce usuario y contraseña."); return; }
       button.disabled = true;
       button.textContent = "Entrando...";
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (error) {
-        alert("No se ha podido iniciar sesión: " + error.message);
-      } finally {
-        button.disabled = false;
-        button.textContent = "Entrar";
-      }
+      try { await signInWithEmailAndPassword(auth, email, password); }
+      catch (error) { alert("No se ha podido iniciar sesión: " + error.message); }
+      finally { button.disabled = false; button.textContent = "Entrar"; }
     }
 
-    async function logout() {
-      await signOut(auth);
-    }
+    async function logout() { await signOut(auth); }
 
     function showPage(page) {
       ["summary", "tickets", "manual", "reset"].forEach(name => {
         document.getElementById(name + "Page").classList.toggle("hidden", name !== page);
         document.getElementById("nav" + capitalize(name)).classList.toggle("active", name === page);
       });
-
       if (page === "tickets") renderTicketList();
       window.scrollTo(0, 0);
     }
 
-    function capitalize(value) {
-      return value.charAt(0).toUpperCase() + value.slice(1);
-    }
+    function capitalize(value) { return value.charAt(0).toUpperCase() + value.slice(1); }
 
     function subscribeTickets() {
       setConnection("warn", "Cargando datos...");
-
       if (unsubscribeTickets) unsubscribeTickets();
-
       unsubscribeTickets = onSnapshot(collection(db, "tickets"), snapshot => {
         tickets = {};
-
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          tickets[data.codigo || docSnap.id] = {
-            ...data,
-            codigo: data.codigo || docSnap.id
-          };
+          tickets[data.codigo || docSnap.id] = { ...data, codigo: data.codigo || docSnap.id };
         });
-
         setConnection("online", "Realtime activo");
         renderAll();
-
-      }, error => {
-        console.error(error);
-        setConnection("bad", "Error Firebase");
-      });
+      }, error => { console.error(error); setConnection("bad", "Error Firebase"); });
     }
 
     function subscribeRecentCheckins() {
       if (unsubscribeCheckins) unsubscribeCheckins();
-
-      const q = query(
-        collection(db, "checkins"),
-        orderBy("checkin_at", "desc"),
-        limit(20)
-      );
-
+      const q = query(collection(db, "checkins"), orderBy("checkin_at", "desc"), limit(20));
       unsubscribeCheckins = onSnapshot(q, snapshot => {
         recentLogs = [];
-
-        snapshot.forEach(docSnap => {
-          recentLogs.push(docSnap.data());
-        });
-
+        snapshot.forEach(docSnap => recentLogs.push(docSnap.data()));
         renderRecentLogs();
-
-      }, error => {
-        console.error(error);
-      });
+      }, error => console.error(error));
     }
 
-    function renderAll() {
-      renderStats();
-      renderTicketList();
-      renderRecentLogs();
-    }
+    function renderAll() { renderStats(); renderTicketList(); renderRecentLogs(); }
 
     function renderStats() {
       const values = Object.values(tickets);
@@ -819,22 +476,17 @@
       const used = values.filter(t => t.usado === true).length;
       const pending = Math.max(total - used, 0);
       const percent = total ? Math.round((used / total) * 100) : 0;
-
       const salon = values.filter(t => getTicketAccessZone(t) === "PATIO");
       const palco = values.filter(t => getTicketAccessZone(t) === "PALCO");
-
       const salonUsed = salon.filter(t => t.usado === true).length;
       const palcoUsed = palco.filter(t => t.usado === true).length;
-
       document.getElementById("totalStat").textContent = total || "-";
       document.getElementById("usedStat").textContent = used;
       document.getElementById("pendingStat").textContent = pending;
       document.getElementById("percentStat").textContent = percent + "%";
       document.getElementById("progressBar").style.width = percent + "%";
-
       document.getElementById("salonValue").textContent = `${salonUsed} / ${salon.length}`;
       document.getElementById("salonPending").textContent = `${salon.length - salonUsed} pendientes`;
-
       document.getElementById("palcoValue").textContent = `${palcoUsed} / ${palco.length}`;
       document.getElementById("palcoPending").textContent = `${palco.length - palcoUsed} pendientes`;
     }
@@ -844,140 +496,64 @@
       const q = normalizeSearch(document.getElementById("searchInput").value);
       const zoneFilter = document.getElementById("zoneFilter").value;
       const statusFilter = document.getElementById("statusFilter").value;
-
       let values = Object.values(tickets);
-
-      if (zoneFilter !== "ALL") {
-        values = values.filter(t => getTicketAccessZone(t) === zoneFilter);
-      }
-
-      if (statusFilter === "USED") {
-        values = values.filter(t => t.usado === true);
-      }
-
-      if (statusFilter === "PENDING") {
-        values = values.filter(t => t.usado !== true);
-      }
-
+      if (zoneFilter !== "ALL") values = values.filter(t => getTicketAccessZone(t) === zoneFilter);
+      if (statusFilter === "USED") values = values.filter(t => t.usado === true);
+      if (statusFilter === "PENDING") values = values.filter(t => t.usado !== true);
       if (q) {
-        values = values.filter(ticket => {
-          const haystack = normalizeSearch([
-            ticket.codigo,
-            ticket.nombre,
-            ticket.email,
-            ticket.zona,
-            ticket.zona_label,
-            "fila " + ticket.fila,
-            "butaca " + ticket.butaca,
-            ticket.fila,
-            ticket.butaca,
-            ticket.checkin_by
-          ].join(" "));
-
-          return haystack.includes(q);
-        });
+        values = values.filter(ticket => normalizeSearch([
+          ticket.codigo, ticket.nombre, ticket.email, ticket.zona, ticket.zona_label,
+          "fila " + ticket.fila, "butaca " + ticket.butaca, ticket.fila, ticket.butaca, ticket.checkin_by
+        ].join(" ")).includes(q));
       }
-
       values.sort((a, b) => {
-        if ((a.usado === true) !== (b.usado === true)) {
-          return a.usado === true ? 1 : -1;
-        }
-
+        if ((a.usado === true) !== (b.usado === true)) return a.usado === true ? 1 : -1;
         return String(a.nombre || "").localeCompare(String(b.nombre || ""), "es");
       });
-
-      document.getElementById("ticketCountText").textContent =
-        `${values.length} entradas mostradas de ${Object.keys(tickets).length}`;
-
-      if (!values.length) {
-        container.innerHTML = '<div class="notice">No hay entradas con esos filtros.</div>';
-        return;
-      }
-
+      document.getElementById("ticketCountText").textContent = `${values.length} entradas mostradas de ${Object.keys(tickets).length}`;
+      if (!values.length) { container.innerHTML = '<div class="notice">No hay entradas con esos filtros.</div>'; return; }
       container.innerHTML = values.slice(0, 400).map(ticket => {
         const zone = getTicketAccessZone(ticket);
         const used = ticket.usado === true;
         const zoneText = zone === "PALCO" ? "PALCO" : "SALÓN PRINCIPAL";
         const zoneClass = zone === "PALCO" ? "palco" : "salon";
-
         return `
           <div class="ticket-row ${used ? "used" : "pending"}">
             <div class="ticket-top">
               <div>
                 <div class="ticket-name">${escapeHtml(ticket.nombre || "Sin nombre")}</div>
-                <div class="ticket-meta">
-                  ${escapeHtml(ticket.codigo || "")}<br>
-                  Fila ${escapeHtml(ticket.fila || "-")} · Butaca ${escapeHtml(ticket.butaca || "-")}
-                  ${ticket.email ? `<br>${escapeHtml(ticket.email)}` : ""}
-                </div>
+                <div class="ticket-meta">${escapeHtml(ticket.codigo || "")}<br>Fila ${escapeHtml(ticket.fila || "-")} · Butaca ${escapeHtml(ticket.butaca || "-")}${ticket.email ? `<br>${escapeHtml(ticket.email)}` : ""}</div>
               </div>
-
-              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-                <span class="pill ${zoneClass}">${zoneText}</span>
-                <span class="pill ${used ? "warn" : "ok"}">${used ? "USADA" : "PENDIENTE"}</span>
-              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill ${zoneClass}">${zoneText}</span><span class="pill ${used ? "warn" : "ok"}">${used ? "USADA" : "PENDIENTE"}</span></div>
             </div>
-
-            ${used ? `
-              <div class="ticket-meta mt">
-                Validada: ${escapeHtml(formatDate(ticket.checkin_at || ""))}
-                ${ticket.checkin_by ? " · " + escapeHtml(ticket.checkin_by) : ""}
-              </div>
-            ` : ""}
-
+            ${used ? `<div class="ticket-meta mt">Validada: ${escapeHtml(formatDate(ticket.checkin_at || ""))}${ticket.checkin_by ? " · " + escapeHtml(ticket.checkin_by) : ""}</div>` : ""}
             <div class="actions">
-              <button class="btn small ${used ? "secondary" : ""}" data-validate-code="${escapeHtml(ticket.codigo || "")}">
-                ${used ? "Ver estado" : "Validar manualmente"}
-              </button>
-
-              <button class="btn warn small" data-reset-code="${escapeHtml(ticket.codigo || "")}">
-                Reiniciar
-              </button>
-
+              <button class="btn small ${used ? "secondary" : ""}" data-validate-code="${escapeHtml(ticket.codigo || "")}">${used ? "Ver estado" : "Validar manualmente"}</button>
+              <button class="btn warn small" data-reset-code="${escapeHtml(ticket.codigo || "")}">Reiniciar</button>
               ${ticket.pdf_url ? `<a class="btn secondary small" href="${escapeHtml(ticket.pdf_url)}" target="_blank" style="text-decoration:none">Abrir PDF</a>` : ""}
             </div>
-          </div>
-        `;
+          </div>`;
       }).join("");
-
-      container.querySelectorAll("button[data-validate-code]").forEach(button => {
-        button.addEventListener("click", () => {
-          document.getElementById("manualCodeInput").value = button.dataset.validateCode;
-          showPage("manual");
-          manualValidate();
-        });
-      });
-
-      container.querySelectorAll("button[data-reset-code]").forEach(button => {
-        button.addEventListener("click", () => {
-          document.getElementById("resetSingleCodeInput").value = button.dataset.resetCode;
-          showPage("reset");
-          document.getElementById("resetSinglePinInput").focus();
-        });
-      });
+      container.querySelectorAll("button[data-validate-code]").forEach(button => button.addEventListener("click", () => {
+        document.getElementById("manualCodeInput").value = button.dataset.validateCode;
+        showPage("manual");
+        manualValidate();
+      }));
+      container.querySelectorAll("button[data-reset-code]").forEach(button => button.addEventListener("click", () => {
+        document.getElementById("resetSingleCodeInput").value = button.dataset.resetCode;
+        showPage("reset");
+        document.getElementById("resetSinglePinInput").focus();
+      }));
     }
 
     function renderRecentLogs() {
-      const html = recentLogs.length
-        ? recentLogs.map(log => `
-          <div class="log-item">
-            <div class="ticket-top">
-              <div>
-                <div class="ticket-name">${escapeHtml(log.nombre || "Sin nombre")}</div>
-                <div class="ticket-meta">
-                  ${escapeHtml(log.zona_label || log.zona || "")}
-                  · Fila ${escapeHtml(log.fila || "-")}
-                  · Butaca ${escapeHtml(log.butaca || "-")}<br>
-                  ${escapeHtml(formatDate(log.checkin_at || ""))}
-                  ${log.checkin_by ? " · " + escapeHtml(log.checkin_by) : ""}
-                </div>
-              </div>
-              <span class="pill ok">OK</span>
-            </div>
+      const html = recentLogs.length ? recentLogs.map(log => `
+        <div class="log-item">
+          <div class="ticket-top">
+            <div><div class="ticket-name">${escapeHtml(log.nombre || "Sin nombre")}</div><div class="ticket-meta">${escapeHtml(log.zona_label || log.zona || "")} · Fila ${escapeHtml(log.fila || "-")} · Butaca ${escapeHtml(log.butaca || "-")}<br>${escapeHtml(formatDate(log.checkin_at || ""))}${log.checkin_by ? " · " + escapeHtml(log.checkin_by) : ""}</div></div>
+            <span class="pill ok">OK</span>
           </div>
-        `).join("")
-        : '<div class="small-text">Todavía no hay accesos registrados.</div>';
-
+        </div>`).join("") : '<div class="small-text">Todavía no hay accesos registrados.</div>';
       document.getElementById("recentLogsSummary").innerHTML = html;
       document.getElementById("recentLogsManual").innerHTML = html;
     }
@@ -986,56 +562,22 @@
       const input = document.getElementById("manualCodeInput");
       const code = normalizeCode(input.value);
       const resultBox = document.getElementById("manualResult");
-
-      if (!code) {
-        resultBox.innerHTML = '<div class="notice">Introduce un código.</div>';
-        return;
-      }
-
+      if (!code) { resultBox.innerHTML = '<div class="notice">Introduce un código.</div>'; return; }
       resultBox.innerHTML = '<div class="notice">Validando...</div>';
-
       try {
         const result = await validateTicketTransaction(code);
-
         if (result.status === "OK") {
-          resultBox.innerHTML = `
-            <div class="success">
-              ✅ Acceso validado: ${escapeHtml(result.ticket.nombre || "")}
-              · Fila ${escapeHtml(result.ticket.fila || "-")}
-              · Butaca ${escapeHtml(result.ticket.butaca || "-")}
-              <br>Guardando en Excel...
-            </div>
-          `;
-
-          syncSheetAction({
-            action: "checkin",
-            codigo: result.ticket.codigo || "",
-            checkin_at: result.ticket.checkin_at || "",
-            checkin_by: result.ticket.checkin_by || "",
-            checkin_email: result.ticket.checkin_email || ""
-          }, ok => {
-            resultBox.innerHTML = ok
-              ? `<div class="success">✅ Acceso validado y guardado en Excel.</div>`
-              : `<div class="notice">⚠️ Acceso validado en Firebase, pero no guardado en Excel.</div>`;
+          resultBox.innerHTML = `<div class="success">✅ Acceso validado: ${escapeHtml(result.ticket.nombre || "")} · Fila ${escapeHtml(result.ticket.fila || "-")} · Butaca ${escapeHtml(result.ticket.butaca || "-")}<br>Guardando en Excel...</div>`;
+          syncSheetAction({ action: "checkin", codigo: result.ticket.codigo || "", checkin_at: result.ticket.checkin_at || "", checkin_by: result.ticket.checkin_by || "", checkin_email: result.ticket.checkin_email || "" }, ok => {
+            resultBox.innerHTML = ok ? `<div class="success">✅ Acceso validado y petición enviada al Excel.</div>` : `<div class="notice">⚠️ Acceso validado en Firebase, pero no guardado en Excel.</div>`;
           });
-
         } else if (result.status === "ALREADY_USED") {
-          resultBox.innerHTML = `
-            <div class="notice">
-              ⚠️ Entrada ya utilizada.<br>
-              ${escapeHtml(result.ticket.nombre || "")}
-              ${result.ticket.checkin_at ? "<br>" + escapeHtml(formatDate(result.ticket.checkin_at)) : ""}
-              ${result.ticket.checkin_by ? " · " + escapeHtml(result.ticket.checkin_by) : ""}
-            </div>
-          `;
-
+          resultBox.innerHTML = `<div class="notice">⚠️ Entrada ya utilizada.<br>${escapeHtml(result.ticket.nombre || "")}${result.ticket.checkin_at ? "<br>" + escapeHtml(formatDate(result.ticket.checkin_at)) : ""}${result.ticket.checkin_by ? " · " + escapeHtml(result.ticket.checkin_by) : ""}</div>`;
         } else if (result.status === "NOT_FOUND") {
           resultBox.innerHTML = `<div class="notice">❌ Entrada no encontrada.</div>`;
-
         } else {
           resultBox.innerHTML = `<div class="notice">❌ No se ha podido validar.</div>`;
         }
-
       } catch (error) {
         resultBox.innerHTML = `<div class="notice">❌ Error: ${escapeHtml(error.message)}</div>`;
       }
@@ -1045,52 +587,16 @@
       const ticketRef = doc(db, "tickets", code);
       const checkinRef = doc(db, "checkins", code);
       const deviceLabel = "admin";
-
       return await runTransaction(db, async transaction => {
         const snap = await transaction.get(ticketRef);
-
-        if (!snap.exists()) {
-          return { status: "NOT_FOUND" };
-        }
-
+        if (!snap.exists()) return { status: "NOT_FOUND" };
         const ticket = snap.data();
-
-        if (ticket.usado === true) {
-          return { status: "ALREADY_USED", ticket };
-        }
-
+        if (ticket.usado === true) return { status: "ALREADY_USED", ticket };
         const nowIso = new Date().toISOString();
-
-        const updatedTicket = {
-          usado: true,
-          checkin_at: nowIso,
-          checkin_by: deviceLabel,
-          checkin_uid: currentUser.uid,
-          checkin_email: currentUser.email || "",
-          last_update_source: "admin_realtime"
-        };
-
+        const updatedTicket = { usado: true, checkin_at: nowIso, checkin_by: deviceLabel, checkin_uid: currentUser.uid, checkin_email: currentUser.email || "", last_update_source: "admin_realtime" };
         transaction.update(ticketRef, updatedTicket);
-
-        transaction.set(checkinRef, {
-          codigo: ticket.codigo || code,
-          nombre: ticket.nombre || "",
-          zona: ticket.zona || "",
-          zona_label: ticket.zona_label || "",
-          fila: ticket.fila || "",
-          butaca: ticket.butaca || "",
-          tipo_entrada: ticket.tipo_entrada || "",
-          checkin_at: nowIso,
-          checkin_by: deviceLabel,
-          checkin_uid: currentUser.uid,
-          checkin_email: currentUser.email || "",
-          created_at: nowIso
-        });
-
-        return {
-          status: "OK",
-          ticket: { ...ticket, ...updatedTicket }
-        };
+        transaction.set(checkinRef, { codigo: ticket.codigo || code, nombre: ticket.nombre || "", zona: ticket.zona || "", zona_label: ticket.zona_label || "", fila: ticket.fila || "", butaca: ticket.butaca || "", tipo_entrada: ticket.tipo_entrada || "", checkin_at: nowIso, checkin_by: deviceLabel, checkin_uid: currentUser.uid, checkin_email: currentUser.email || "", created_at: nowIso });
+        return { status: "OK", ticket: { ...ticket, ...updatedTicket } };
       });
     }
 
@@ -1098,36 +604,16 @@
       const code = normalizeCode(document.getElementById("resetSingleCodeInput").value);
       const pin = document.getElementById("resetSinglePinInput").value.trim();
       const box = document.getElementById("resetSingleResult");
-
-      if (!code) {
-        box.innerHTML = '<div class="notice">Introduce un código.</div>';
-        return;
-      }
-
-      if (!pin) {
-        box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>';
-        return;
-      }
-
+      if (!code) { box.innerHTML = '<div class="notice">Introduce un código.</div>'; return; }
+      if (!pin) { box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>'; return; }
       if (!confirm("¿Reiniciar esta entrada en Firebase y Excel?\n\n" + code)) return;
-
       box.innerHTML = '<div class="notice">Reiniciando en Firebase...</div>';
-
       try {
         await resetTicketInFirebase(code);
-
         box.innerHTML = '<div class="notice">Firebase reiniciado. Limpiando Excel...</div>';
-
-        syncSheetAction({
-          action: "reset_ticket",
-          reset_pin: pin,
-          codigo: code
-        }, (ok, response) => {
-          box.innerHTML = ok
-            ? '<div class="success">✅ Entrada reiniciada en Firebase y Excel.</div>'
-            : `<div class="notice">⚠️ Reiniciada en Firebase, pero no en Excel.<br>${escapeHtml(response?.message || "Sin respuesta de Apps Script.")}</div>`;
+        syncSheetAction({ action: "reset_ticket", reset_pin: pin, codigo: code }, ok => {
+          box.innerHTML = ok ? '<div class="success">✅ Entrada reiniciada en Firebase y petición enviada al Excel.</div>' : '<div class="notice">⚠️ Reiniciada en Firebase, pero no se pudo llamar al Excel.</div>';
         });
-
       } catch (error) {
         box.innerHTML = `<div class="notice">❌ Error reiniciando: ${escapeHtml(error.message)}</div>`;
       }
@@ -1136,23 +622,10 @@
     async function resetTicketInFirebase(code) {
       const ticketRef = doc(db, "tickets", code);
       const checkinRef = doc(db, "checkins", code);
-
       return await runTransaction(db, async transaction => {
         const snap = await transaction.get(ticketRef);
-
-        if (!snap.exists()) {
-          throw new Error("No existe ese ticket en Firebase.");
-        }
-
-        transaction.update(ticketRef, {
-          usado: false,
-          checkin_at: "",
-          checkin_by: "",
-          checkin_uid: "",
-          checkin_email: "",
-          last_update_source: "admin_reset"
-        });
-
+        if (!snap.exists()) throw new Error("No existe ese ticket en Firebase.");
+        transaction.update(ticketRef, { usado: false, checkin_at: "", checkin_by: "", checkin_uid: "", checkin_email: "", last_update_source: "admin_reset" });
         transaction.delete(checkinRef);
       });
     }
@@ -1161,43 +634,17 @@
       const pin = document.getElementById("resetAllPinInput").value.trim();
       const confirmText = document.getElementById("resetAllConfirmInput").value.trim();
       const box = document.getElementById("resetAllResult");
-
-      if (!pin) {
-        box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>';
-        return;
-      }
-
-      if (confirmText !== "REINICIAR TODO") {
-        box.innerHTML = '<div class="notice">Para confirmar, escribe exactamente: REINICIAR TODO</div>';
-        return;
-      }
-
+      if (!pin) { box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>'; return; }
+      if (confirmText !== "REINICIAR TODO") { box.innerHTML = '<div class="notice">Para confirmar, escribe exactamente: REINICIAR TODO</div>'; return; }
       if (!confirm("ATENCIÓN: se reiniciarán TODOS los accesos en Firebase y Excel.\n\n¿Seguro?")) return;
       if (!confirm("Última confirmación: esto dejará todas las entradas como no usadas.")) return;
-
       box.innerHTML = '<div class="notice">Reiniciando Firebase...</div>';
-
       try {
         const firebaseResult = await resetAllInFirebase();
-
-        box.innerHTML = `
-          <div class="notice">
-            Firebase reiniciado.<br>
-            Tickets actualizados: ${firebaseResult.tickets}<br>
-            Checkins borrados: ${firebaseResult.checkins}<br>
-            Limpiando Excel...
-          </div>
-        `;
-
-        syncSheetAction({
-          action: "reset_all",
-          reset_pin: pin
-        }, (ok, response) => {
-          box.innerHTML = ok
-            ? `<div class="success">✅ Todo reiniciado en Firebase y Excel.</div>`
-            : `<div class="notice">⚠️ Firebase reiniciado, pero Excel no.<br>${escapeHtml(response?.message || "Sin respuesta de Apps Script.")}</div>`;
+        box.innerHTML = `<div class="notice">Firebase reiniciado.<br>Tickets actualizados: ${firebaseResult.tickets}<br>Checkins borrados: ${firebaseResult.checkins}<br>Limpiando Excel...</div>`;
+        syncSheetAction({ action: "reset_all", reset_pin: pin }, ok => {
+          box.innerHTML = ok ? `<div class="success">✅ Firebase reiniciado y petición enviada al Excel. Refresca el Excel para comprobarlo.</div>` : `<div class="notice">⚠️ Firebase reiniciado, pero no se pudo llamar al Excel.</div>`;
         });
-
       } catch (error) {
         box.innerHTML = `<div class="notice">❌ Error reiniciando todo: ${escapeHtml(error.message)}</div>`;
       }
@@ -1206,12 +653,8 @@
     async function resetAllInFirebase() {
       const ticketSnap = await getDocs(collection(db, "tickets"));
       const checkinSnap = await getDocs(collection(db, "checkins"));
-
       let batch = writeBatch(db);
-      let operations = 0;
-      let ticketCount = 0;
-      let checkinCount = 0;
-
+      let operations = 0, ticketCount = 0, checkinCount = 0;
       async function commitIfNeeded(force = false) {
         if (operations >= 450 || (force && operations > 0)) {
           await batch.commit();
@@ -1219,111 +662,61 @@
           operations = 0;
         }
       }
-
       for (const docSnap of ticketSnap.docs) {
-        batch.update(docSnap.ref, {
-          usado: false,
-          checkin_at: "",
-          checkin_by: "",
-          checkin_uid: "",
-          checkin_email: "",
-          last_update_source: "admin_reset_all"
-        });
-
-        operations++;
-        ticketCount++;
-        await commitIfNeeded();
+        batch.update(docSnap.ref, { usado: false, checkin_at: "", checkin_by: "", checkin_uid: "", checkin_email: "", last_update_source: "admin_reset_all" });
+        operations++; ticketCount++; await commitIfNeeded();
       }
-
       for (const docSnap of checkinSnap.docs) {
         batch.delete(docSnap.ref);
-        operations++;
-        checkinCount++;
-        await commitIfNeeded();
+        operations++; checkinCount++; await commitIfNeeded();
       }
-
       await commitIfNeeded(true);
-
-      return {
-        tickets: ticketCount,
-        checkins: checkinCount
-      };
+      return { tickets: ticketCount, checkins: checkinCount };
     }
 
     function syncSheetAction(params, callback) {
-      const callbackName = "__admin_sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-
-      window[callbackName] = function(response) {
-        console.log("Respuesta Apps Script:", response);
-        cleanup();
-        callback?.(response && response.status === "OK", response);
-      };
-
-      script.onerror = function() {
-        console.warn("Error llamando a Apps Script");
-        cleanup();
-        callback?.(false, null);
-      };
-
-      function cleanup() {
-        try { delete window[callbackName]; } catch (error) {}
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
-
       const url = new URL(SHEETS_SYNC_URL);
-
       url.searchParams.set("secret", SHEETS_SYNC_SECRET);
-      url.searchParams.set("callback", callbackName);
       url.searchParams.set("_", Date.now());
-
       for (const key in params) {
         if (Object.prototype.hasOwnProperty.call(params, key)) {
           url.searchParams.set(key, params[key] ?? "");
         }
       }
-
-      console.log("URL Apps Script:", url.toString());
-
-      script.src = url.toString();
-      document.head.appendChild(script);
+      console.log("Ejecutando Apps Script:", url.toString());
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = url.toString();
+      let finished = false;
+      iframe.onload = function() {
+        if (finished) return;
+        finished = true;
+        setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 1000);
+        callback?.(true, { status: "OK", message: "Petición enviada a Apps Script." });
+      };
+      iframe.onerror = function() {
+        if (finished) return;
+        finished = true;
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        callback?.(false, { status: "ERROR", message: "No se ha podido llamar a Apps Script." });
+      };
+      document.body.appendChild(iframe);
+      setTimeout(() => {
+        if (finished) return;
+        finished = true;
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        callback?.(true, { status: "OK", message: "Petición enviada a Apps Script." });
+      }, 6000);
     }
 
     function exportCsv() {
       const values = Object.values(tickets);
-
-      const headers = [
-        "codigo",
-        "nombre",
-        "email",
-        "zona",
-        "fila",
-        "butaca",
-        "usado",
-        "checkin_at",
-        "checkin_by"
-      ];
-
-      const rows = values.map(t => [
-        t.codigo || "",
-        t.nombre || "",
-        t.email || "",
-        t.zona_label || t.zona || "",
-        t.fila || "",
-        t.butaca || "",
-        t.usado === true ? "TRUE" : "FALSE",
-        t.checkin_at || "",
-        t.checkin_by || ""
-      ]);
-
-      const csv = [headers, ...rows]
-        .map(row => row.map(csvEscape).join(","))
-        .join("\n");
-
+      const headers = ["codigo", "nombre", "email", "zona", "fila", "butaca", "usado", "checkin_at", "checkin_by"];
+      const rows = values.map(t => [t.codigo || "", t.nombre || "", t.email || "", t.zona_label || t.zona || "", t.fila || "", t.butaca || "", t.usado === true ? "TRUE" : "FALSE", t.checkin_at || "", t.checkin_by || ""]);
+      const csv = [headers, ...rows].map(row => row.map(csvEscape).join(",")).join("\n");
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-
       a.href = url;
       a.download = "estado_entradas_realtime.csv";
       document.body.appendChild(a);
@@ -1332,70 +725,33 @@
       URL.revokeObjectURL(url);
     }
 
-    function csvEscape(value) {
-      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
-    }
-
-    function setConnection(state, text) {
-      const badge = document.getElementById("connectionBadge");
-      badge.className = "badge " + state;
-      document.getElementById("connectionText").textContent = text;
-    }
+    function csvEscape(value) { return '"' + String(value ?? "").replace(/"/g, '""') + '"'; }
+    function setConnection(state, text) { const badge = document.getElementById("connectionBadge"); badge.className = "badge " + state; document.getElementById("connectionText").textContent = text; }
 
     function normalizeCode(raw) {
       let text = String(raw || "").trim();
-
       try {
         const url = new URL(text);
         const code = url.searchParams.get("code") || url.searchParams.get("codigo");
         if (code) return code.trim().toUpperCase();
       } catch (error) {}
-
       const match = text.match(/EV26-[A-Z0-9-]+/i);
       if (match) return match[0].toUpperCase();
-
       return text.toUpperCase();
     }
 
-    function normalizeSearch(value) {
-      return String(value || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-    }
-
-    function getTicketAccessZone(ticket) {
-      const raw = String(ticket && (ticket.zonaId || ticket.zona || "")).toUpperCase();
-      return raw.includes("PALCO") ? "PALCO" : "PATIO";
-    }
+    function normalizeSearch(value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
+    function getTicketAccessZone(ticket) { const raw = String(ticket && (ticket.zonaId || ticket.zona || "")).toUpperCase(); return raw.includes("PALCO") ? "PALCO" : "PATIO"; }
 
     function formatDate(value) {
       if (!value) return "";
-
       try {
         const date = new Date(value);
-        return date.toLocaleString("es-ES", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        });
-      } catch (error) {
-        return value;
-      }
+        return date.toLocaleString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      } catch (error) { return value; }
     }
 
-    function escapeHtml(value) {
-      return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+    function escapeHtml(value) { return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
   </script>
 </body>
 </html>
