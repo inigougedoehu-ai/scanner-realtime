@@ -131,12 +131,6 @@
       gap: 10px;
     }
 
-    .grid3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
     .grid4 {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -403,7 +397,7 @@
     }
 
     @media (max-width: 800px) {
-      .grid4, .grid3, .filters, .grid2 {
+      .grid4, .filters, .grid2 {
         grid-template-columns: 1fr;
       }
 
@@ -578,11 +572,11 @@
             <br><br>
             Se borrarán:
             <br>
-            - `usado`, `checkin_at`, `checkin_by` del Excel.
+            - usado, checkin_at, checkin_by del Excel.
             <br>
             - Estado usado de todos los tickets en Firebase.
             <br>
-            - Registros de la colección `checkins`.
+            - Registros de la colección checkins.
           </div>
 
           <div class="grid2 mt">
@@ -1128,10 +1122,10 @@
           action: "reset_ticket",
           reset_pin: pin,
           codigo: code
-        }, ok => {
+        }, (ok, response) => {
           box.innerHTML = ok
             ? '<div class="success">✅ Entrada reiniciada en Firebase y Excel.</div>'
-            : '<div class="notice">⚠️ Reiniciada en Firebase, pero no en Excel. Revisa la clave o repite la operación.</div>';
+            : `<div class="notice">⚠️ Reiniciada en Firebase, pero no en Excel.<br>${escapeHtml(response?.message || "Sin respuesta de Apps Script.")}</div>`;
         });
 
       } catch (error) {
@@ -1198,10 +1192,10 @@
         syncSheetAction({
           action: "reset_all",
           reset_pin: pin
-        }, ok => {
+        }, (ok, response) => {
           box.innerHTML = ok
             ? `<div class="success">✅ Todo reiniciado en Firebase y Excel.</div>`
-            : `<div class="notice">⚠️ Firebase reiniciado, pero Excel no. Revisa la clave o ejecuta de nuevo el reinicio de Excel.</div>`;
+            : `<div class="notice">⚠️ Firebase reiniciado, pero Excel no.<br>${escapeHtml(response?.message || "Sin respuesta de Apps Script.")}</div>`;
         });
 
       } catch (error) {
@@ -1261,11 +1255,13 @@
       const script = document.createElement("script");
 
       window[callbackName] = function(response) {
+        console.log("Respuesta Apps Script:", response);
         cleanup();
         callback?.(response && response.status === "OK", response);
       };
 
       script.onerror = function() {
+        console.warn("Error llamando a Apps Script");
         cleanup();
         callback?.(false, null);
       };
@@ -1281,9 +1277,13 @@
       url.searchParams.set("callback", callbackName);
       url.searchParams.set("_", Date.now());
 
-      Object.entries(params || {}).forEach(([key, value]) => {
-        url.searchParams.set(key, value ?? "");
-      });
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          url.searchParams.set(key, params[key] ?? "");
+        }
+      }
+
+      console.log("URL Apps Script:", url.toString());
 
       script.src = url.toString();
       document.head.appendChild(script);
