@@ -604,17 +604,49 @@
       const code = normalizeCode(document.getElementById("resetSingleCodeInput").value);
       const pin = document.getElementById("resetSinglePinInput").value.trim();
       const box = document.getElementById("resetSingleResult");
-      if (!code) { box.innerHTML = '<div class="notice">Introduce un código.</div>'; return; }
-      if (!pin) { box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>'; return; }
+
+      if (!code) {
+        box.innerHTML = '<div class="notice">Introduce un código.</div>';
+        return;
+      }
+
+      if (!pin) {
+        box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>';
+        return;
+      }
+
       if (!confirm("¿Reiniciar esta entrada en Firebase y Excel?\n\n" + code)) return;
+
+      // Abrimos una pestaña vacía inmediatamente por el clic del usuario.
+      // Así el navegador no bloquea la apertura cuando termine Firebase.
+      const excelTab = window.open("about:blank", "_blank");
+      if (excelTab) {
+        excelTab.document.write("<p style='font-family:Arial'>Preparando limpieza del Excel...</p>");
+      }
+
       box.innerHTML = '<div class="notice">Reiniciando en Firebase...</div>';
+
       try {
         await resetTicketInFirebase(code);
-        box.innerHTML = '<div class="notice">Firebase reiniciado. Limpiando Excel...</div>';
-        syncSheetAction({ action: "reset_ticket", reset_pin: pin, codigo: code }, ok => {
-          box.innerHTML = ok ? '<div class="success">✅ Entrada reiniciada en Firebase y petición enviada al Excel.</div>' : '<div class="notice">⚠️ Reiniciada en Firebase, pero no se pudo llamar al Excel.</div>';
+
+        const excelUrl = buildSheetActionUrl({
+          action: "reset_ticket",
+          reset_pin: pin,
+          codigo: code
         });
+
+        openSheetActionUrl(excelUrl, excelTab);
+
+        box.innerHTML = `
+          <div class="success">
+            ✅ Entrada reiniciada en Firebase.<br>
+            Se ha abierto una pestaña de Apps Script para limpiar el Excel.<br>
+            Cuando esa pestaña devuelva <strong>{"status":"OK"}</strong>, refresca el Excel.
+          </div>
+        `;
+
       } catch (error) {
+        if (excelTab) excelTab.close();
         box.innerHTML = `<div class="notice">❌ Error reiniciando: ${escapeHtml(error.message)}</div>`;
       }
     }
@@ -634,18 +666,51 @@
       const pin = document.getElementById("resetAllPinInput").value.trim();
       const confirmText = document.getElementById("resetAllConfirmInput").value.trim();
       const box = document.getElementById("resetAllResult");
-      if (!pin) { box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>'; return; }
-      if (confirmText !== "REINICIAR TODO") { box.innerHTML = '<div class="notice">Para confirmar, escribe exactamente: REINICIAR TODO</div>'; return; }
+
+      if (!pin) {
+        box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>';
+        return;
+      }
+
+      if (confirmText !== "REINICIAR TODO") {
+        box.innerHTML = '<div class="notice">Para confirmar, escribe exactamente: REINICIAR TODO</div>';
+        return;
+      }
+
       if (!confirm("ATENCIÓN: se reiniciarán TODOS los accesos en Firebase y Excel.\n\n¿Seguro?")) return;
       if (!confirm("Última confirmación: esto dejará todas las entradas como no usadas.")) return;
+
+      // Abrimos una pestaña vacía inmediatamente por el clic del usuario.
+      // Así el navegador no bloquea la apertura cuando termine Firebase.
+      const excelTab = window.open("about:blank", "_blank");
+      if (excelTab) {
+        excelTab.document.write("<p style='font-family:Arial'>Preparando reinicio del Excel...</p>");
+      }
+
       box.innerHTML = '<div class="notice">Reiniciando Firebase...</div>';
+
       try {
         const firebaseResult = await resetAllInFirebase();
-        box.innerHTML = `<div class="notice">Firebase reiniciado.<br>Tickets actualizados: ${firebaseResult.tickets}<br>Checkins borrados: ${firebaseResult.checkins}<br>Limpiando Excel...</div>`;
-        syncSheetAction({ action: "reset_all", reset_pin: pin }, ok => {
-          box.innerHTML = ok ? `<div class="success">✅ Firebase reiniciado y petición enviada al Excel. Refresca el Excel para comprobarlo.</div>` : `<div class="notice">⚠️ Firebase reiniciado, pero no se pudo llamar al Excel.</div>`;
+
+        const excelUrl = buildSheetActionUrl({
+          action: "reset_all",
+          reset_pin: pin
         });
+
+        openSheetActionUrl(excelUrl, excelTab);
+
+        box.innerHTML = `
+          <div class="success">
+            ✅ Firebase reiniciado.<br>
+            Tickets actualizados: ${firebaseResult.tickets}<br>
+            Checkins borrados: ${firebaseResult.checkins}<br><br>
+            Se ha abierto una pestaña de Apps Script para limpiar el Excel.<br>
+            Cuando esa pestaña devuelva <strong>{"status":"OK"}</strong>, refresca el Excel.
+          </div>
+        `;
+
       } catch (error) {
+        if (excelTab) excelTab.close();
         box.innerHTML = `<div class="notice">❌ Error reiniciando todo: ${escapeHtml(error.message)}</div>`;
       }
     }
@@ -674,39 +739,60 @@
       return { tickets: ticketCount, checkins: checkinCount };
     }
 
-    function syncSheetAction(params, callback) {
+    function buildSheetActionUrl(params) {
       const url = new URL(SHEETS_SYNC_URL);
+
       url.searchParams.set("secret", SHEETS_SYNC_SECRET);
       url.searchParams.set("_", Date.now());
+
       for (const key in params) {
         if (Object.prototype.hasOwnProperty.call(params, key)) {
           url.searchParams.set(key, params[key] ?? "");
         }
       }
-      console.log("Ejecutando Apps Script:", url.toString());
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = url.toString();
-      let finished = false;
-      iframe.onload = function() {
-        if (finished) return;
-        finished = true;
-        setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 1000);
-        callback?.(true, { status: "OK", message: "Petición enviada a Apps Script." });
+
+      return url.toString();
+    }
+
+    function openSheetActionUrl(url, existingTab) {
+      console.log("Abriendo Apps Script:", url);
+
+      if (existingTab && !existingTab.closed) {
+        existingTab.location.href = url;
+        return;
+      }
+
+      window.open(url, "_blank");
+    }
+
+    // Para validación manual normal usamos JSONP, sin abrir pestañas.
+    // Para reinicios usamos pestaña visible con openSheetActionUrl(), porque Google
+    // puede bloquear iframe oculto y así garantizamos que Apps Script se ejecuta.
+    function syncSheetAction(params, callback) {
+      const callbackName = "__admin_sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+
+      window[callbackName] = function(response) {
+        cleanup();
+        callback?.(response && response.status === "OK", response);
       };
-      iframe.onerror = function() {
-        if (finished) return;
-        finished = true;
-        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-        callback?.(false, { status: "ERROR", message: "No se ha podido llamar a Apps Script." });
+
+      script.onerror = function() {
+        cleanup();
+        callback?.(false, null);
       };
-      document.body.appendChild(iframe);
-      setTimeout(() => {
-        if (finished) return;
-        finished = true;
-        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-        callback?.(true, { status: "OK", message: "Petición enviada a Apps Script." });
-      }, 6000);
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch (error) {}
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      const url = new URL(buildSheetActionUrl(params));
+      url.searchParams.set("callback", callbackName);
+
+      console.log("Llamando Apps Script JSONP:", url.toString());
+      script.src = url.toString();
+      document.head.appendChild(script);
     }
 
     function exportCsv() {
