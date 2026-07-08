@@ -150,6 +150,14 @@
       border-color: var(--warn);
     }
 
+    .status.sync {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+      font-size: 14px;
+      padding: 10px;
+    }
+
     .ticket-info {
       font-size: 15px;
       line-height: 1.45;
@@ -215,16 +223,6 @@
       color: #115e59;
     }
 
-    .pill.bad {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .pill.warn {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
     @media (max-width: 620px) {
       .row, .stats {
         grid-template-columns: 1fr;
@@ -240,7 +238,7 @@
 <body>
   <header>
     <h1>Control de entradas realtime</h1>
-    <p>Sistema nuevo con Firebase · No toca el sistema actual</p>
+    <p>Sistema nuevo con Firebase · Sin tocar el sistema actual</p>
   </header>
 
   <main>
@@ -296,7 +294,7 @@
             <div class="label">Pendientes</div>
           </div>
         </div>
-        <p class="small">Estas cifras se actualizan en tiempo real.</p>
+        <p class="small">Estas cifras se actualizan en tiempo real desde Firebase.</p>
       </section>
 
       <section class="card">
@@ -315,6 +313,7 @@
       </section>
 
       <section id="resultBox" class="status hidden"></section>
+      <section id="syncBox" class="status sync hidden"></section>
 
       <section id="ticketCard" class="card hidden">
         <h2>Entrada</h2>
@@ -332,6 +331,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
     import {
       getAuth,
       signInWithEmailAndPassword,
@@ -342,17 +342,16 @@
     import {
       getFirestore,
       doc,
-      getDoc,
-      updateDoc,
-      setDoc,
       runTransaction,
-      serverTimestamp,
       collection,
       query,
       orderBy,
       limit,
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const SHEETS_SYNC_URL = "https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec";
+    const SHEETS_SYNC_SECRET = "graduacion-realtime-2026";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",
@@ -388,6 +387,7 @@
     const manualBtn = document.getElementById("manualBtn");
 
     const resultBox = document.getElementById("resultBox");
+    const syncBox = document.getElementById("syncBox");
     const ticketCard = document.getElementById("ticketCard");
     const ticketInfo = document.getElementById("ticketInfo");
 
@@ -551,14 +551,18 @@
           showResult("ACCESO VALIDADO", "ok");
           showTicket(result.ticket);
           vibrateOk();
+          syncCheckinToSheets(result.ticket);
+
         } else if (result.status === "ALREADY_USED") {
           showResult("ENTRADA YA USADA", "bad");
           showTicket(result.ticket);
           vibrateBad();
+
         } else if (result.status === "WRONG_ZONE") {
           showResult("ZONA INCORRECTA: esta entrada es de " + result.ticket.zona_label, "warn");
           showTicket(result.ticket);
           vibrateBad();
+
         } else if (result.status === "NOT_FOUND") {
           showResult("ENTRADA NO ENCONTRADA", "bad");
           hideTicket();
@@ -647,6 +651,69 @@
       });
     }
 
+    function syncCheckinToSheets(ticket) {
+      syncBox.classList.remove("hidden");
+      syncBox.textContent = "Sincronizando con Google Sheets...";
+
+      const callbackName = "__sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+
+      window[callbackName] = function(response) {
+        try {
+          console.log("Sync Sheets:", response);
+        } catch (error) {}
+
+        if (response && response.status === "OK") {
+          syncBox.textContent = "Guardado también en Google Sheets.";
+        } else {
+          syncBox.textContent = "Validado en Firebase, pero no se ha podido guardar en Sheets.";
+        }
+
+        try {
+          delete window[callbackName];
+        } catch (error) {}
+
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      };
+
+      script.onerror = function() {
+        syncBox.classList.remove("hidden");
+        syncBox.textContent = "Validado en Firebase, pero ha fallado la sincronización con Sheets.";
+
+        try {
+          delete window[callbackName];
+        } catch (error) {}
+
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      };
+
+      const url = new URL(SHEETS_SYNC_URL);
+
+      url.searchParams.set("action", "checkin");
+      url.searchParams.set("secret", SHEETS_SYNC_SECRET);
+      url.searchParams.set("callback", callbackName);
+      url.searchParams.set("_", Date.now());
+
+      url.searchParams.set("codigo", ticket.codigo || "");
+      url.searchParams.set("nombre", ticket.nombre || "");
+      url.searchParams.set("zona", ticket.zona || "");
+      url.searchParams.set("zona_label", ticket.zona_label || "");
+      url.searchParams.set("fila", ticket.fila || "");
+      url.searchParams.set("butaca", ticket.butaca || "");
+      url.searchParams.set("tipo_entrada", ticket.tipo_entrada || "");
+      url.searchParams.set("checkin_at", ticket.checkin_at || "");
+      url.searchParams.set("checkin_by", ticket.checkin_by || "");
+      url.searchParams.set("checkin_email", ticket.checkin_email || "");
+      url.searchParams.set("checkin_uid", ticket.checkin_uid || "");
+
+      script.src = url.toString();
+      document.head.appendChild(script);
+    }
+
     function zoneMatches(selectedZone, ticketZone) {
       const normalized = String(ticketZone || "").toUpperCase();
 
@@ -659,6 +726,12 @@
 
     function normalizeCode(value) {
       const text = String(value || "").trim();
+
+      try {
+        const url = new URL(text);
+        const code = url.searchParams.get("code") || url.searchParams.get("codigo");
+        if (code) return code.trim().toUpperCase();
+      } catch (error) {}
 
       const match = text.match(/EV26-[A-Z0-9-]+/i);
       if (match) return match[0].toUpperCase();
@@ -762,7 +835,7 @@
         });
 
         recentLog.innerHTML = items.join("");
-      }, (error) => {
+      }, () => {
         recentLog.innerHTML = '<p class="small">No se pueden cargar últimos accesos.</p>';
       });
     }
