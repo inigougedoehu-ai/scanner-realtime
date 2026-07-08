@@ -3,606 +3,1340 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#020617">
-  <title>Admin entradas realtime</title>
-
+  <meta name="theme-color" content="#07111f">
+  <title>Administración · Control de entradas</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <style>
-    :root {
-      --bg: #020617;
-      --card: #0f172a;
-      --text: #f8fafc;
-      --muted: #aebbd0;
-      --border: rgba(255,255,255,.12);
-      --blue: #2563eb;
-      --ok: #16a34a;
-      --warn: #d97706;
-      --bad: #dc2626;
-      --palco: #7c2d3e;
-      --salon: #163c67;
+    :root{
+      --bg:#06111f;--panel:#0d1b2c;--panel2:#122338;--text:#f8fafc;--muted:#9db0c7;
+      --line:rgba(255,255,255,.1);--blue:#2f6fed;--cyan:#22c1dc;--green:#22c55e;
+      --amber:#f59e0b;--red:#ef4444;--palco:#7c2d3e;--salon:#174a78;
     }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background:
-        radial-gradient(circle at top left, rgba(37,99,235,.28), transparent 34%),
-        radial-gradient(circle at bottom right, rgba(22,163,74,.12), transparent 32%),
-        var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
-    button, input, select { font: inherit; }
-    button { cursor: pointer; }
-
-    .app { max-width: 1050px; margin: 0 auto; padding: 14px; }
-    .hidden { display: none !important; }
-
-    .card {
-      background: rgba(15,23,42,.97);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: 0 22px 60px rgba(0,0,0,.30);
-      margin-bottom: 14px;
-    }
-
-    .title { font-size: 31px; line-height: 1.05; font-weight: 950; letter-spacing: -.04em; }
-    .subtitle { color: var(--muted); font-size: 15px; margin-top: 6px; line-height: 1.4; }
-    .mt { margin-top: 14px; }
-
-    input, select {
-      width: 100%; min-height: 52px; border-radius: 16px; border: 1px solid var(--border);
-      background: rgba(255,255,255,.08); color: white; padding: 13px 14px; outline: none;
-    }
-    input::placeholder { color: #8795aa; }
-    select option { color: #111827; }
-
-    .btn {
-      width: 100%; min-height: 52px; border: 0; border-radius: 16px; background: var(--blue);
-      color: white; font-size: 16px; font-weight: 850; padding: 12px 16px;
-    }
-    .btn.secondary { background: rgba(255,255,255,.10); border: 1px solid var(--border); }
-    .btn.danger { background: var(--bad); }
-    .btn.warn { background: var(--warn); }
-    .btn.small { min-height: 38px; font-size: 14px; border-radius: 13px; }
-    .btn.inline { width: auto; padding-left: 18px; padding-right: 18px; }
-    .btn:disabled { opacity: .55; cursor: default; }
-
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-
-    .stat { background: rgba(255,255,255,.075); border: 1px solid var(--border); border-radius: 18px; padding: 14px 10px; text-align: center; }
-    .stat-number { font-size: 32px; font-weight: 950; line-height: 1; }
-    .stat-label { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 750; }
-
-    .progress-wrap { width: 100%; height: 14px; border-radius: 999px; background: rgba(255,255,255,.09); overflow: hidden; margin-top: 12px; border: 1px solid var(--border); }
-    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #22c55e, #60a5fa); border-radius: 999px; transition: width .25s; }
-
-    .sync-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .badge, .pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 7px 11px; font-size: 13px; font-weight: 850; border: 1px solid var(--border); background: rgba(255,255,255,.08); }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
-    .badge.online .dot { background: #22c55e; }
-    .badge.warn .dot { background: #f59e0b; }
-    .badge.bad .dot { background: #ef4444; }
-    .pill.ok { color: #bbf7d0; background: rgba(22,163,74,.18); }
-    .pill.warn { color: #fde68a; background: rgba(217,119,6,.18); }
-    .pill.bad { color: #fecaca; background: rgba(220,38,38,.18); }
-    .pill.salon { color: #bfdbfe; background: rgba(37,99,235,.16); }
-    .pill.palco { color: #fbcfe8; background: rgba(190,24,93,.16); }
-
-    .zone-card { border-radius: 18px; border: 1px solid var(--border); padding: 15px; background: rgba(255,255,255,.07); }
-    .zone-card.salon { border-left: 5px solid #3b82c4; }
-    .zone-card.palco { border-left: 5px solid #a64c61; }
-    .zone-title { font-size: 17px; font-weight: 950; }
-    .zone-value { font-size: 28px; font-weight: 950; margin-top: 5px; }
-
-    .small-text { color: var(--muted); font-size: 13px; line-height: 1.4; }
-    .section-title { font-size: 20px; font-weight: 950; margin-bottom: 10px; }
-    .filters { display: grid; grid-template-columns: 1.4fr .8fr .8fr; gap: 10px; }
-    .ticket-list { max-height: 590px; overflow: auto; padding-right: 2px; }
-
-    .ticket-row, .log-item { padding: 13px; border-radius: 16px; border: 1px solid var(--border); background: rgba(255,255,255,.06); margin-top: 10px; }
-    .ticket-row.used { border-color: rgba(245,158,11,.38); background: rgba(245,158,11,.08); }
-    .ticket-row.pending { border-color: rgba(34,197,94,.38); background: rgba(34,197,94,.08); }
-    .ticket-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
-    .ticket-name { font-weight: 950; font-size: 17px; }
-    .ticket-meta { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.4; word-break: break-word; }
-    .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .actions .btn { width: auto; }
-
-    .notice { margin-top: 12px; padding: 11px 13px; border-radius: 15px; background: rgba(245,158,11,.14); border: 1px solid rgba(245,158,11,.45); color: #fde68a; font-size: 13px; line-height: 1.4; }
-    .success { margin-top: 12px; padding: 11px 13px; border-radius: 15px; background: rgba(22,163,74,.14); border: 1px solid rgba(22,163,74,.45); color: #bbf7d0; font-size: 13px; line-height: 1.4; }
-    .danger-box { margin-top: 12px; padding: 13px; border-radius: 17px; background: rgba(220,38,38,.14); border: 1px solid rgba(248,113,113,.45); color: #fecaca; font-size: 14px; line-height: 1.45; }
-
-    .bottom-nav { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: min(1050px, 100%); padding: 9px 10px calc(9px + env(safe-area-inset-bottom)); background: rgba(2,6,23,.94); backdrop-filter: blur(18px); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; z-index: 9999; }
-    .nav-btn { border: 0; background: transparent; color: var(--muted); border-radius: 14px; padding: 8px 4px; min-height: 53px; font-size: 11px; font-weight: 800; }
-    .nav-btn .nav-icon { display: block; font-size: 21px; margin-bottom: 2px; }
-    .nav-btn.active { background: rgba(37,99,235,.18); color: white; }
-
-    @media (max-width: 800px) {
-      .grid4, .filters, .grid2 { grid-template-columns: 1fr; }
-      .title { font-size: 27px; }
-    }
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:
+      radial-gradient(circle at 10% 0%,rgba(47,111,237,.26),transparent 34%),
+      radial-gradient(circle at 90% 10%,rgba(34,193,220,.15),transparent 28%),var(--bg);color:var(--text)}
+    button,input,select{font:inherit}.hidden{display:none!important}
+    .login{min-height:100vh;display:grid;place-items:center;padding:20px}.login-card{width:min(520px,100%);background:rgba(13,27,44,.96);border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:0 34px 90px rgba(0,0,0,.4)}
+    .brand{display:flex;align-items:center;gap:14px}.brand-mark{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--cyan));font-size:25px;box-shadow:0 12px 28px rgba(47,111,237,.35)}
+    h1,h2,h3,p{margin:0}.brand h1{font-size:25px}.muted{color:var(--muted)}.small{font-size:13px}.mt{margin-top:16px}
+    .input{width:100%;min-height:54px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;padding:13px 15px;outline:none}.input:focus{border-color:rgba(96,165,250,.8);box-shadow:0 0 0 3px rgba(47,111,237,.18)}
+    .btn{border:0;border-radius:15px;min-height:48px;padding:11px 16px;background:var(--blue);color:#fff;font-weight:800;cursor:pointer}.btn:hover{filter:brightness(1.08)}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.secondary{background:rgba(255,255,255,.09);border:1px solid var(--line)}.btn.green{background:#168a43}.btn.amber{background:#b66b06}.btn.red{background:#b4232e}.btn.small{min-height:38px;padding:8px 12px;font-size:13px}.btn-row{display:flex;gap:10px;flex-wrap:wrap}.btn-row .btn{width:auto}
+    .app{display:grid;grid-template-columns:255px 1fr;min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;padding:20px 14px;border-right:1px solid var(--line);background:rgba(7,17,31,.84);backdrop-filter:blur(16px)}
+    .side-brand{padding:5px 8px 22px}.side-brand strong{display:block;font-size:18px}.side-brand span{font-size:12px;color:var(--muted)}
+    .nav{display:grid;gap:7px}.nav button{width:100%;border:0;background:transparent;color:var(--muted);text-align:left;border-radius:14px;padding:12px 13px;font-weight:750;cursor:pointer}.nav button.active,.nav button:hover{background:rgba(47,111,237,.17);color:#fff}.nav button span{margin-right:10px}
+    .side-footer{position:absolute;left:14px;right:14px;bottom:18px}.session{font-size:12px;color:var(--muted);padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04)}
+    .main{padding:24px;min-width:0}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px}.topbar h1{font-size:29px;letter-spacing:-.03em}.top-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+    .grid{display:grid;gap:14px}.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.card{background:rgba(13,27,44,.94);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.18)}
+    .metric{position:relative;overflow:hidden}.metric:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-28px;top:-35px;background:rgba(255,255,255,.05)}.metric .value{font-size:35px;font-weight:950;margin-top:8px}.metric .label{color:var(--muted);font-size:13px;font-weight:700}.metric .delta{font-size:12px;margin-top:8px;color:#b7c6d8}
+    .card-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.card-title h2{font-size:18px}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid var(--line)}.badge.ok{background:rgba(34,197,94,.14);color:#9df5ba}.badge.warn{background:rgba(245,158,11,.14);color:#ffd58a}.badge.bad{background:rgba(239,68,68,.14);color:#ffb3b3}
+    .progress{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.progress>div{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--cyan));width:0}.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px}
+    .drop{border:1.5px dashed rgba(96,165,250,.55);border-radius:20px;padding:30px;text-align:center;background:rgba(47,111,237,.07);cursor:pointer}.drop.drag{background:rgba(47,111,237,.17);border-color:#7bb1ff}.drop .icon{font-size:40px;margin-bottom:9px}.drop input{display:none}
+    .steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.step{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:12px;font-weight:800}.step.active{background:rgba(47,111,237,.2);color:#fff}.step.done{background:rgba(34,197,94,.15);color:#aff5c5}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px}.table{width:100%;border-collapse:collapse;min-width:720px}.table th,.table td{padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.07);text-align:left;font-size:13px}.table th{position:sticky;top:0;background:#13263c;color:#bed0e2;z-index:1}.table tr:hover td{background:rgba(255,255,255,.025)}
+    .zone{font-weight:850}.zone.palco{color:#efb6c1}.zone.salon{color:#9fd0ff}.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}.status-dot.ok{background:var(--green)}.status-dot.warn{background:var(--amber)}.status-dot.bad{background:var(--red)}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar .input{min-height:44px;width:min(320px,100%)}.spacer{flex:1}
+    .alert{border-radius:15px;padding:13px 14px;border:1px solid var(--line);font-size:13px;line-height:1.45}.alert.info{background:rgba(47,111,237,.12)}.alert.warn{background:rgba(245,158,11,.12)}.alert.bad{background:rgba(239,68,68,.12)}.alert.ok{background:rgba(34,197,94,.12)}
+    .log{display:grid;grid-template-columns:150px 100px 1fr 160px;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}.log:last-child{border-bottom:0}.log .result{font-weight:900}.log .result.OK{color:#8ff0ad}.log .result.DUPLICATE{color:#ffd083}.log .result.INVALID,.log .result.ERROR{color:#ffaaa9}
+    .split{display:flex;align-items:center;gap:16px}.ring{--p:0;width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--cyan) calc(var(--p)*1%),rgba(255,255,255,.08) 0)}.ring:before{content:"";width:86px;height:86px;border-radius:50%;background:var(--panel);position:absolute}.ring strong{position:relative;font-size:22px}.danger-zone{border-color:rgba(239,68,68,.38);background:rgba(239,68,68,.055)}
+    .toast{position:fixed;right:18px;bottom:18px;max-width:380px;padding:14px 16px;border-radius:15px;background:#152840;border:1px solid var(--line);box-shadow:0 18px 54px rgba(0,0,0,.4);z-index:50}.toast.ok{border-color:rgba(34,197,94,.5)}.toast.bad{border-color:rgba(239,68,68,.5)}
+    .audit-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .audit-console{max-height:280px;overflow:auto;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:15px;padding:12px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#c8d6e5}
+    .audit-console div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+    .audit-console div:last-child{border-bottom:0}
+    .audit-error-row td{background:rgba(239,68,68,.06)}
+    .audit-ok-row td{background:rgba(34,197,94,.035)}
+    .mobile-nav{display:none}
+    @media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:15px;padding-bottom:88px}.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.topbar{align-items:flex-start}.mobile-nav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;bottom:0;left:0;right:0;background:rgba(7,17,31,.96);border-top:1px solid var(--line);z-index:20;padding:7px 6px calc(7px + env(safe-area-inset-bottom))}.mobile-nav button{border:0;background:none;color:var(--muted);padding:7px 2px;font-size:10px}.mobile-nav button b{display:block;font-size:20px;margin-bottom:2px}.mobile-nav button.active{color:#fff}}
+    @media(max-width:620px){.grid4{grid-template-columns:1fr 1fr}.metric .value{font-size:29px}.topbar{display:block}.top-actions{justify-content:flex-start;margin-top:13px}.main{padding:12px;padding-bottom:92px}.card{padding:15px}.drop{padding:22px 12px}.log{grid-template-columns:110px 90px 1fr}.log>div:last-child{display:none}}
   </style>
 </head>
-
 <body>
-  <div class="app">
-    <section id="loginView" class="card">
-      <div class="title">Admin entradas</div>
-      <div class="subtitle">Panel realtime de control de accesos.</div>
-      <div class="mt"><input id="emailInput" type="email" placeholder="admin@graduacion.local" autocomplete="username"></div>
-      <div class="mt"><input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password"></div>
-      <div class="mt"><button id="loginButton" class="btn">Entrar</button></div>
-      <div class="small-text mt">Solo debería usarse con el usuario admin.</div>
-    </section>
+  <section id="loginView" class="login">
+    <div class="login-card">
+      <div class="brand"><div class="brand-mark">🎟️</div><div><h1>Administración de entradas</h1><p class="muted">Importación, generación y control en tiempo real</p></div></div>
+      <div class="mt"><label class="small muted">Nombre del dispositivo</label><input id="deviceInput" class="input mt" value="Administración" autocomplete="off"></div>
+      <div class="mt"><label class="small muted">PIN de administración</label><input id="pinInput" class="input mt" type="password" inputmode="numeric" autocomplete="off"></div>
+      <div class="mt"><label class="small muted">Usuario Firebase admin</label><input id="firebaseEmailInput" class="input mt" type="email" value="admin@graduacion.local" autocomplete="username"></div>
+      <div class="mt"><label class="small muted">Contraseña Firebase</label><input id="firebasePasswordInput" class="input mt" type="password" autocomplete="current-password"></div>
+      <button id="loginBtn" class="btn mt" onclick="login()">Entrar al panel</button>
+      <div id="loginError" class="alert bad mt hidden"></div>
+    </div>
+  </section>
 
-    <main id="mainApp" class="hidden">
-      <section id="summaryPage" class="page-view">
-        <section class="card">
-          <div class="sync-row">
-            <div>
-              <div class="title">Resumen</div>
-              <div id="adminUser" class="subtitle"></div>
+  <div id="appView" class="app hidden">
+    <aside class="sidebar">
+      <div class="side-brand"><strong>Control de entradas</strong><span id="eventSide">Panel de administración</span></div>
+      <nav class="nav">
+        <button data-tab="overview" class="active" onclick="openTab('overview')"><span>⌂</span>Resumen</button>
+        <button data-tab="import" onclick="openTab('import')"><span>⇧</span>Importar Excel</button>
+        <button data-tab="tickets" onclick="openTab('tickets')"><span>🎫</span>Entradas</button>
+        <button data-tab="monitor" onclick="openTab('monitor')"><span>●</span>Monitor del acto</button>
+        <button data-tab="audit" onclick="openTab('audit')"><span>✓</span>Auditoría completa</button>
+        <button data-tab="settings" onclick="openTab('settings')"><span>⚙</span>Herramientas</button>
+      </nav>
+      <div class="side-footer"><div class="session"><strong id="sessionDevice">Administración</strong><br><span id="syncText">Conectando…</span></div></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><div><h1 id="pageTitle">Resumen</h1><p id="pageSubtitle" class="muted">Situación general del sistema</p></div><div class="top-actions"><button class="btn secondary small" onclick="refreshAll(true)">↻ Actualizar</button><button class="btn secondary small" onclick="openExternal('sheet')">Abrir Excel</button><button class="btn secondary small" onclick="logout()">Salir</button></div></header>
+
+      <section id="tab-overview" class="tab">
+        <div class="grid grid4">
+          <div class="card metric"><div class="label">Entradas totales</div><div id="mTotal" class="value">—</div><div id="mTotalSub" class="delta">Cargando…</div></div>
+          <div class="card metric"><div class="label">Personas dentro</div><div id="mUsed" class="value">—</div><div id="mUsedSub" class="delta">—</div></div>
+          <div class="card metric"><div class="label">Pendientes</div><div id="mPending" class="value">—</div><div id="mPendingSub" class="delta">—</div></div>
+          <div class="card metric"><div class="label">Dispositivos activos</div><div id="mDevices" class="value">—</div><div class="delta">Últimos 2 minutos</div></div>
+        </div>
+        <div class="grid grid2 mt">
+          <div class="card"><div class="card-title"><h2>Progreso de acceso</h2><span id="accessBadge" class="badge">—</span></div><div class="split"><div id="accessRing" class="ring"><strong id="accessPercent">0%</strong></div><div style="flex:1"><div class="progress"><div id="accessBar"></div></div><div class="progress-label"><span id="salonProgress">Salón: —</span><span id="palcoProgress">Palco: —</span></div><div id="lastSync" class="small muted mt">Sin datos</div></div></div></div>
+          <div class="card"><div class="card-title"><h2>Estado del sistema</h2><span id="systemBadge" class="badge">Comprobando</span></div><div id="systemSummary" class="alert info">Ejecutando comprobaciones…</div><div class="btn-row mt"><button class="btn secondary small" onclick="runPreflight()">Comprobar ahora</button><button class="btn secondary small" onclick="createBackup()">Crear copia</button></div></div>
+        </div>
+        <div class="grid grid2 mt">
+          <div class="card"><div class="card-title"><h2>Preparación de entradas</h2><span id="pdfBadge" class="badge">—</span></div><div class="progress"><div id="pdfBar"></div></div><div class="progress-label"><span id="pdfGenerated">Generados: —</span><span id="pdfPending">Pendientes: —</span></div><div class="btn-row mt"><button class="btn green small" onclick="generateCodes()">Generar códigos</button><button class="btn small" onclick="generatePdfBatch()">Generar lote de PDFs</button>
+<button class="btn secondary" type="button" onclick="refreshPdfGenerationStatus()">Ver estado</button>
+<button class="btn danger" type="button" onclick="stopPdfGeneration()">Detener generación</button></div></div>
+          <div class="card"><div class="card-title"><h2>Últimas incidencias</h2><span id="incidentBadge" class="badge">—</span></div><div id="overviewIncidents" class="muted small">Sin datos</div></div>
+        </div>
+      </section>
+
+      <section id="tab-import" class="tab hidden">
+        <div class="steps"><span id="s1" class="step active">1 · Seleccionar Excel</span><span id="s2" class="step">2 · Revisar</span><span id="s3" class="step">3 · Importar</span><span id="s4" class="step">4 · Generar códigos</span></div>
+        <div class="card">
+          <div class="card-title"><h2>Subir listado de entradas</h2><span class="badge">.xlsx · .xls · .csv</span></div>
+          <label id="dropZone" class="drop"><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this.files[0])"><div class="icon">⇧</div><strong>Arrastra aquí el Excel o pulsa para elegirlo</strong><p class="muted small mt">Detecta automáticamente columnas como nombre, fila, butaca, zona, tipo de entrada, correo y código.</p></label>
+          <div id="fileInfo" class="alert info mt hidden"></div>
+        </div>
+        <div id="importReview" class="card hidden">
+          <div class="card-title"><h2>Revisión antes de importar</h2><span id="importBadge" class="badge">—</span></div>
+          <div id="importStats" class="grid grid4"></div>
+          <div id="importWarnings" class="mt"></div>
+          <div class="toolbar mt"><select id="importMode" class="input"><option value="replace">Reemplazar el contenido actual</option><option value="append">Añadir al final</option></select><div class="spacer"></div><button class="btn secondary" onclick="downloadNormalizedCsv()">Descargar revisión</button><button id="importBtn" class="btn green" onclick="importExcel()">Importar al sistema</button></div>
+          <div id="importProgressWrap" class="mt hidden"><div class="progress"><div id="importProgress"></div></div><div id="importProgressText" class="progress-label"><span>Preparando…</span><span>0%</span></div></div>
+          <div class="table-wrap mt"><table class="table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Fila</th><th>Butaca</th><th>Zona</th><th>Código</th><th>Correo</th></tr></thead><tbody id="importPreview"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="tab-tickets" class="tab hidden">
+        <div class="card"><div class="toolbar"><input id="ticketSearch" class="input" placeholder="Buscar por nombre, código, fila o butaca…" oninput="renderTickets()"><select id="zoneFilter" class="input" style="width:170px" onchange="renderTickets()"><option value="">Todas las zonas</option><option value="SALON">Salón</option><option value="PALCO">Palco</option></select><select id="usedFilter" class="input" style="width:180px" onchange="renderTickets()"><option value="">Todos los estados</option><option value="used">Utilizadas</option><option value="pending">Pendientes</option></select><div class="spacer"></div><button class="btn secondary small" onclick="exportTicketsCsv()">Exportar CSV</button></div></div>
+        <div class="card"><div class="card-title"><h2>Listado de entradas</h2><span id="ticketCountBadge" class="badge">0</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Estado</th><th>Estudiante</th><th>Zona</th><th>Fila</th><th>Butaca</th><th>Código</th><th>PDF</th></tr></thead><tbody id="ticketsBody"></tbody></table></div></div>
+      </section>
+
+      <section id="tab-monitor" class="tab hidden">
+        <div class="grid grid4"><div class="card metric"><div class="label">Dentro</div><div id="monUsed" class="value">—</div><div class="delta">Actualización automática</div></div><div class="card metric"><div class="label">Pendientes</div><div id="monPending" class="value">—</div><div class="delta">Total restante</div></div><div class="card metric"><div class="label">Duplicadas recientes</div><div id="monDuplicates" class="value">—</div><div class="delta">Últimos registros</div></div><div class="card metric"><div class="label">No válidas recientes</div><div id="monInvalid" class="value">—</div><div class="delta">Últimos registros</div></div></div>
+        <div class="grid grid2 mt"><div class="card"><div class="card-title"><h2>Salón principal</h2><span id="monSalonBadge" class="badge">—</span></div><div class="progress"><div id="monSalonBar"></div></div><div id="monSalonText" class="progress-label"><span>—</span><span>—</span></div></div><div class="card"><div class="card-title"><h2>Palco</h2><span id="monPalcoBadge" class="badge">—</span></div><div class="progress"><div id="monPalcoBar"></div></div><div id="monPalcoText" class="progress-label"><span>—</span><span>—</span></div></div></div>
+        <div class="card mt"><div class="card-title"><h2>Actividad en directo</h2><span id="monitorTime" class="badge">—</span></div><div id="logsList"></div></div>
+      </section>
+
+      <section id="tab-audit" class="tab hidden">
+        <div class="grid grid2">
+          <div class="card">
+            <div class="card-title">
+              <h2>Auditoría completa de entradas</h2>
+              <span id="auditBadge" class="badge">Sin iniciar</span>
             </div>
-            <div id="connectionBadge" class="badge warn"><span class="dot"></span><span id="connectionText">Conectando...</span></div>
+            <p class="muted small">
+              Comprueba la hoja, códigos y asientos duplicados, existencia de cada PDF,
+              archivo y carpeta, QR real impreso dentro del PDF y correspondencia de
+              nombre, zona, fila y butaca.
+            </p>
+            <div class="alert warn mt">
+              Mantén esta pestaña abierta, el ordenador conectado y evita que entre
+              en reposo. Para 500 entradas puede tardar entre 20 y 45 minutos.
+            </div>
+            <div class="btn-row mt">
+              <button id="auditStartBtn" class="btn green" onclick="startCompleteAudit()">Auditar todas las entradas</button>
+              <button id="auditStopBtn" class="btn red" onclick="stopCompleteAudit()" disabled>Detener</button>
+              <button class="btn secondary" onclick="openAuditSheet()">Abrir informe</button>
+            </div>
           </div>
-          <div class="grid4 mt">
-            <div class="stat"><div id="totalStat" class="stat-number">-</div><div class="stat-label">Total entradas</div></div>
-            <div class="stat"><div id="usedStat" class="stat-number">-</div><div class="stat-label">Dentro</div></div>
-            <div class="stat"><div id="pendingStat" class="stat-number">-</div><div class="stat-label">Pendientes</div></div>
-            <div class="stat"><div id="percentStat" class="stat-number">-</div><div class="stat-label">% completado</div></div>
+
+          <div class="card">
+            <div class="card-title">
+              <h2>Progreso</h2>
+              <span id="auditTime" class="badge">—</span>
+            </div>
+            <div class="progress"><div id="auditProgressBar"></div></div>
+            <div id="auditProgressText" class="progress-label">
+              <span>0 de 0</span><span>0%</span>
+            </div>
+            <div class="audit-stats mt">
+              <div class="card metric"><div class="label">Correctas</div><div id="auditOk" class="value">0</div></div>
+              <div class="card metric"><div class="label">Con error</div><div id="auditErrors" class="value">0</div></div>
+              <div class="card metric"><div class="label">QR ilegibles</div><div id="auditUnreadable" class="value">0</div></div>
+              <div class="card metric"><div class="label">Asientos repetidos</div><div id="auditDuplicateSeats" class="value">0</div></div>
+            </div>
           </div>
-          <div class="progress-wrap"><div id="progressBar" class="progress-bar"></div></div>
-        </section>
+        </div>
 
-        <section class="grid2">
-          <div class="zone-card salon"><div class="zone-title">SALÓN PRINCIPAL</div><div id="salonValue" class="zone-value">-</div><div id="salonPending" class="small-text"></div></div>
-          <div class="zone-card palco"><div class="zone-title">PALCO</div><div id="palcoValue" class="zone-value">-</div><div id="palcoPending" class="small-text"></div></div>
-        </section>
+        <div class="card mt">
+          <div class="card-title">
+            <h2>Resultado</h2>
+            <span id="auditResultBadge" class="badge">—</span>
+          </div>
+          <div id="auditSummary" class="alert info">
+            Pulsa “Auditar todas las entradas” para comenzar.
+          </div>
+          <div id="auditConsole" class="audit-console mt">
+            <div>Esperando auditoría…</div>
+          </div>
+        </div>
 
-        <section class="card"><div class="section-title">Últimos accesos</div><div id="recentLogsSummary"></div></section>
+        <div class="card mt">
+          <div class="card-title">
+            <h2>Incidencias detectadas</h2>
+            <span id="auditIssueCount" class="badge">0</span>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Zona</th>
+                  <th>Fila</th>
+                  <th>Butaca</th>
+                  <th>Resultado</th>
+                  <th>Observaciones</th>
+                </tr>
+              </thead>
+              <tbody id="auditIssuesBody">
+                <tr><td colspan="7" class="muted">Todavía no hay resultados.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
-      <section id="ticketsPage" class="page-view hidden">
-        <section class="card">
-          <div class="sync-row">
-            <div><div class="title">Entradas</div><div id="ticketCountText" class="subtitle">Cargando...</div></div>
-            <button id="exportButton" class="btn secondary small inline">Exportar CSV</button>
-          </div>
-          <div class="filters mt">
-            <input id="searchInput" type="search" placeholder="Buscar por nombre, código, fila, butaca...">
-            <select id="zoneFilter"><option value="ALL">Todas las zonas</option><option value="PATIO">Salón principal</option><option value="PALCO">Palco</option></select>
-            <select id="statusFilter"><option value="ALL">Todos los estados</option><option value="PENDING">Pendientes</option><option value="USED">Usadas</option></select>
-          </div>
-          <div id="ticketList" class="ticket-list mt"></div>
-        </section>
-      </section>
-
-      <section id="manualPage" class="page-view hidden">
-        <section class="card">
-          <div class="title">Validación manual</div>
-          <div class="subtitle">Permite registrar una entrada sin cámara desde el panel admin.</div>
-          <div class="grid2 mt"><input id="manualCodeInput" type="text" placeholder="EV26-..."><button id="manualValidateButton" class="btn">Validar entrada</button></div>
-          <div id="manualResult"></div>
-        </section>
-        <section class="card"><div class="section-title">Últimos accesos</div><div id="recentLogsManual"></div></section>
-      </section>
-
-      <section id="resetPage" class="page-view hidden">
-        <section class="card">
-          <div class="title">Reiniciar accesos</div>
-          <div class="subtitle">Borra accesos en Firebase y en el Excel, sin abrir pestañas externas.</div>
-          <div class="danger-box">
-            ⚠️ Clave de reinicio: usa <strong>graduacion-realtime-2026</strong>.<br><br>
-            Reiniciar una entrada deja solo esa entrada como no usada. Reiniciar todo borra todos los accesos de Firebase y limpia usado, checkin_at y checkin_by en Excel.
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="section-title">Reiniciar una entrada</div>
-          <div class="grid2"><input id="resetSingleCodeInput" type="text" placeholder="EV26-..."><input id="resetSinglePinInput" type="password" placeholder="Clave de reinicio"></div>
-          <button id="resetSingleButton" class="btn warn mt">Reiniciar esta entrada</button>
-          <div id="resetSingleResult"></div>
-        </section>
-
-        <section class="card">
-          <div class="section-title">Reiniciar todos los accesos</div>
-          <div class="danger-box">Escribe la clave y confirma con <strong>REINICIAR TODO</strong>.</div>
-          <div class="grid2 mt"><input id="resetAllPinInput" type="password" placeholder="Clave de reinicio"><input id="resetAllConfirmInput" type="text" placeholder="Escribe REINICIAR TODO"></div>
-          <button id="resetAllButton" class="btn danger mt">Reiniciar absolutamente todo</button>
-          <div id="resetAllResult"></div>
-        </section>
-
-        <section class="card"><div class="section-title">Sesión</div><button id="logoutButton" class="btn danger">Cerrar sesión</button></section>
+      <section id="tab-settings" class="tab hidden">
+        <div class="grid grid2">
+          <div class="card"><div class="card-title"><h2>Acciones del sistema</h2></div><div class="btn-row"><button class="btn secondary" onclick="runPreflight()">Comprobar integridad</button><button class="btn secondary" onclick="createBackup()">Crear copia de seguridad</button><button class="btn secondary" onclick="openExternal('folder')">Abrir carpeta de PDFs</button><button class="btn secondary" onclick="refreshAll(true)">Recargar datos</button></div></div>
+          <div class="card"><div class="card-title"><h2>Información del evento</h2></div><div id="eventInfo" class="small muted">Cargando…</div></div>
+        </div>
+        <div class="card danger-zone mt"><div class="card-title"><h2>Zona sensible</h2><span class="badge bad">Confirmación requerida</span></div><p class="muted small">Estas acciones modifican de forma masiva el control de accesos.</p><div class="btn-row mt"><button class="btn amber" onclick="resetCheckins()">Reiniciar todos los accesos</button><button class="btn red" onclick="clearTickets()">Vaciar la hoja tickets</button></div></div>
+        <div class="card danger-zone mt"><div class="card-title"><h2>Reiniciar una entrada concreta</h2><span class="badge warn">Firebase + Excel</span></div><p class="muted small">Deja una entrada concreta como pendiente en Firestore y limpia usado, checkin_at y checkin_by en Excel.</p><div class="toolbar mt"><input id="resetSingleCode" class="input" placeholder="EV26-..." style="width:min(360px,100%)"><button class="btn amber" onclick="resetSingleCheckin()">Reiniciar entrada</button></div></div>
       </section>
     </main>
+
+    <nav class="mobile-nav"><button data-tab="overview" class="active" onclick="openTab('overview')"><b>⌂</b>Resumen</button><button data-tab="import" onclick="openTab('import')"><b>⇧</b>Importar</button><button data-tab="tickets" onclick="openTab('tickets')"><b>🎫</b>Entradas</button><button data-tab="monitor" onclick="openTab('monitor')"><b>●</b>Monitor</button><button data-tab="audit" onclick="openTab('audit')"><b>✓</b>Auditar</button><button data-tab="settings" onclick="openTab('settings')"><b>⚙</b>Ajustes</button></nav>
   </div>
+  <div id="toast" class="toast hidden"></div>
 
-  <nav id="bottomNav" class="bottom-nav hidden">
-    <button type="button" id="navSummary" class="nav-btn active" data-page="summary"><span class="nav-icon">▤</span>Resumen</button>
-    <button type="button" id="navTickets" class="nav-btn" data-page="tickets"><span class="nav-icon">⌕</span>Entradas</button>
-    <button type="button" id="navManual" class="nav-btn" data-page="manual"><span class="nav-icon">＋</span>Manual</button>
-    <button type="button" id="navReset" class="nav-btn" data-page="reset"><span class="nav-icon">⚠</span>Reiniciar</button>
-  </nav>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, runTransaction, collection, query, orderBy, limit, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getFirestore, collection, doc, onSnapshot, query, orderBy, limit, runTransaction, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    const ADMIN_EMAIL = "admin@graduacion.local";
-    const SHEETS_SYNC_URL = "https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec";
-    const SHEETS_SYNC_SECRET = "graduacion-realtime-2026";
-    const RESET_PIN_DEFAULT = "graduacion-realtime-2026";
+  const firebaseConfig = {
+    apiKey: "AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",
+    authDomain: "control-entradas-64826hfgr.firebaseapp.com",
+    projectId: "control-entradas-64826hfgr",
+    storageBucket: "control-entradas-64826hfgr.firebasestorage.app",
+    messagingSenderId: "779578072302",
+    appId: "1:779578072302:web:57216df153bcb2319767ff"
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",
-      authDomain: "control-entradas-64826hfgr.firebaseapp.com",
-      projectId: "control-entradas-64826hfgr",
-      storageBucket: "control-entradas-64826hfgr.firebasestorage.app",
-      messagingSenderId: "779578072302",
-      appId: "1:779578072302:web:57216df153bcb2319767ff"
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let unsubTickets = null;
+  let unsubCheckins = null;
+
+  function ticketAccessZone(ticket) {
+    const raw = String(ticket && (ticket.zonaId || ticket.zona || '')).toUpperCase();
+    return raw.includes('PALCO') ? 'PALCO' : 'SALON';
+  }
+
+  function ticketZoneLabel(ticket) {
+    const z = ticketAccessZone(ticket);
+    return z === 'PALCO' ? 'Palco' : 'Salón principal';
+  }
+
+  function buildStats(tickets, logs) {
+    const total = tickets.length;
+    const used = tickets.filter(t => t.used).length;
+    const salon = tickets.filter(t => t.zonaId === 'SALON');
+    const palco = tickets.filter(t => t.zonaId === 'PALCO');
+    const salonUsed = salon.filter(t => t.used).length;
+    const palcoUsed = palco.filter(t => t.used).length;
+    const activeDevices = new Set((logs || []).map(l => l.deviceName).filter(Boolean)).size;
+
+    return {
+      total,
+      used,
+      pending: Math.max(total - used, 0),
+      activeDevices,
+      salon: { total: salon.length, used: salonUsed, pending: Math.max(salon.length - salonUsed, 0) },
+      palco: { total: palco.length, used: palcoUsed, pending: Math.max(palco.length - palcoUsed, 0) }
     };
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  function mapTicket(docSnap) {
+    const d = docSnap.data() || {};
+    const code = d.codigo || docSnap.id;
+    const zonaId = ticketAccessZone(d);
+    return {
+      ...d,
+      code,
+      codigo: code,
+      nombre: d.nombre || d.estudiante || '',
+      estudiante: d.nombre || d.estudiante || '',
+      email: d.email || '',
+      fila: d.fila || '',
+      butaca: d.butaca || '',
+      zonaId,
+      zona: d.zona_label || ticketZoneLabel(d),
+      tipoEntrada: d.tipo_entrada || d.tipoEntrada || 'GENERAL',
+      used: d.usado === true,
+      usado: d.usado === true,
+      checkinAt: d.checkin_at || '',
+      checkinBy: d.checkin_by || '',
+      pdfUrl: d.pdf_url || '',
+      qrUrl: d.qr_url || ''
+    };
+  }
 
-    let currentUser = null;
-    let tickets = {};
-    let recentLogs = [];
-    let unsubscribeTickets = null;
-    let unsubscribeCheckins = null;
+  function mapLog(docSnap) {
+    const d = docSnap.data() || {};
+    const date = d.checkin_at ? new Date(d.checkin_at).toLocaleString('es-ES') : '';
+    return {
+      result: 'OK',
+      estudiante: d.nombre || '',
+      code: d.codigo || docSnap.id,
+      zona: d.zona_label || d.zona || '',
+      fila: d.fila || '',
+      butaca: d.butaca || '',
+      date,
+      deviceName: d.checkin_by || '',
+      checkinAt: d.checkin_at || ''
+    };
+  }
 
-    const loginView = document.getElementById("loginView");
-    const mainApp = document.getElementById("mainApp");
-    const bottomNav = document.getElementById("bottomNav");
-
-    document.getElementById("loginButton").addEventListener("click", login);
-    document.getElementById("logoutButton").addEventListener("click", logout);
-    document.getElementById("manualValidateButton").addEventListener("click", manualValidate);
-    document.getElementById("exportButton").addEventListener("click", exportCsv);
-    document.getElementById("resetSingleButton").addEventListener("click", resetSingleTicket);
-    document.getElementById("resetAllButton").addEventListener("click", resetAllAccesses);
-    document.getElementById("resetSinglePinInput").value = RESET_PIN_DEFAULT;
-    document.getElementById("resetAllPinInput").value = RESET_PIN_DEFAULT;
-
-    document.getElementById("manualCodeInput").addEventListener("keydown", event => { if (event.key === "Enter") manualValidate(); });
-    document.getElementById("resetSingleCodeInput").addEventListener("keydown", event => { if (event.key === "Enter") resetSingleTicket(); });
-    document.getElementById("searchInput").addEventListener("input", renderTicketList);
-    document.getElementById("zoneFilter").addEventListener("change", renderTicketList);
-    document.getElementById("statusFilter").addEventListener("change", renderTicketList);
-    document.querySelectorAll(".nav-btn[data-page]").forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
-
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        currentUser = null;
-        loginView.classList.remove("hidden");
-        mainApp.classList.add("hidden");
-        bottomNav.classList.add("hidden");
-        if (unsubscribeTickets) unsubscribeTickets();
-        if (unsubscribeCheckins) unsubscribeCheckins();
-        unsubscribeTickets = null;
-        unsubscribeCheckins = null;
-        return;
-      }
-
-      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL) {
-        alert("Este panel solo está permitido para admin@graduacion.local.");
+  window.realtimeAdmin = {
+    tickets: [],
+    logs: [],
+    async login(email, password) {
+      if (!email || !password) throw new Error('Introduce usuario y contraseña de Firebase.');
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      if ((cred.user.email || '').toLowerCase() !== 'admin@graduacion.local') {
         await signOut(auth);
-        return;
+        throw new Error('El panel admin debe entrar con admin@graduacion.local.');
       }
+      return cred.user;
+    },
+    async logout() {
+      try { await signOut(auth); } catch (e) {}
+    },
+    subscribe(onChange, onError) {
+      if (unsubTickets) unsubTickets();
+      if (unsubCheckins) unsubCheckins();
 
-      currentUser = user;
-      loginView.classList.add("hidden");
-      mainApp.classList.remove("hidden");
-      bottomNav.classList.remove("hidden");
-      document.getElementById("adminUser").textContent = user.email + " · " + user.uid;
-      subscribeTickets();
-      subscribeRecentCheckins();
-      showPage("summary");
-    });
-
-    async function login() {
-      const email = document.getElementById("emailInput").value.trim();
-      const password = document.getElementById("passwordInput").value;
-      const button = document.getElementById("loginButton");
-      if (!email || !password) { alert("Introduce usuario y contraseña."); return; }
-      button.disabled = true;
-      button.textContent = "Entrando...";
-      try { await signInWithEmailAndPassword(auth, email, password); }
-      catch (error) { alert("No se ha podido iniciar sesión: " + error.message); }
-      finally { button.disabled = false; button.textContent = "Entrar"; }
-    }
-
-    async function logout() { await signOut(auth); }
-
-    function showPage(page) {
-      ["summary", "tickets", "manual", "reset"].forEach(name => {
-        document.getElementById(name + "Page").classList.toggle("hidden", name !== page);
-        document.getElementById("nav" + capitalize(name)).classList.toggle("active", name === page);
-      });
-      if (page === "tickets") renderTicketList();
-      window.scrollTo(0, 0);
-    }
-
-    function capitalize(value) { return value.charAt(0).toUpperCase() + value.slice(1); }
-
-    function subscribeTickets() {
-      setConnection("warn", "Cargando datos...");
-      if (unsubscribeTickets) unsubscribeTickets();
-      unsubscribeTickets = onSnapshot(collection(db, "tickets"), snapshot => {
-        tickets = {};
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          tickets[data.codigo || docSnap.id] = { ...data, codigo: data.codigo || docSnap.id };
+      const emit = () => {
+        const stats = buildStats(window.realtimeAdmin.tickets, window.realtimeAdmin.logs);
+        onChange?.({
+          tickets: window.realtimeAdmin.tickets,
+          stats,
+          logs: window.realtimeAdmin.logs,
+          incidents: []
         });
-        setConnection("online", "Realtime activo");
-        renderAll();
-      }, error => { console.error(error); setConnection("bad", "Error Firebase"); });
-    }
+      };
 
-    function subscribeRecentCheckins() {
-      if (unsubscribeCheckins) unsubscribeCheckins();
-      const q = query(collection(db, "checkins"), orderBy("checkin_at", "desc"), limit(20));
-      unsubscribeCheckins = onSnapshot(q, snapshot => {
-        recentLogs = [];
-        snapshot.forEach(docSnap => recentLogs.push(docSnap.data()));
-        renderRecentLogs();
-      }, error => console.error(error));
-    }
+      unsubTickets = onSnapshot(collection(db, 'tickets'), snap => {
+        window.realtimeAdmin.tickets = snap.docs.map(mapTicket);
+        emit();
+      }, error => onError?.(error));
 
-    function renderAll() { renderStats(); renderTicketList(); renderRecentLogs(); }
-
-    function renderStats() {
-      const values = Object.values(tickets);
-      const total = values.length;
-      const used = values.filter(t => t.usado === true).length;
-      const pending = Math.max(total - used, 0);
-      const percent = total ? Math.round((used / total) * 100) : 0;
-      const salon = values.filter(t => getTicketAccessZone(t) === "PATIO");
-      const palco = values.filter(t => getTicketAccessZone(t) === "PALCO");
-      const salonUsed = salon.filter(t => t.usado === true).length;
-      const palcoUsed = palco.filter(t => t.usado === true).length;
-      document.getElementById("totalStat").textContent = total || "-";
-      document.getElementById("usedStat").textContent = used;
-      document.getElementById("pendingStat").textContent = pending;
-      document.getElementById("percentStat").textContent = percent + "%";
-      document.getElementById("progressBar").style.width = percent + "%";
-      document.getElementById("salonValue").textContent = `${salonUsed} / ${salon.length}`;
-      document.getElementById("salonPending").textContent = `${salon.length - salonUsed} pendientes`;
-      document.getElementById("palcoValue").textContent = `${palcoUsed} / ${palco.length}`;
-      document.getElementById("palcoPending").textContent = `${palco.length - palcoUsed} pendientes`;
-    }
-
-    function renderTicketList() {
-      const container = document.getElementById("ticketList");
-      const q = normalizeSearch(document.getElementById("searchInput").value);
-      const zoneFilter = document.getElementById("zoneFilter").value;
-      const statusFilter = document.getElementById("statusFilter").value;
-      let values = Object.values(tickets);
-      if (zoneFilter !== "ALL") values = values.filter(t => getTicketAccessZone(t) === zoneFilter);
-      if (statusFilter === "USED") values = values.filter(t => t.usado === true);
-      if (statusFilter === "PENDING") values = values.filter(t => t.usado !== true);
-      if (q) {
-        values = values.filter(ticket => normalizeSearch([ticket.codigo, ticket.nombre, ticket.email, ticket.zona, ticket.zona_label, "fila " + ticket.fila, "butaca " + ticket.butaca, ticket.fila, ticket.butaca, ticket.checkin_by].join(" ")).includes(q));
-      }
-      values.sort((a, b) => {
-        if ((a.usado === true) !== (b.usado === true)) return a.usado === true ? 1 : -1;
-        return String(a.nombre || "").localeCompare(String(b.nombre || ""), "es");
-      });
-      document.getElementById("ticketCountText").textContent = `${values.length} entradas mostradas de ${Object.keys(tickets).length}`;
-      if (!values.length) { container.innerHTML = '<div class="notice">No hay entradas con esos filtros.</div>'; return; }
-      container.innerHTML = values.slice(0, 400).map(ticket => {
-        const zone = getTicketAccessZone(ticket);
-        const used = ticket.usado === true;
-        const zoneText = zone === "PALCO" ? "PALCO" : "SALÓN PRINCIPAL";
-        const zoneClass = zone === "PALCO" ? "palco" : "salon";
-        return `
-          <div class="ticket-row ${used ? "used" : "pending"}">
-            <div class="ticket-top">
-              <div>
-                <div class="ticket-name">${escapeHtml(ticket.nombre || "Sin nombre")}</div>
-                <div class="ticket-meta">${escapeHtml(ticket.codigo || "")}<br>Fila ${escapeHtml(ticket.fila || "-")} · Butaca ${escapeHtml(ticket.butaca || "-")}${ticket.email ? `<br>${escapeHtml(ticket.email)}` : ""}</div>
-              </div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill ${zoneClass}">${zoneText}</span><span class="pill ${used ? "warn" : "ok"}">${used ? "USADA" : "PENDIENTE"}</span></div>
-            </div>
-            ${used ? `<div class="ticket-meta mt">Validada: ${escapeHtml(formatDate(ticket.checkin_at || ""))}${ticket.checkin_by ? " · " + escapeHtml(ticket.checkin_by) : ""}</div>` : ""}
-            <div class="actions">
-              <button class="btn small ${used ? "secondary" : ""}" data-validate-code="${escapeHtml(ticket.codigo || "")}">${used ? "Ver estado" : "Validar manualmente"}</button>
-              <button class="btn warn small" data-reset-code="${escapeHtml(ticket.codigo || "")}">Reiniciar</button>
-              ${ticket.pdf_url ? `<a class="btn secondary small" href="${escapeHtml(ticket.pdf_url)}" target="_blank" style="text-decoration:none">Abrir PDF</a>` : ""}
-            </div>
-          </div>`;
-      }).join("");
-      container.querySelectorAll("button[data-validate-code]").forEach(button => button.addEventListener("click", () => { document.getElementById("manualCodeInput").value = button.dataset.validateCode; showPage("manual"); manualValidate(); }));
-      container.querySelectorAll("button[data-reset-code]").forEach(button => button.addEventListener("click", () => { document.getElementById("resetSingleCodeInput").value = button.dataset.resetCode; showPage("reset"); document.getElementById("resetSinglePinInput").focus(); }));
-    }
-
-    function renderRecentLogs() {
-      const html = recentLogs.length ? recentLogs.map(log => `
-        <div class="log-item"><div class="ticket-top"><div><div class="ticket-name">${escapeHtml(log.nombre || "Sin nombre")}</div><div class="ticket-meta">${escapeHtml(log.zona_label || log.zona || "")} · Fila ${escapeHtml(log.fila || "-")} · Butaca ${escapeHtml(log.butaca || "-")}<br>${escapeHtml(formatDate(log.checkin_at || ""))}${log.checkin_by ? " · " + escapeHtml(log.checkin_by) : ""}</div></div><span class="pill ok">OK</span></div></div>`).join("") : '<div class="small-text">Todavía no hay accesos registrados.</div>';
-      document.getElementById("recentLogsSummary").innerHTML = html;
-      document.getElementById("recentLogsManual").innerHTML = html;
-    }
-
-    async function manualValidate() {
-      const input = document.getElementById("manualCodeInput");
-      const code = normalizeCode(input.value);
-      const resultBox = document.getElementById("manualResult");
-      if (!code) { resultBox.innerHTML = '<div class="notice">Introduce un código.</div>'; return; }
-      resultBox.innerHTML = '<div class="notice">Validando...</div>';
-      try {
-        const result = await validateTicketTransaction(code);
-        if (result.status === "OK") {
-          resultBox.innerHTML = `<div class="success">✅ Acceso validado: ${escapeHtml(result.ticket.nombre || "")} · Fila ${escapeHtml(result.ticket.fila || "-")} · Butaca ${escapeHtml(result.ticket.butaca || "-")}<br>Guardando en Excel...</div>`;
-          syncSheetAction({ action: "checkin", codigo: result.ticket.codigo || "", checkin_at: result.ticket.checkin_at || "", checkin_by: result.ticket.checkin_by || "", checkin_email: result.ticket.checkin_email || "" }, (ok, response) => {
-            resultBox.innerHTML = ok ? `<div class="success">✅ Acceso validado y guardado en Excel.</div>` : `<div class="notice">⚠️ Acceso validado en Firebase, pero no guardado en Excel.<br>${escapeHtml(response?.message || "Sin respuesta.")}</div>`;
-          });
-        } else if (result.status === "ALREADY_USED") {
-          resultBox.innerHTML = `<div class="notice">⚠️ Entrada ya utilizada.<br>${escapeHtml(result.ticket.nombre || "")}${result.ticket.checkin_at ? "<br>" + escapeHtml(formatDate(result.ticket.checkin_at)) : ""}${result.ticket.checkin_by ? " · " + escapeHtml(result.ticket.checkin_by) : ""}</div>`;
-        } else if (result.status === "NOT_FOUND") {
-          resultBox.innerHTML = `<div class="notice">❌ Entrada no encontrada.</div>`;
-        } else {
-          resultBox.innerHTML = `<div class="notice">❌ No se ha podido validar.</div>`;
-        }
-      } catch (error) {
-        resultBox.innerHTML = `<div class="notice">❌ Error: ${escapeHtml(error.message)}</div>`;
-      }
-    }
-
-    async function validateTicketTransaction(code) {
-      const ticketRef = doc(db, "tickets", code);
-      const checkinRef = doc(db, "checkins", code);
-      return await runTransaction(db, async transaction => {
-        const snap = await transaction.get(ticketRef);
-        if (!snap.exists()) return { status: "NOT_FOUND" };
-        const ticket = snap.data();
-        if (ticket.usado === true) return { status: "ALREADY_USED", ticket };
-        const nowIso = new Date().toISOString();
-        const updatedTicket = { usado: true, checkin_at: nowIso, checkin_by: "admin", checkin_uid: currentUser.uid, checkin_email: currentUser.email || "", last_update_source: "admin_realtime" };
-        transaction.update(ticketRef, updatedTicket);
-        transaction.set(checkinRef, { codigo: ticket.codigo || code, nombre: ticket.nombre || "", zona: ticket.zona || "", zona_label: ticket.zona_label || "", fila: ticket.fila || "", butaca: ticket.butaca || "", tipo_entrada: ticket.tipo_entrada || "", checkin_at: nowIso, checkin_by: "admin", checkin_uid: currentUser.uid, checkin_email: currentUser.email || "", created_at: nowIso });
-        return { status: "OK", ticket: { ...ticket, ...updatedTicket } };
-      });
-    }
-
-    async function resetSingleTicket() {
-      const code = normalizeCode(document.getElementById("resetSingleCodeInput").value);
-      const pin = document.getElementById("resetSinglePinInput").value.trim();
-      const box = document.getElementById("resetSingleResult");
-      if (!code) { box.innerHTML = '<div class="notice">Introduce un código.</div>'; return; }
-      if (!pin) { box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>'; return; }
-      if (!confirm("¿Reiniciar esta entrada en Firebase y Excel?\n\n" + code)) return;
-      box.innerHTML = '<div class="notice">Reiniciando en Firebase...</div>';
-      try {
-        await resetTicketInFirebase(code);
-        box.innerHTML = '<div class="notice">Firebase reiniciado. Limpiando Excel...</div>';
-        syncSheetAction({ action: "reset_ticket", reset_pin: pin, codigo: code }, (ok, response) => {
-          box.innerHTML = ok ? '<div class="success">✅ Entrada reiniciada en Firebase y Excel.</div>' : `<div class="notice">⚠️ Reiniciada en Firebase, pero no en Excel.<br>${escapeHtml(response?.message || "Sin respuesta.")}</div>`;
+      const q = query(collection(db, 'checkins'), orderBy('checkin_at', 'desc'), limit(50));
+      unsubCheckins = onSnapshot(q, snap => {
+        window.realtimeAdmin.logs = snap.docs.map(mapLog);
+        emit();
+      }, error => onError?.(error));
+    },
+    async resetTicket(code) {
+      const ticketRef = doc(db, 'tickets', code);
+      const checkinRef = doc(db, 'checkins', code);
+      await runTransaction(db, async tx => {
+        const snap = await tx.get(ticketRef);
+        if (!snap.exists()) throw new Error('No existe ese ticket en Firebase.');
+        tx.update(ticketRef, {
+          usado: false,
+          checkin_at: '',
+          checkin_by: '',
+          checkin_uid: '',
+          checkin_email: '',
+          last_update_source: 'admin_legacy_reset_single'
         });
-      } catch (error) { box.innerHTML = `<div class="notice">❌ Error reiniciando: ${escapeHtml(error.message)}</div>`; }
-    }
-
-    async function resetTicketInFirebase(code) {
-      const ticketRef = doc(db, "tickets", code);
-      const checkinRef = doc(db, "checkins", code);
-      return await runTransaction(db, async transaction => {
-        const snap = await transaction.get(ticketRef);
-        if (!snap.exists()) throw new Error("No existe ese ticket en Firebase.");
-        transaction.update(ticketRef, { usado: false, checkin_at: "", checkin_by: "", checkin_uid: "", checkin_email: "", last_update_source: "admin_reset" });
-        transaction.delete(checkinRef);
+        tx.delete(checkinRef);
       });
-    }
-
-    async function resetAllAccesses() {
-      const pin = document.getElementById("resetAllPinInput").value.trim();
-      const confirmText = document.getElementById("resetAllConfirmInput").value.trim();
-      const box = document.getElementById("resetAllResult");
-      if (!pin) { box.innerHTML = '<div class="notice">Introduce la clave de reinicio.</div>'; return; }
-      if (confirmText !== "REINICIAR TODO") { box.innerHTML = '<div class="notice">Para confirmar, escribe exactamente: REINICIAR TODO</div>'; return; }
-      if (!confirm("ATENCIÓN: se reiniciarán TODOS los accesos en Firebase y Excel.\n\n¿Seguro?")) return;
-      if (!confirm("Última confirmación: esto dejará todas las entradas como no usadas.")) return;
-      box.innerHTML = '<div class="notice">Reiniciando Firebase...</div>';
-      try {
-        const firebaseResult = await resetAllInFirebase();
-        box.innerHTML = `<div class="notice">Firebase reiniciado.<br>Tickets actualizados: ${firebaseResult.tickets}<br>Checkins borrados: ${firebaseResult.checkins}<br>Limpiando Excel...</div>`;
-        syncSheetAction({ action: "reset_all", reset_pin: pin }, (ok, response) => {
-          box.innerHTML = ok ? `<div class="success">✅ Todo reiniciado en Firebase y Excel.<br>${escapeHtml(response?.message || "")}</div>` : `<div class="notice">⚠️ Firebase reiniciado, pero Excel no.<br>${escapeHtml(response?.message || "Sin respuesta.")}</div>`;
-        });
-      } catch (error) { box.innerHTML = `<div class="notice">❌ Error reiniciando todo: ${escapeHtml(error.message)}</div>`; }
-    }
-
-    async function resetAllInFirebase() {
-      const ticketSnap = await getDocs(collection(db, "tickets"));
-      const checkinSnap = await getDocs(collection(db, "checkins"));
+    },
+    async resetAll() {
+      const ticketSnap = await getDocs(collection(db, 'tickets'));
+      const checkinSnap = await getDocs(collection(db, 'checkins'));
       let batch = writeBatch(db);
-      let operations = 0, ticketCount = 0, checkinCount = 0;
+      let operations = 0;
+      let tickets = 0;
+      let checkins = 0;
+
       async function commitIfNeeded(force = false) {
-        if (operations >= 450 || (force && operations > 0)) { await batch.commit(); batch = writeBatch(db); operations = 0; }
+        if (operations >= 450 || (force && operations > 0)) {
+          await batch.commit();
+          batch = writeBatch(db);
+          operations = 0;
+        }
       }
-      for (const docSnap of ticketSnap.docs) {
-        batch.update(docSnap.ref, { usado: false, checkin_at: "", checkin_by: "", checkin_uid: "", checkin_email: "", last_update_source: "admin_reset_all" });
-        operations++; ticketCount++; await commitIfNeeded();
+
+      for (const d of ticketSnap.docs) {
+        batch.update(d.ref, {
+          usado: false,
+          checkin_at: '',
+          checkin_by: '',
+          checkin_uid: '',
+          checkin_email: '',
+          last_update_source: 'admin_legacy_reset_all'
+        });
+        operations++; tickets++;
+        await commitIfNeeded();
       }
-      for (const docSnap of checkinSnap.docs) {
-        batch.delete(docSnap.ref); operations++; checkinCount++; await commitIfNeeded();
+
+      for (const d of checkinSnap.docs) {
+        batch.delete(d.ref);
+        operations++; checkins++;
+        await commitIfNeeded();
       }
+
       await commitIfNeeded(true);
-      return { tickets: ticketCount, checkins: checkinCount };
+      return { tickets, checkins };
     }
+  };
+</script>
 
-    function syncSheetAction(params, callback) {
-      const callbackName = "__admin_sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-      let done = false;
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbxvl_pqDAFZMMoXYO_7I-3iqf4ECFwu1Bgh81evKnKHSZv4EULkIMskRnid1sUdjaVR/exec'
+const SYNC_API_URL='https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec'
+const SYNC_SECRET='graduacion-realtime-2026'
+let token=localStorage.getItem('admin_token')||''
+let adminPin=sessionStorage.getItem('admin_pin')||''
+let deviceName=localStorage.getItem('admin_device')||'Administración'
+let state={tickets:[],stats:null,pdfs:null,preflight:null,logs:[],incidents:[],event:{},spreadsheetUrl:'',outputFolderUrl:''}
+let realtimeSnapshot=null
+let realtimeStarted=false
+let importedRows=[]
+let auditRunning=false
+let auditStopRequested=false
+let auditSession=''
+let auditSheetUrl=''
+let auditStartedAt=0
+let auditResults=[]
+let auditWakeLock=null
+let currentTab='overview'
+let monitorTimer=null
 
-      window[callbackName] = function(response) {
-        done = true;
-        console.log("Respuesta Apps Script:", response);
-        cleanup();
-        callback?.(response && response.status === "OK", response);
-      };
+window.addEventListener('load',()=>{document.getElementById('deviceInput').value=deviceName;setupDrop();if(token){localStorage.removeItem('admin_token');token='';setSync('Sesión caducada: entra de nuevo con Firebase')}})
 
-      script.onerror = function() {
-        if (done) return;
-        done = true;
-        cleanup();
-        callback?.(false, { status: "ERROR", message: "No se ha podido llamar a Apps Script." });
-      };
+function jsonp(action,params={},timeout=45000){return new Promise((resolve,reject)=>{const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const script=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('El servidor ha tardado demasiado en responder.'))},timeout);function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script)}window[cb]=(data)=>{cleanup();resolve(data)};const query=new URLSearchParams({action,callback:cb,...params});script.onerror=()=>{cleanup();reject(new Error('No se ha podido conectar con el servidor.'))};script.src=API_URL+'?'+query.toString();document.body.appendChild(script)})}
 
-      function cleanup() {
-        try { delete window[callbackName]; } catch (error) {}
-        if (script.parentNode) script.parentNode.removeChild(script);
+async function login(){const pin=document.getElementById('pinInput').value.trim();const device=document.getElementById('deviceInput').value.trim()||'Administración';const fbEmail=(document.getElementById('firebaseEmailInput')?.value||'admin@graduacion.local').trim();const fbPassword=document.getElementById('firebasePasswordInput')?.value||'';const btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='Conectando…';hide('loginError');try{const r=await jsonp('login',{pin,deviceName:device});if(r.status!=='OK')throw new Error(r.message||'No se ha podido iniciar sesión.');await window.realtimeAdmin.login(fbEmail,fbPassword);token=r.token;adminPin=pin;deviceName=device;localStorage.setItem('admin_token',token);localStorage.setItem('admin_device',deviceName);sessionStorage.setItem('admin_pin',adminPin);showApp();startRealtime();await refreshAll(true)}catch(e){showError('loginError',e.message)}finally{btn.disabled=false;btn.textContent='Entrar al panel'}}
+function showApp(){hide('loginView');show('appView');document.getElementById('sessionDevice').textContent=deviceName;openTab('overview')}
+async function logout(){try{await window.realtimeAdmin?.logout?.()}catch(e){}localStorage.removeItem('admin_token');sessionStorage.removeItem('admin_pin');token='';adminPin='';location.reload()}
+
+async function refreshAll(notify){setSync('Actualizando…');const r=await jsonp('adminsnapshot',{token},60000);if(r.status==='UNAUTHORIZED'){logout();return}if(r.status!=='OK')throw new Error(r.message||'No se han podido cargar los datos.');state={...state,...r};applyRealtimeState();renderAll();setSync('Actualizado '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));if(notify)toast('Datos actualizados','ok')}
+function startRealtime(){if(realtimeStarted||!window.realtimeAdmin)return;realtimeStarted=true;window.realtimeAdmin.subscribe(data=>{realtimeSnapshot=data;applyRealtimeState();renderAll();setSync('Firebase realtime · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}))},error=>{console.error(error);toast('Error Firebase: '+(error.message||error),'bad')})}
+function applyRealtimeState(){if(!realtimeSnapshot)return;state.tickets=realtimeSnapshot.tickets||state.tickets;state.stats=realtimeSnapshot.stats||state.stats;state.recentLogs=realtimeSnapshot.logs||state.recentLogs;state.incidents=realtimeSnapshot.incidents||[]} 
+function renderAll(){renderOverview();renderTickets();renderMonitor();renderEvent()}
+
+function openTab(tab){currentTab=tab;document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));document.getElementById('tab-'+tab).classList.remove('hidden');document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));const labels={overview:['Resumen','Situación general del sistema'],import:['Importar Excel','Carga automática de entradas'],tickets:['Entradas','Listado y búsqueda'],monitor:['Monitor del acto','Actividad y fallos en tiempo real'],audit:['Auditoría completa','Comprobación real de PDF, QR, datos y asientos'],settings:['Herramientas','Mantenimiento y seguridad']};document.getElementById('pageTitle').textContent=labels[tab][0];document.getElementById('pageSubtitle').textContent=labels[tab][1];if(tab==='monitor'){refreshAll(false);clearInterval(monitorTimer);monitorTimer=setInterval(()=>refreshAll(false).catch(()=>{}),8000)}else{clearInterval(monitorTimer);monitorTimer=null}}
+
+function renderOverview(){const s=state.stats||emptyStats();const total=n(s.total),used=n(s.used),pending=n(s.pending),pct=total?Math.round(used/total*100):0;txt('mTotal',total);txt('mUsed',used);txt('mPending',pending);txt('mDevices',n(s.activeDevices));txt('mTotalSub',`${n(s.salon?.total)} salón · ${n(s.palco?.total)} palco`);txt('mUsedSub',`${pct}% del aforo registrado`);txt('mPendingSub',`${Math.max(total-used,0)} por acceder`);txt('accessPercent',pct+'%');document.getElementById('accessRing').style.setProperty('--p',pct);width('accessBar',pct);txt('salonProgress',`Salón: ${n(s.salon?.used)}/${n(s.salon?.total)}`);txt('palcoProgress',`Palco: ${n(s.palco?.used)}/${n(s.palco?.total)}`);txt('lastSync','Última actualización: '+new Date().toLocaleTimeString('es-ES'));setBadge('accessBadge',used+' dentro',pct>=90?'ok':'');const p=state.preflight||{};setBadge('systemBadge',p.issueCount?`${p.issueCount} avisos`:'Correcto',p.issueCount?'warn':'ok');document.getElementById('systemSummary').className='alert '+(p.issueCount?'warn':'ok');document.getElementById('systemSummary').textContent=p.issueCount?`Hay ${p.issueCount} incidencias de integridad. Pulsa “Comprobar ahora” para verlas.`:`${n(p.total)} entradas comprobadas: ${n(p.salon)} en salón y ${n(p.palco)} en palco.`;const pdf=state.pdfs||{};const pdfPct=n(pdf.total)?Math.round(n(pdf.generated)/n(pdf.total)*100):0;width('pdfBar',pdfPct);txt('pdfGenerated','Generados: '+n(pdf.generated));txt('pdfPending','Pendientes: '+n(pdf.pending));setBadge('pdfBadge',pdfPct+'%',pdf.pending?'warn':'ok');const incidents=state.incidents||[];setBadge('incidentBadge',incidents.length+' recientes',incidents.length?'warn':'ok');document.getElementById('overviewIncidents').innerHTML=incidents.length?incidents.slice(0,5).map(logMini).join(''):'No hay incidencias recientes.'}
+
+function renderTickets(){const q=(document.getElementById('ticketSearch')?.value||'').trim().toLowerCase();const zone=document.getElementById('zoneFilter')?.value||'';const used=document.getElementById('usedFilter')?.value||'';const filtered=(state.tickets||[]).filter(t=>{const hay=[t.nombre||t.estudiante,t.code,t.fila,t.butaca,t.email].join(' ').toLowerCase().includes(q);const z=!zone||t.zonaId===zone;const u=!used||(used==='used'?t.used:!t.used);return hay&&z&&u});txt('ticketCountBadge',filtered.length+' entradas');document.getElementById('ticketsBody').innerHTML=filtered.slice(0,700).map(t=>`<tr><td><span class="status-dot ${t.used?'ok':'warn'}"></span>${t.used?'Utilizada':'Pendiente'}</td><td><strong>${esc(t.nombre||t.estudiante)}</strong><br><span class="muted small">${esc(t.email||'')}</span></td><td class="zone ${t.zonaId==='PALCO'?'palco':'salon'}">${esc(t.zona)}</td><td>${esc(t.fila)}</td><td>${esc(t.butaca)}</td><td><code>${esc(t.code)}</code></td><td>${t.pdfUrl?`<a class="btn secondary small" target="_blank" href="${esc(t.pdfUrl)}">Abrir</a>`:'—'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">No hay resultados.</td></tr>'}
+
+function renderMonitor(){const s=state.stats||emptyStats();txt('monUsed',n(s.used));txt('monPending',n(s.pending));const dup=(state.recentLogs||[]).filter(x=>x.result==='DUPLICATE').length;const inv=(state.recentLogs||[]).filter(x=>x.result==='INVALID'||x.result==='ERROR').length;txt('monDuplicates',dup);txt('monInvalid',inv);renderZoneMonitor('Salon',s.salon);renderZoneMonitor('Palco',s.palco);txt('monitorTime',new Date().toLocaleTimeString('es-ES'));document.getElementById('logsList').innerHTML=(state.recentLogs||[]).slice(0,50).map(l=>`<div class="log"><div>${esc(l.date)}</div><div class="result ${esc(l.result)}">${esc(l.result)}</div><div><strong>${esc(l.estudiante||l.code||'')}</strong><br><span class="muted">${esc([l.zona,l.fila&&'F '+l.fila,l.butaca&&'B '+l.butaca].filter(Boolean).join(' · '))}</span></div><div>${esc(l.deviceName||'')}</div></div>`).join('')||'<div class="muted">Aún no hay actividad.</div>'}
+function renderZoneMonitor(name,z={}){const pct=n(z.total)?Math.round(n(z.used)/n(z.total)*100):0;setBadge('mon'+name+'Badge',pct+'%',pct>90?'ok':'');width('mon'+name+'Bar',pct);document.getElementById('mon'+name+'Text').innerHTML=`<span>${n(z.used)} dentro</span><span>${n(z.pending)} pendientes</span>`}
+function renderEvent(){const e=state.event||{};document.getElementById('eventInfo').innerHTML=`<strong>${esc(e.name||'Acto')}</strong><br>${esc(e.faculty||'')}<br><br>${esc(e.date||'')} · ${esc(e.time||'')}<br>${esc(e.venue||'')}`;txt('eventSide',e.name||'Panel de administración')}
+
+function setupDrop(){const dz=document.getElementById('dropZone');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag')}));dz.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]))}
+async function handleFile(file){if(!file)return;try{const buffer=await file.arrayBuffer();const wb=XLSX.read(buffer,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});if(!raw.length)throw new Error('El archivo no contiene filas.');importedRows=normalizeImportedRows(raw);if(!importedRows.length)throw new Error('No se han detectado entradas válidas.');show('fileInfo');document.getElementById('fileInfo').textContent=`${file.name} · ${importedRows.length} filas detectadas · Hoja: ${wb.SheetNames[0]}`;show('importReview');markStep(2);renderImportReview()}catch(e){toast(e.message,'bad')}}
+function normalizeImportedRows(raw){return raw.map(obj=>{const map={};Object.keys(obj).forEach(k=>map[norm(k)]=obj[k]);const get=(...keys)=>{for(const key of keys){if(map[norm(key)]!==undefined&&String(map[norm(key)]).trim()!=='')return map[norm(key)]}return''};const nombre=clean(get('nombre','estudiante','alumno','alumna','titular','graduado','graduada','nombre estudiante','nombre invitado','persona'));return{codigo:clean(get('codigo','código','code','ticket')),nombre,email:clean(get('email','correo','correo electronico','e-mail')),fila:clean(get('fila','row')),butaca:clean(get('butaca','asiento','seat')),zona:normalizeZone(get('zona','ubicacion','localizacion','espacio','sector')),tipoEntrada:normalizeTicketType(get('tipo de entrada','tipo_entrada','tipo entrada','tipo','categoria','categoría')),notas:clean(get('notas','observaciones')),usado:get('usado','utilizado','checked in'),qrUrl:clean(get('qr_url','qr url')),pdfUrl:clean(get('pdf_url','pdf url'))}}).filter(r=>r.nombre||r.fila||r.butaca||r.codigo)}
+function normalizeTicketType(value){const x=norm(value);return ['invitado','invitados','profesor','profesores','docente','docentes'].includes(x)?'INVITADO':'GENERAL'}
+function renderImportReview(){const total=importedRows.length,salon=importedRows.filter(r=>r.zona==='SALON').length,palco=importedRows.filter(r=>r.zona==='PALCO').length,invitados=importedRows.filter(r=>r.tipoEntrada==='INVITADO').length,noZone=importedRows.filter(r=>!['SALON','PALCO'].includes(r.zona)).length;const seats={},dups=[];importedRows.forEach((r,i)=>{const k=`${r.zona}|${r.fila}|${r.butaca}`;if(r.zona&&r.fila&&r.butaca){if(seats[k])dups.push(`${k} (filas ${seats[k]} y ${i+2})`);else seats[k]=i+2}});const missing=importedRows.filter(r=>!r.nombre||!r.fila||!r.butaca||!r.zona).length;document.getElementById('importStats').innerHTML=metricMini('Filas',total)+metricMini('Salón',salon)+metricMini('Palco',palco)+metricMini('Invitados',invitados);const issues=[];if(noZone)issues.push(`${noZone} filas tienen una zona no reconocida.`);if(missing)issues.push(`${missing} filas tienen datos obligatorios incompletos.`);if(dups.length)issues.push(`${dups.length} asientos están repetidos.`);document.getElementById('importWarnings').innerHTML=issues.length?`<div class="alert warn"><strong>Revisa antes de importar:</strong><br>${issues.map(esc).join('<br>')}</div>`:`<div class="alert ok">El archivo supera las comprobaciones básicas.</div>`;setBadge('importBadge',issues.length?issues.length+' avisos':'Listo',issues.length?'warn':'ok');document.getElementById('importPreview').innerHTML=importedRows.slice(0,100).map(r=>`<tr><td>${esc(r.nombre)}</td><td>${esc(r.tipoEntrada==='INVITADO'?'Invitado':'General')}</td><td>${esc(r.fila)}</td><td>${esc(r.butaca)}</td><td class="zone ${r.zona==='PALCO'?'palco':'salon'}">${esc(r.zona)}</td><td>${esc(r.codigo||'Se generará')}</td><td>${esc(r.email)}</td></tr>`).join('')}
+
+
+async function importExcel(){
+  if(!importedRows.length){
+    toast('Primero debes seleccionar un Excel.','bad')
+    return
+  }
+
+  const pin=await ensurePin()
+  if(!pin){
+    toast('Necesitas introducir el PIN de administración.','bad')
+    return
+  }
+
+  const mode=document.getElementById('importMode').value
+
+  if(
+    mode==='replace' &&
+    !confirm(
+      `Se sustituirá el contenido actual de tickets por ` +
+      `${importedRows.length} filas. ¿Continuar?`
+    )
+  ){
+    return
+  }
+
+  const btn=document.getElementById('importBtn')
+  btn.disabled=true
+  btn.textContent='Importando…'
+
+  show('importProgressWrap')
+  markStep(3)
+  setImportProgress(0,importedRows.length)
+  setSync('Preparando importación…')
+
+  const compact=importedRows.map(r=>[
+    r.codigo,
+    r.nombre,
+    r.email,
+    r.fila,
+    r.butaca,
+    r.zona,
+    r.tipoEntrada,
+    r.notas,
+    r.usado,
+    r.qrUrl,
+    r.pdfUrl
+  ])
+
+  /*
+   * JSONP utiliza una petición GET. Con bloques grandes la URL supera
+   * el límite de Chrome/Apps Script y la petición ni siquiera llega al
+   * servidor. Tres filas por bloque mantiene cada URL pequeña y estable.
+   */
+  const chunkSize=3
+  let done=0
+
+  try{
+    for(let i=0;i<compact.length;i+=chunkSize){
+      const chunk=compact.slice(i,i+chunkSize)
+
+      setSync(
+        `Importando ${done+1}–${Math.min(done+chunk.length,compact.length)} ` +
+        `de ${compact.length}…`
+      )
+
+      const r=await jsonp(
+        'adminimportchunk',
+        {
+          token,
+          adminPin:pin,
+          reset:(i===0&&mode==='replace')?'1':'0',
+          rows:JSON.stringify(chunk)
+        },
+        90000
+      )
+
+      if(!r || r.status!=='OK'){
+        throw new Error(
+          (r&&r.message) ||
+          `El servidor no ha aceptado el bloque que empieza en la fila ${i+2}.`
+        )
       }
 
-      const url = new URL(SHEETS_SYNC_URL);
-      url.searchParams.set("secret", SHEETS_SYNC_SECRET);
-      url.searchParams.set("callback", callbackName);
-      url.searchParams.set("_", Date.now());
-      for (const key in params) {
-        if (Object.prototype.hasOwnProperty.call(params, key)) url.searchParams.set(key, params[key] ?? "");
+      if(Number(r.written)!==chunk.length){
+        throw new Error(
+          `El servidor confirmó ${r.written||0} filas, ` +
+          `pero se enviaron ${chunk.length}.`
+        )
       }
-      console.log("URL Apps Script:", url.toString());
-      script.src = url.toString();
-      document.head.appendChild(script);
 
-      setTimeout(() => {
-        if (done) return;
-        done = true;
-        cleanup();
-        callback?.(false, { status: "ERROR", message: "Apps Script no ha respondido en 20 segundos." });
-      }, 20000);
+      done+=chunk.length
+      setImportProgress(done,compact.length)
+
+      // Pequeña pausa para no saturar Apps Script.
+      await new Promise(resolve=>setTimeout(resolve,120))
     }
 
-    function exportCsv() {
-      const values = Object.values(tickets);
-      const headers = ["codigo", "nombre", "email", "zona", "fila", "butaca", "usado", "checkin_at", "checkin_by"];
-      const rows = values.map(t => [t.codigo || "", t.nombre || "", t.email || "", t.zona_label || t.zona || "", t.fila || "", t.butaca || "", t.usado === true ? "TRUE" : "FALSE", t.checkin_at || "", t.checkin_by || ""]);
-      const csv = [headers, ...rows].map(row => row.map(csvEscape).join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "estado_entradas_realtime.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    setSync('Finalizando importación…')
+
+    const final=await jsonp(
+      'adminfinalizeimport',
+      {
+        token,
+        adminPin:pin,
+        expected:compact.length
+      },
+      120000
+    )
+
+    if(!final || final.status!=='OK'){
+      throw new Error(
+        (final&&final.message) ||
+        'No se ha podido finalizar la importación.'
+      )
     }
 
-    function csvEscape(value) { return '"' + String(value ?? "").replace(/"/g, '""') + '"'; }
-    function setConnection(state, text) { const badge = document.getElementById("connectionBadge"); badge.className = "badge " + state; document.getElementById("connectionText").textContent = text; }
-    function normalizeCode(raw) { let text = String(raw || "").trim(); try { const url = new URL(text); const code = url.searchParams.get("code") || url.searchParams.get("codigo"); if (code) return code.trim().toUpperCase(); } catch (error) {} const match = text.match(/EV26-[A-Z0-9-]+/i); if (match) return match[0].toUpperCase(); return text.toUpperCase(); }
-    function normalizeSearch(value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
-    function getTicketAccessZone(ticket) { const raw = String(ticket && (ticket.zonaId || ticket.zona || "")).toUpperCase(); return raw.includes("PALCO") ? "PALCO" : "PATIO"; }
-    function formatDate(value) { if (!value) return ""; try { const date = new Date(value); return date.toLocaleString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }); } catch (error) { return value; } }
-    function escapeHtml(value) { return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
-  </script>
+    if(Number(final.imported)!==compact.length){
+      throw new Error(
+        `La importación no coincide: se esperaban ${compact.length} filas ` +
+        `y el servidor contabiliza ${final.imported}.`
+      )
+    }
+
+    markStep(4)
+    setSync(`Importación terminada: ${final.imported} filas`)
+    toast(`${final.imported} entradas importadas correctamente.`,'ok')
+
+    await refreshAll(false)
+    openTab('tickets')
+
+  }catch(e){
+    console.error('Error de importación:',e)
+    setSync(`Error tras importar ${done} de ${compact.length}`)
+    toast(
+      `La importación se detuvo en ${done} de ${compact.length}: ` +
+      `${e.message||e}`,
+      'bad'
+    )
+    alert(
+      `La importación se detuvo en ${done} de ${compact.length} filas.\n\n` +
+      `${e.message||e}\n\n` +
+      `No vuelvas a pulsar importar en modo “Añadir”. ` +
+      `Usa “Reemplazar” para repetirla desde cero.`
+    )
+  }finally{
+    btn.disabled=false
+    btn.textContent='Importar al sistema'
+  }
+}
+function setImportProgress(done,total){const pct=Math.round(done/total*100);width('importProgress',pct);document.getElementById('importProgressText').innerHTML=`<span>${done} de ${total} filas</span><span>${pct}%</span>`}
+
+
+async function startCompleteAudit(){
+  if(auditRunning){
+    toast('Ya hay una auditoría en curso.','bad')
+    return
+  }
+
+  if(
+    !confirm(
+      'Se comprobarán todas las entradas, sus PDF y el QR real de cada archivo. ' +
+      'La pestaña debe permanecer abierta. ¿Comenzar?'
+    )
+  )return
+
+  auditRunning=true
+  auditStopRequested=false
+  auditResults=[]
+  auditStartedAt=Date.now()
+
+  document.getElementById('auditStartBtn').disabled=true
+  document.getElementById('auditStopBtn').disabled=false
+  document.getElementById('auditIssuesBody').innerHTML=
+    '<tr><td colspan="7" class="muted">Auditoría en curso…</td></tr>'
+
+  setBadge('auditBadge','Preparando','warn')
+  setBadge('auditResultBadge','En curso','warn')
+  txt('auditOk','0')
+  txt('auditErrors','0')
+  txt('auditUnreadable','0')
+  txt('auditDuplicateSeats','0')
+  width('auditProgressBar',0)
+  document.getElementById('auditConsole').innerHTML=''
+  auditLog('Preparando la auditoría…')
+
+  try{
+    await acquireAuditWakeLock()
+
+    if(window.pdfjsLib){
+      pdfjsLib.GlobalWorkerOptions.workerSrc=
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+    }
+
+    const start=await jsonp(
+      'adminauditstart',
+      {token,adminPin},
+      180000
+    )
+
+    if(start.status!=='OK'){
+      throw new Error(start.message||'No se ha podido iniciar la auditoría.')
+    }
+
+    auditSession=start.auditSession
+    auditSheetUrl=start.sheetUrl||''
+    const total=n(start.total)
+
+    txt('auditDuplicateSeats',n(start.duplicateSeats))
+    auditLog(
+      `Se han encontrado ${total} entradas. ` +
+      `Códigos repetidos: ${n(start.duplicateCodes)}. ` +
+      `Asientos repetidos: ${n(start.duplicateSeats)}.`
+    )
+
+    const resultBuffer=[]
+    let okCount=0
+    let errorCount=0
+    let unreadableCount=0
+
+    for(let index=0;index<total;index++){
+      if(auditStopRequested){
+        auditLog('Auditoría detenida por el usuario.')
+        break
+      }
+
+      const payload=await jsonp(
+        'adminauditpdf',
+        {
+          token,
+          adminPin,
+          auditSession,
+          index
+        },
+        180000
+      )
+
+      let result
+
+      if(payload.status==='OK'){
+        result=await auditSinglePdf(payload)
+      }else{
+        const expected=payload.expected||{}
+        result={
+          index,
+          code:expected.code||'',
+          name:expected.name||'',
+          zone:expected.zone||'',
+          fila:expected.fila||'',
+          butaca:expected.butaca||'',
+          qrLegible:false,
+          qrRead:'',
+          qrMatches:false,
+          nameInPdf:false,
+          seatInPdf:false,
+          zoneInPdf:false,
+          result:'ERROR',
+          observations:payload.message||'No se ha podido abrir el PDF.'
+        }
+      }
+
+      auditResults.push(result)
+      resultBuffer.push({
+        index:result.index,
+        qrLegible:result.qrLegible,
+        qrRead:result.qrRead,
+        qrMatches:result.qrMatches,
+        nameInPdf:result.nameInPdf,
+        seatInPdf:result.seatInPdf,
+        zoneInPdf:result.zoneInPdf,
+        observations:result.observations
+      })
+
+      if(result.result==='OK')okCount++
+      else errorCount++
+
+      if(!result.qrLegible)unreadableCount++
+
+      txt('auditOk',okCount)
+      txt('auditErrors',errorCount)
+      txt('auditUnreadable',unreadableCount)
+
+      const done=index+1
+      const pct=total?Math.round(done/total*100):0
+      width('auditProgressBar',pct)
+      document.getElementById('auditProgressText').innerHTML=
+        `<span>${done} de ${total}</span><span>${pct}%</span>`
+
+      txt(
+        'auditTime',
+        formatAuditDuration(Date.now()-auditStartedAt)
+      )
+
+      if(result.result==='ERROR'){
+        auditLog(
+          `ERROR · ${result.code||'sin código'} · ${result.observations}`
+        )
+      }else if(done%10===0||done===total){
+        auditLog(`Comprobadas ${done} de ${total} entradas.`)
+      }
+
+      if(resultBuffer.length>=2||done===total){
+        const save=await jsonp(
+          'adminauditresults',
+          {
+            token,
+            adminPin,
+            auditSession,
+            rows:JSON.stringify(resultBuffer.splice(0))
+          },
+          120000
+        )
+
+        if(save.status!=='OK'){
+          throw new Error(
+            save.message||
+            'No se han podido guardar los resultados de auditoría.'
+          )
+        }
+      }
+
+      // Libera memoria entre PDF.
+      await new Promise(resolve=>setTimeout(resolve,20))
+    }
+
+    if(auditStopRequested){
+      setBadge('auditBadge','Detenida','warn')
+      setBadge('auditResultBadge','Incompleta','warn')
+      document.getElementById('auditSummary').className='alert warn'
+      document.getElementById('auditSummary').textContent=
+        'La auditoría se ha detenido. Los resultados procesados quedan guardados.'
+      renderAuditIssues()
+      return
+    }
+
+    const finish=await jsonp(
+      'adminauditfinish',
+      {token,adminPin,auditSession},
+      180000
+    )
+
+    if(finish.status!=='OK'){
+      throw new Error(finish.message||'No se ha podido finalizar la auditoría.')
+    }
+
+    auditSheetUrl=finish.sheetUrl||auditSheetUrl
+    renderAuditFinish(finish.summary)
+    renderAuditIssues()
+    auditLog('Auditoría terminada y guardada en AUDITORIA_ENTRADAS.')
+
+  }catch(error){
+    console.error(error)
+    setBadge('auditBadge','Error','bad')
+    setBadge('auditResultBadge','Error','bad')
+    document.getElementById('auditSummary').className='alert bad'
+    document.getElementById('auditSummary').textContent=
+      error.message||String(error)
+    auditLog('ERROR GENERAL · '+(error.message||error))
+    toast(error.message||String(error),'bad')
+    renderAuditIssues()
+
+  }finally{
+    auditRunning=false
+    document.getElementById('auditStartBtn').disabled=false
+    document.getElementById('auditStopBtn').disabled=true
+    await releaseAuditWakeLock()
+  }
+}
+
+
+function stopCompleteAudit(){
+  if(!auditRunning)return
+
+  auditStopRequested=true
+  document.getElementById('auditStopBtn').disabled=true
+  auditLog('Solicitud de detención recibida. Se terminará el PDF actual.')
+}
+
+
+async function auditSinglePdf(payload){
+  const expected=payload.expected||{}
+  const file=payload.file||{}
+  const server=payload.serverChecks||{}
+  const issues=[]
+
+  let qrRead=''
+  let qrLegible=false
+  let extractedText=''
+
+  try{
+    const bytes=base64ToUint8Array(file.base64||'')
+    const pdf=await pdfjsLib.getDocument({data:bytes}).promise
+    const pagesToCheck=Math.min(pdf.numPages,2)
+
+    for(let pageNumber=1;pageNumber<=pagesToCheck;pageNumber++){
+      const page=await pdf.getPage(pageNumber)
+      const textContent=await page.getTextContent()
+      extractedText+=' '+textContent.items.map(item=>item.str||'').join(' ')
+
+      if(!qrLegible){
+        qrRead=await readQrFromPdfPage(page)
+        qrLegible=Boolean(qrRead)
+      }
+
+      try{page.cleanup()}catch(e){}
+    }
+
+    try{await pdf.destroy()}catch(e){}
+
+  }catch(error){
+    issues.push('No se ha podido procesar el PDF: '+(error.message||error))
+  }
+
+  const normalizedPdfText=normalizeAuditClientText(extractedText)
+  const normalizedName=normalizeAuditClientText(expected.name||'')
+  const nameInPdf=Boolean(
+    normalizedName&&normalizedPdfText.includes(normalizedName)
+  )
+
+  const seatInPdf=checkAuditSeatInText(
+    normalizedPdfText,
+    expected.fila,
+    expected.butaca
+  )
+
+  const zoneInPdf=checkAuditZoneInText(
+    normalizedPdfText,
+    expected.zone
+  )
+
+  const qrMatches=Boolean(
+    qrLegible&&
+    String(qrRead).trim()===String(expected.code||'').trim()
+  )
+
+  if(!server.pdfExists)issues.push('PDF no encontrado')
+  if(server.pdfExists&&!server.pdfMimeOk)issues.push('El archivo no es PDF')
+  if(n(server.pdfBytes)<=1000)issues.push('PDF vacío o demasiado pequeño')
+  if(!server.fileNameOk)issues.push('El nombre del PDF no contiene el código')
+  if(!server.folderOk)issues.push('El PDF no está en la carpeta correcta')
+  if(!expected.codeUnique)issues.push('Código repetido')
+  if(!expected.seatUnique)issues.push('Asiento repetido')
+  if(!expected.dataComplete)issues.push('Datos obligatorios incompletos')
+  if(!expected.qrUrlCorrect)issues.push('URL del QR incorrecta')
+  if(!qrLegible)issues.push('QR no legible dentro del PDF')
+  if(qrLegible&&!qrMatches)issues.push(`QR incorrecto: ${qrRead}`)
+  if(!nameInPdf)issues.push('Nombre no localizado en el PDF')
+  if(!seatInPdf)issues.push('Fila o butaca no coinciden en el PDF')
+  if(!zoneInPdf)issues.push('Zona no coincide en el PDF')
+
+  const allOk=Boolean(
+    server.pdfExists&&
+    server.pdfMimeOk&&
+    n(server.pdfBytes)>1000&&
+    server.fileNameOk&&
+    server.folderOk&&
+    expected.codeUnique&&
+    expected.seatUnique&&
+    expected.dataComplete&&
+    expected.qrUrlCorrect&&
+    qrLegible&&
+    qrMatches&&
+    nameInPdf&&
+    seatInPdf&&
+    zoneInPdf
+  )
+
+  return{
+    index:n(expected.index)-1,
+    code:expected.code||'',
+    name:expected.name||'',
+    zone:expected.zone||'',
+    fila:expected.fila||'',
+    butaca:expected.butaca||'',
+    qrLegible,
+    qrRead,
+    qrMatches,
+    nameInPdf,
+    seatInPdf,
+    zoneInPdf,
+    result:allOk?'OK':'ERROR',
+    observations:[...new Set(issues.filter(Boolean))].join(' · ')
+  }
+}
+
+
+async function readQrFromPdfPage(page){
+  const scales=[2.6,3.5]
+
+  for(const scale of scales){
+    const viewport=page.getViewport({scale})
+    const canvas=document.createElement('canvas')
+    const context=canvas.getContext('2d',{
+      willReadFrequently:true
+    })
+
+    canvas.width=Math.ceil(viewport.width)
+    canvas.height=Math.ceil(viewport.height)
+
+    await page.render({
+      canvasContext:context,
+      viewport
+    }).promise
+
+    const image=context.getImageData(
+      0,0,canvas.width,canvas.height
+    )
+
+    const result=jsQR(
+      image.data,
+      image.width,
+      image.height,
+      {inversionAttempts:'attemptBoth'}
+    )
+
+    canvas.width=1
+    canvas.height=1
+
+    if(result&&result.data){
+      return String(result.data).trim()
+    }
+  }
+
+  return''
+}
+
+
+function checkAuditSeatInText(text,fila,butaca){
+  const f=normalizeAuditClientText(fila)
+  const b=normalizeAuditClientText(butaca)
+
+  if(!f||!b)return false
+
+  const filaPatterns=[
+    new RegExp(`FILA\\s*[:\\-]?\\s*${escapeAuditRegex(f)}(?:\\D|$)`),
+    new RegExp(`F\\s*[:\\-]?\\s*${escapeAuditRegex(f)}(?:\\D|$)`)
+  ]
+
+  const butacaPatterns=[
+    new RegExp(`BUTACA\\s*[:\\-]?\\s*${escapeAuditRegex(b)}(?:\\D|$)`),
+    new RegExp(`ASIENTO\\s*[:\\-]?\\s*${escapeAuditRegex(b)}(?:\\D|$)`),
+    new RegExp(`B\\s*[:\\-]?\\s*${escapeAuditRegex(b)}(?:\\D|$)`)
+  ]
+
+  const filaOk=filaPatterns.some(pattern=>pattern.test(text))
+  const butacaOk=butacaPatterns.some(pattern=>pattern.test(text))
+
+  return filaOk&&butacaOk
+}
+
+
+function checkAuditZoneInText(text,zone){
+  const z=normalizeAuditClientText(zone)
+
+  if(z==='PALCO'){
+    return text.includes('PALCO')
+  }
+
+  if(z==='PATIO'||z==='SALON'){
+    return text.includes('PATIO')||text.includes('SALON')
+  }
+
+  return false
+}
+
+
+function normalizeAuditClientText(value){
+  return String(value||'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toUpperCase()
+    .replace(/\s+/g,' ')
+    .trim()
+}
+
+
+function escapeAuditRegex(value){
+  return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+}
+
+
+function base64ToUint8Array(base64){
+  const binary=atob(base64)
+  const bytes=new Uint8Array(binary.length)
+
+  for(let i=0;i<binary.length;i++){
+    bytes[i]=binary.charCodeAt(i)
+  }
+
+  return bytes
+}
+
+
+function renderAuditFinish(summary){
+  const s=summary||{}
+  const allOk=n(s.error)===0&&n(s.pending)===0
+
+  setBadge(
+    'auditBadge',
+    allOk?'Completada sin errores':'Completada con incidencias',
+    allOk?'ok':'warn'
+  )
+
+  setBadge(
+    'auditResultBadge',
+    `${n(s.ok)} correctas · ${n(s.error)} errores`,
+    allOk?'ok':'warn'
+  )
+
+  document.getElementById('auditSummary').className=
+    'alert '+(allOk?'ok':'warn')
+
+  document.getElementById('auditSummary').innerHTML=
+    `<strong>${n(s.total)} entradas analizadas</strong><br>`+
+    `${n(s.ok)} correctas · ${n(s.error)} con error · ${n(s.pending)} pendientes<br>`+
+    `Códigos repetidos: ${n(s.duplicateCodes)} · `+
+    `Asientos repetidos: ${n(s.duplicateSeats)} · `+
+    `PDF no encontrados: ${n(s.missingPdfs)} · `+
+    `QR ilegibles: ${n(s.unreadableQr)} · `+
+    `QR incorrectos: ${n(s.mismatchedQr)}`
+
+  txt('auditOk',n(s.ok))
+  txt('auditErrors',n(s.error))
+  txt('auditUnreadable',n(s.unreadableQr))
+  txt('auditDuplicateSeats',n(s.duplicateSeats))
+  width('auditProgressBar',100)
+  document.getElementById('auditProgressText').innerHTML=
+    `<span>${n(s.total)} de ${n(s.total)}</span><span>100%</span>`
+}
+
+
+function renderAuditIssues(){
+  const issues=auditResults.filter(item=>item.result!=='OK')
+  txt('auditIssueCount',issues.length)
+
+  document.getElementById('auditIssuesBody').innerHTML=
+    issues.length
+      ?issues.map(item=>`
+        <tr class="audit-error-row">
+          <td><code>${esc(item.code)}</code></td>
+          <td>${esc(item.name)}</td>
+          <td>${esc(item.zone)}</td>
+          <td>${esc(item.fila)}</td>
+          <td>${esc(item.butaca)}</td>
+          <td><span class="badge bad">ERROR</span></td>
+          <td>${esc(item.observations)}</td>
+        </tr>
+      `).join('')
+      :'<tr class="audit-ok-row"><td colspan="7">No se han detectado incidencias.</td></tr>'
+}
+
+
+function auditLog(message){
+  const consoleBox=document.getElementById('auditConsole')
+  const line=document.createElement('div')
+  line.textContent=
+    new Date().toLocaleTimeString('es-ES')+' · '+message
+  consoleBox.appendChild(line)
+  consoleBox.scrollTop=consoleBox.scrollHeight
+}
+
+
+function formatAuditDuration(milliseconds){
+  const total=Math.max(Math.floor(milliseconds/1000),0)
+  const minutes=Math.floor(total/60)
+  const seconds=total%60
+  return `${minutes}:${String(seconds).padStart(2,'0')}`
+}
+
+
+async function acquireAuditWakeLock(){
+  if(!('wakeLock'in navigator))return
+
+  try{
+    auditWakeLock=await navigator.wakeLock.request('screen')
+  }catch(error){
+    auditLog('No se ha podido impedir el reposo automático.')
+  }
+}
+
+
+async function releaseAuditWakeLock(){
+  if(!auditWakeLock)return
+
+  try{
+    await auditWakeLock.release()
+  }catch(error){}
+
+  auditWakeLock=null
+}
+
+
+function openAuditSheet(){
+  if(auditSheetUrl){
+    window.open(auditSheetUrl,'_blank','noopener')
+    return
+  }
+
+  openExternal('sheet')
+}
+
+
+document.addEventListener('visibilitychange',async()=>{
+  if(
+    document.visibilityState==='visible'&&
+    auditRunning&&
+    !auditWakeLock
+  ){
+    await acquireAuditWakeLock()
+  }
+})
+
+
+async function generateCodes(){if(!confirm('Se generarán códigos para todas las filas que todavía no tengan uno. ¿Continuar?'))return;busy('Generando códigos…');try{const r=await jsonp('admingeneratecodes',{token,adminPin},180000);if(r.status!=='OK')throw new Error(r.message);toast(`${r.generated} códigos generados.`,'ok');await refreshAll(false)}catch(e){toast(e.message,'bad')}finally{unbusy()}}
+async function generatePdfBatch(){
+  const selected=prompt(
+    '¿Cuántos PDF quieres generar?\n\n' +
+    'Escribe 100, 300, 600, 1000 o TODO.',
+    '100'
+  );
+
+  if(selected===null)return;
+
+  const normalized=String(selected).trim().toLowerCase();
+  const allowed=['100','300','600','1000','todo','all'];
+
+  if(!allowed.includes(normalized)){
+    toast('Escribe 100, 300, 600, 1000 o TODO.','bad');
+    return;
+  }
+
+  const target=(normalized==='todo'||normalized==='all')
+    ? 'all'
+    : normalized;
+
+  if(
+    !confirm(
+      `Se iniciará la generación automática de ${target==='all'?'todos los PDF pendientes':target+' PDF'}. ` +
+      'El proceso continuará solo en varios lotes. ¿Continuar?'
+    )
+  )return;
+
+  busy('Iniciando generación automática…');
+
+  try{
+    const r=await jsonp(
+      'admingeneratepdfs',
+      {token,adminPin,target},
+      360000
+    );
+
+    if(r.status!=='OK')throw new Error(r.message);
+
+    const automatic=r.automatic?.state||r.automatic||{};
+    const generated=n(automatic.generated);
+    const pending=n(r.pdfs?.pending);
+
+    toast(
+      `Generación automática iniciada. ` +
+      `Procesadas: ${generated}. Pendientes: ${pending}.`,
+      'ok'
+    );
+
+    await refreshAll(false);
+
+  }catch(e){
+    toast(e.message,'bad');
+  }finally{
+    unbusy();
+  }
+}
+
+
+async function stopPdfGeneration(){
+  if(!confirm('¿Detener la generación automática de PDF?'))return;
+
+  busy('Deteniendo generación…');
+
+  try{
+    const r=await jsonp(
+      'adminstoppdfs',
+      {token,adminPin},
+      120000
+    );
+
+    if(r.status!=='OK')throw new Error(r.message);
+
+    toast('Generación automática detenida.','ok');
+    await refreshAll(false);
+
+  }catch(e){
+    toast(e.message,'bad');
+  }finally{
+    unbusy();
+  }
+}
+
+
+async function refreshPdfGenerationStatus(){
+  try{
+    const r=await jsonp(
+      'adminpdfstatus',
+      {token,adminPin},
+      120000
+    );
+
+    if(r.status!=='OK')throw new Error(r.message);
+
+    const a=r.automatic||{};
+    const target=n(a.target);
+    const generated=n(a.generated);
+    const pending=n(a.pending);
+
+    toast(
+      `PDF: ${a.active?'procesando':'detenido'} · ` +
+      `generados ${generated}` +
+      `${target>0?' de '+target:''} · ` +
+      `pendientes ${pending}`,
+      a.lastError?'bad':'ok'
+    );
+
+    await refreshAll(false);
+
+  }catch(e){
+    toast(e.message,'bad');
+  }
+}
+async function runPreflight(){
+  busy('Comprobando sistema…')
+  try{
+    const r=await jsonp('preflight',{token},90000)
+    if(r.status==='UNAUTHORIZED')return logout()
+    state.preflight=r
+    renderOverview()
+    if(r.issueCount){
+      alert(
+        `Se han encontrado ${r.issueCount} avisos:\n\n` +
+        `${(r.issues||[]).slice(0,25).join('\n')}`
+      )
+    }else{
+      toast('La comprobación no ha encontrado incidencias.','ok')
+    }
+  }catch(e){
+    toast(e.message,'bad')
+  }finally{
+    unbusy()
+  }
+}
+async function createBackup(){const pin=await ensurePin();if(!pin)return;busy('Creando copia…');try{const r=await jsonp('backup',{token,adminPin:pin},90000);if(r.status!=='OK')throw new Error(r.message);toast('Copia de seguridad creada.','ok')}catch(e){toast(e.message,'bad')}finally{unbusy()}}
+function jsonpSync(action,params={},timeout=120000){return new Promise((resolve,reject)=>{const cb='sync_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const script=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('La sincronización con Excel ha tardado demasiado.'))},timeout);function cleanup(){clearTimeout(timer);delete window[cb];if(script.parentNode)script.parentNode.removeChild(script)}window[cb]=(data)=>{cleanup();resolve(data)};const query=new URLSearchParams({action,secret:SYNC_SECRET,callback:cb,...params});script.onerror=()=>{cleanup();reject(new Error('No se ha podido llamar al sincronizador de Excel.'))};script.src=SYNC_API_URL+'?'+query.toString();document.body.appendChild(script)})}
+async function resetSingleCheckin(){const code=clean(document.getElementById('resetSingleCode')?.value||'');if(!code)return toast('Introduce el código de la entrada.','bad');if(!confirm('Se reiniciará esta entrada en Firebase y Excel:\n\n'+code))return;busy('Reiniciando entrada…');try{await window.realtimeAdmin.resetTicket(code);const excel=await jsonpSync('reset_ticket',{reset_pin:SYNC_SECRET,codigo:code},120000);if(excel.status!=='OK')throw new Error(excel.message||'Firebase reiniciado, pero Excel no.');toast('Entrada reiniciada en Firebase y Excel.','ok');await refreshAll(false)}catch(e){toast(e.message,'bad')}finally{unbusy()}}
+async function resetCheckins(){if(!confirm('Se borrarán todos los estados de acceso, fechas y dispositivos en Firebase y Excel. ¿Seguro?'))return;const pin=await ensurePin(true);if(!pin)return;busy('Reiniciando Firebase…');try{const fb=await window.realtimeAdmin.resetAll();busy(`Firebase reiniciado: ${fb.tickets} tickets y ${fb.checkins} checkins. Limpiando Excel…`);const excel=await jsonpSync('reset_all',{reset_pin:SYNC_SECRET},180000);if(excel.status!=='OK')throw new Error(excel.message||'Firebase reiniciado, pero Excel no.');try{await jsonp('adminresetcheckins',{token,adminPin:pin},120000)}catch(e){console.warn('Reset antiguo no aplicado:',e)}toast(`Accesos reiniciados en Firebase y Excel. Excel: ${excel.reset_count||0} filas.`,'ok');await refreshAll(false)}catch(e){toast(e.message,'bad')}finally{unbusy()}}
+async function clearTickets(){if(!confirm('ATENCIÓN: se vaciarán todas las filas de la hoja tickets. Haz una copia antes. ¿Continuar?'))return;const phrase=prompt('Escribe VACIAR para confirmar.');if(phrase!=='VACIAR')return;const pin=await ensurePin(true);if(!pin)return;busy('Vaciando hoja…');try{const r=await jsonp('admincleartickets',{token,adminPin:pin},120000);if(r.status!=='OK')throw new Error(r.message);toast(r.message,'ok');await refreshAll(false)}catch(e){toast(e.message,'bad')}finally{unbusy()}}
+async function ensurePin(force){if(adminPin&&!force)return adminPin;const p=prompt('Introduce el PIN de administración:');if(!p)return'';adminPin=p;sessionStorage.setItem('admin_pin',p);return p}
+
+function exportTicketsCsv(){downloadCsv('entradas_control.csv',(state.tickets||[]).map(t=>({codigo:t.code,nombre:t.nombre||t.estudiante,email:t.email,fila:t.fila,butaca:t.butaca,zona:t.zonaId,tipo_entrada:t.tipoEntrada||'GENERAL',usado:t.used,checkin_at:t.checkinAt,checkin_by:t.checkinBy,pdf_url:t.pdfUrl})))}
+function downloadNormalizedCsv(){downloadCsv('revision_importacion.csv',importedRows)}
+function downloadCsv(name,rows){if(!rows.length)return toast('No hay datos para exportar.','bad');const ws=XLSX.utils.json_to_sheet(rows);const csv=XLSX.utils.sheet_to_csv(ws);const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function openExternal(type){const url=type==='sheet'?state.spreadsheetUrl:state.outputFolderUrl;if(url)window.open(url,'_blank')}
+
+function emptyStats(){return{total:0,used:0,pending:0,activeDevices:0,salon:{total:0,used:0,pending:0},palco:{total:0,used:0,pending:0}}}
+function logMini(l){return `<div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)"><strong>${esc(l.result)}</strong> · ${esc(l.estudiante||l.code||'')}<br><span class="muted">${esc(l.date||'')} · ${esc(l.deviceName||'')}</span></div>`}
+
+function metricMini(label,value){return `<div class="card metric" style="padding:14px"><div class="label">${esc(label)}</div><div class="value" style="font-size:27px">${esc(value)}</div></div>`}
+function markStep(n){for(let i=1;i<=4;i++){const el=document.getElementById('s'+i);el.classList.toggle('active',i===n);el.classList.toggle('done',i<n)}}
+function normalizeZone(v){const x=norm(v);if(x.includes('palco'))return'PALCO';if(x.includes('salon')||x.includes('patio'))return'SALON';return clean(v).toUpperCase()}
+function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function clean(v){return String(v==null?'':v).replace(/[\n\r\t]/g,' ').replace(/\s+/g,' ').trim()}
+function n(v){return Number(v||0)}function txt(id,v){const e=document.getElementById(id);if(e)e.textContent=v}function width(id,p){const e=document.getElementById(id);if(e)e.style.width=Math.max(0,Math.min(100,p))+'%'}
+function setBadge(id,text,kind=''){const e=document.getElementById(id);if(!e)return;e.textContent=text;e.className='badge '+kind}
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function show(id){document.getElementById(id)?.classList.remove('hidden')}function hide(id){document.getElementById(id)?.classList.add('hidden')}function showError(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.remove('hidden')}
+function setSync(v){txt('syncText',v)}
+let toastTimer;function toast(message,kind=''){const e=document.getElementById('toast');e.textContent=message;e.className='toast '+kind;clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.add('hidden'),4500)}
+function busy(message){setSync(message);document.body.style.cursor='progress'}function unbusy(){setSync('Listo');document.body.style.cursor=''}
+</script>
 </body>
 </html>
