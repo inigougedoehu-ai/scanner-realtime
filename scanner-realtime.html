@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de entradas realtime</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --ok: #0f766e;
+      --bad: #b91c1c;
+      --warn: #b45309;
+      --blue: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 14px 18px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 18px auto;
+      padding: 0 14px 30px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input, select, button {
+      width: 100%;
+      font-size: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    input, select {
+      background: white;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: var(--blue);
+      color: white;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    button.secondary {
+      background: #374151;
+    }
+
+    button.danger {
+      background: var(--bad);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #reader {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #000;
+    }
+
+    .status {
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+
+    .status.ok {
+      background: #ecfdf5;
+      color: var(--ok);
+      border-color: var(--ok);
+    }
+
+    .status.bad {
+      background: #fef2f2;
+      color: var(--bad);
+      border-color: var(--bad);
+    }
+
+    .status.warn {
+      background: #fffbeb;
+      color: var(--warn);
+      border-color: var(--warn);
+    }
+
+    .ticket-info {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .ticket-info strong {
+      display: inline-block;
+      min-width: 90px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .stat {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .stat .num {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .stat .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .log {
+      font-size: 13px;
+      max-height: 230px;
+      overflow-y: auto;
+    }
+
+    .log-item {
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #e5e7eb;
+    }
+
+    .pill.ok {
+      background: #ccfbf1;
+      color: #115e59;
+    }
+
+    .pill.bad {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .pill.warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    @media (max-width: 620px) {
+      .row, .stats {
+        grid-template-columns: 1fr;
+      }
+
+      header h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Control de entradas realtime</h1>
+    <p>Sistema nuevo con Firebase · No toca el sistema actual</p>
+  </header>
+
+  <main>
+    <section id="loginCard" class="card">
+      <h2>Acceso</h2>
+
+      <label for="email">Usuario</label>
+      <input id="email" type="email" placeholder="patio1@graduacion.local" autocomplete="username" />
+
+      <label for="password" style="margin-top:10px;">Contraseña</label>
+      <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password" />
+
+      <button id="loginBtn">Entrar</button>
+
+      <p class="small">
+        Usa los usuarios creados en Firebase Authentication.
+      </p>
+    </section>
+
+    <section id="appCard" class="hidden">
+      <section class="card">
+        <div class="row">
+          <div>
+            <label>Usuario conectado</label>
+            <div id="currentUser" class="small"></div>
+          </div>
+
+          <div>
+            <label for="accessZone">Zona de acceso</label>
+            <select id="accessZone">
+              <option value="PATIO">Patio / Salón principal</option>
+              <option value="PALCO">Palco</option>
+              <option value="TODAS">Todas</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="logoutBtn" class="secondary">Cerrar sesión</button>
+      </section>
+
+      <section class="card">
+        <div class="stats">
+          <div class="stat">
+            <div id="statTotal" class="num">—</div>
+            <div class="label">Total</div>
+          </div>
+          <div class="stat">
+            <div id="statUsed" class="num">—</div>
+            <div class="label">Validadas</div>
+          </div>
+          <div class="stat">
+            <div id="statPending" class="num">—</div>
+            <div class="label">Pendientes</div>
+          </div>
+        </div>
+        <p class="small">Estas cifras se actualizan en tiempo real.</p>
+      </section>
+
+      <section class="card">
+        <h2>Escáner QR</h2>
+        <div id="reader"></div>
+
+        <button id="startBtn">Iniciar cámara</button>
+        <button id="stopBtn" class="danger" disabled>Detener cámara</button>
+      </section>
+
+      <section class="card">
+        <h2>Validación manual</h2>
+        <label for="manualCode">Código de entrada</label>
+        <input id="manualCode" type="text" placeholder="EV26-..." />
+        <button id="manualBtn">Validar código</button>
+      </section>
+
+      <section id="resultBox" class="status hidden"></section>
+
+      <section id="ticketCard" class="card hidden">
+        <h2>Entrada</h2>
+        <div id="ticketInfo" class="ticket-info"></div>
+      </section>
+
+      <section class="card">
+        <h2>Últimos accesos</h2>
+        <div id="recentLog" class="log">
+          <p class="small">Aún no hay accesos registrados.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      updateDoc,
+      setDoc,
+      runTransaction,
+      serverTimestamp,
+      collection,
+      query,
+      orderBy,
+      limit,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",
+      authDomain: "control-entradas-64826hfgr.firebaseapp.com",
+      projectId: "control-entradas-64826hfgr",
+      storageBucket: "control-entradas-64826hfgr.firebasestorage.app",
+      messagingSenderId: "779578072302",
+      appId: "1:779578072302:web:57216df153bcb2319767ff"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let html5QrCode = null;
+    let cameraRunning = false;
+    let processing = false;
+    let unsubscribeTickets = null;
+    let unsubscribeCheckins = null;
+
+    const loginCard = document.getElementById("loginCard");
+    const appCard = document.getElementById("appCard");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const currentUserEl = document.getElementById("currentUser");
+    const accessZoneEl = document.getElementById("accessZone");
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const manualCodeInput = document.getElementById("manualCode");
+    const manualBtn = document.getElementById("manualBtn");
+
+    const resultBox = document.getElementById("resultBox");
+    const ticketCard = document.getElementById("ticketCard");
+    const ticketInfo = document.getElementById("ticketInfo");
+
+    const statTotal = document.getElementById("statTotal");
+    const statUsed = document.getElementById("statUsed");
+    const statPending = document.getElementById("statPending");
+    const recentLog = document.getElementById("recentLog");
+
+    loginBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showResult("Introduce usuario y contraseña.", "warn");
+        return;
+      }
+
+      loginBtn.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        showResult("No se ha podido iniciar sesión: " + error.message, "bad");
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await stopScanner();
+      await signOut(auth);
+    });
+
+    startBtn.addEventListener("click", startScanner);
+    stopBtn.addEventListener("click", stopScanner);
+
+    manualBtn.addEventListener("click", async () => {
+      const code = normalizeCode(manualCodeInput.value);
+      if (!code) {
+        showResult("Introduce un código.", "warn");
+        return;
+      }
+
+      await validateCode(code);
+    });
+
+    manualCodeInput.addEventListener("keydown", async (event) => {
+      if (event.key === "Enter") {
+        const code = normalizeCode(manualCodeInput.value);
+        if (code) await validateCode(code);
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginCard.classList.add("hidden");
+        appCard.classList.remove("hidden");
+        currentUserEl.textContent = user.email + " · " + user.uid;
+
+        configureZoneByUser(user.email || "");
+        subscribeStats();
+        subscribeRecentCheckins();
+
+      } else {
+        loginCard.classList.remove("hidden");
+        appCard.classList.add("hidden");
+        currentUserEl.textContent = "";
+
+        if (unsubscribeTickets) unsubscribeTickets();
+        if (unsubscribeCheckins) unsubscribeCheckins();
+
+        unsubscribeTickets = null;
+        unsubscribeCheckins = null;
+      }
+    });
+
+    function configureZoneByUser(email) {
+      const lower = email.toLowerCase();
+
+      if (lower.startsWith("palco")) {
+        accessZoneEl.value = "PALCO";
+        accessZoneEl.disabled = true;
+      } else if (lower.startsWith("patio")) {
+        accessZoneEl.value = "PATIO";
+        accessZoneEl.disabled = true;
+      } else if (lower.startsWith("admin")) {
+        accessZoneEl.value = "TODAS";
+        accessZoneEl.disabled = false;
+      } else {
+        accessZoneEl.value = "PATIO";
+        accessZoneEl.disabled = false;
+      }
+    }
+
+    async function startScanner() {
+      if (cameraRunning) return;
+
+      html5QrCode = new Html5Qrcode("reader");
+
+      const config = {
+        fps: 10,
+        qrbox: { width: 260, height: 260 },
+        rememberLastUsedCamera: true
+      };
+
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          async (decodedText) => {
+            const code = normalizeCode(decodedText);
+            if (code) await validateCode(code);
+          },
+          () => {}
+        );
+
+        cameraRunning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+
+      } catch (error) {
+        showResult("No se ha podido iniciar la cámara: " + error.message, "bad");
+      }
+    }
+
+    async function stopScanner() {
+      if (!html5QrCode || !cameraRunning) return;
+
+      try {
+        await html5QrCode.stop();
+        await html5QrCode.clear();
+      } catch (error) {}
+
+      cameraRunning = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    async function validateCode(rawCode) {
+      if (processing) return;
+
+      const user = auth.currentUser;
+      if (!user) {
+        showResult("No hay sesión iniciada.", "bad");
+        return;
+      }
+
+      const code = normalizeCode(rawCode);
+      if (!code) {
+        showResult("Código no válido.", "bad");
+        return;
+      }
+
+      processing = true;
+      manualBtn.disabled = true;
+
+      try {
+        const result = await validateTicketTransaction(code, user);
+
+        if (result.status === "OK") {
+          showResult("ACCESO VALIDADO", "ok");
+          showTicket(result.ticket);
+          vibrateOk();
+        } else if (result.status === "ALREADY_USED") {
+          showResult("ENTRADA YA USADA", "bad");
+          showTicket(result.ticket);
+          vibrateBad();
+        } else if (result.status === "WRONG_ZONE") {
+          showResult("ZONA INCORRECTA: esta entrada es de " + result.ticket.zona_label, "warn");
+          showTicket(result.ticket);
+          vibrateBad();
+        } else if (result.status === "NOT_FOUND") {
+          showResult("ENTRADA NO ENCONTRADA", "bad");
+          hideTicket();
+          vibrateBad();
+        }
+
+      } catch (error) {
+        showResult("Error validando entrada: " + error.message, "bad");
+        vibrateBad();
+      } finally {
+        setTimeout(() => {
+          processing = false;
+          manualBtn.disabled = false;
+        }, 1200);
+      }
+    }
+
+    async function validateTicketTransaction(code, user) {
+      const ticketRef = doc(db, "tickets", code);
+      const checkinRef = doc(db, "checkins", code);
+      const selectedZone = accessZoneEl.value;
+      const deviceLabel = getDeviceLabel(user.email || "");
+
+      return await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(ticketRef);
+
+        if (!snap.exists()) {
+          return { status: "NOT_FOUND" };
+        }
+
+        const ticket = snap.data();
+
+        if (!zoneMatches(selectedZone, ticket.zona)) {
+          return {
+            status: "WRONG_ZONE",
+            ticket: ticket
+          };
+        }
+
+        if (ticket.usado === true) {
+          return {
+            status: "ALREADY_USED",
+            ticket: ticket
+          };
+        }
+
+        const nowIso = new Date().toISOString();
+
+        const updatedTicket = {
+          usado: true,
+          checkin_at: nowIso,
+          checkin_by: deviceLabel,
+          checkin_uid: user.uid,
+          checkin_email: user.email || "",
+          last_update_source: "scanner_realtime"
+        };
+
+        transaction.update(ticketRef, updatedTicket);
+
+        transaction.set(checkinRef, {
+          codigo: ticket.codigo || code,
+          nombre: ticket.nombre || "",
+          zona: ticket.zona || "",
+          zona_label: ticket.zona_label || "",
+          fila: ticket.fila || "",
+          butaca: ticket.butaca || "",
+          tipo_entrada: ticket.tipo_entrada || "",
+          checkin_at: nowIso,
+          checkin_by: deviceLabel,
+          checkin_uid: user.uid,
+          checkin_email: user.email || "",
+          sync_status: "PENDING",
+          sync_at: "",
+          created_at: nowIso
+        });
+
+        const finalTicket = {
+          ...ticket,
+          ...updatedTicket
+        };
+
+        return {
+          status: "OK",
+          ticket: finalTicket
+        };
+      });
+    }
+
+    function zoneMatches(selectedZone, ticketZone) {
+      const normalized = String(ticketZone || "").toUpperCase();
+
+      if (selectedZone === "TODAS") return true;
+      if (selectedZone === "PALCO") return normalized === "PALCO";
+      if (selectedZone === "PATIO") return normalized === "SALON" || normalized === "PATIO";
+
+      return false;
+    }
+
+    function normalizeCode(value) {
+      const text = String(value || "").trim();
+
+      const match = text.match(/EV26-[A-Z0-9-]+/i);
+      if (match) return match[0].toUpperCase();
+
+      return text.toUpperCase();
+    }
+
+    function getDeviceLabel(email) {
+      const clean = String(email || "").toLowerCase();
+
+      if (clean.includes("@")) {
+        return clean.split("@")[0];
+      }
+
+      return clean || "scanner";
+    }
+
+    function showResult(message, type) {
+      resultBox.textContent = message;
+      resultBox.className = "status " + type;
+      resultBox.classList.remove("hidden");
+    }
+
+    function showTicket(ticket) {
+      ticketCard.classList.remove("hidden");
+
+      ticketInfo.innerHTML = `
+        <p><strong>Nombre:</strong> ${escapeHtml(ticket.nombre || "")}</p>
+        <p><strong>Zona:</strong> ${escapeHtml(ticket.zona_label || ticket.zona || "")}</p>
+        <p><strong>Fila:</strong> ${escapeHtml(ticket.fila || "")}</p>
+        <p><strong>Butaca:</strong> ${escapeHtml(ticket.butaca || "")}</p>
+        <p><strong>Código:</strong> ${escapeHtml(ticket.codigo || "")}</p>
+        <p><strong>Usado:</strong> ${ticket.usado ? "Sí" : "No"}</p>
+        ${ticket.checkin_at ? `<p><strong>Hora:</strong> ${escapeHtml(formatDate(ticket.checkin_at))}</p>` : ""}
+        ${ticket.checkin_by ? `<p><strong>Validado por:</strong> ${escapeHtml(ticket.checkin_by)}</p>` : ""}
+      `;
+    }
+
+    function hideTicket() {
+      ticketCard.classList.add("hidden");
+      ticketInfo.innerHTML = "";
+    }
+
+    function subscribeStats() {
+      if (unsubscribeTickets) unsubscribeTickets();
+
+      unsubscribeTickets = onSnapshot(collection(db, "tickets"), (snapshot) => {
+        let total = 0;
+        let used = 0;
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          total++;
+
+          if (data.usado === true) {
+            used++;
+          }
+        });
+
+        statTotal.textContent = total;
+        statUsed.textContent = used;
+        statPending.textContent = total - used;
+      }, (error) => {
+        showResult("No se pueden cargar estadísticas: " + error.message, "bad");
+      });
+    }
+
+    function subscribeRecentCheckins() {
+      if (unsubscribeCheckins) unsubscribeCheckins();
+
+      const q = query(
+        collection(db, "checkins"),
+        orderBy("checkin_at", "desc"),
+        limit(12)
+      );
+
+      unsubscribeCheckins = onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          recentLog.innerHTML = '<p class="small">Aún no hay accesos registrados.</p>';
+          return;
+        }
+
+        const items = [];
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+
+          items.push(`
+            <div class="log-item">
+              <span class="pill ok">OK</span>
+              <strong>${escapeHtml(data.nombre || "")}</strong><br>
+              <span class="small">
+                ${escapeHtml(data.zona_label || data.zona || "")}
+                · Fila ${escapeHtml(data.fila || "")}
+                · Butaca ${escapeHtml(data.butaca || "")}
+                · ${escapeHtml(formatDate(data.checkin_at || ""))}
+                · ${escapeHtml(data.checkin_by || "")}
+              </span>
+            </div>
+          `);
+        });
+
+        recentLog.innerHTML = items.join("");
+      }, (error) => {
+        recentLog.innerHTML = '<p class="small">No se pueden cargar últimos accesos.</p>';
+      });
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+
+      try {
+        const date = new Date(value);
+
+        return date.toLocaleString("es-ES", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          day: "2-digit",
+          month: "2-digit"
+        });
+      } catch (error) {
+        return value;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function vibrateOk() {
+      if (navigator.vibrate) {
+        navigator.vibrate([80]);
+      }
+    }
+
+    function vibrateBad() {
+      if (navigator.vibrate) {
+        navigator.vibrate([150, 80, 150]);
+      }
+    }
+  </script>
+</body>
+</html>
