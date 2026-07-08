@@ -112,6 +112,10 @@
       color: #8795aa;
     }
 
+    select option {
+      color: #111827;
+    }
+
     .btn {
       width: 100%;
       min-height: 56px;
@@ -221,7 +225,6 @@
       border-color: rgba(245,158,11,.55);
       color: #fde68a;
     }
-
 
     .access-zone-badge {
       display: inline-flex;
@@ -446,6 +449,11 @@
       background: rgba(22,163,74,.18);
     }
 
+    .confirm-badge.error {
+      color: #fecaca;
+      background: rgba(220,38,38,.18);
+    }
+
     .search-result,
     .log-item {
       padding: 13px;
@@ -523,47 +531,6 @@
       border-bottom: 0;
     }
 
-    .switch {
-      position: relative;
-      width: 54px;
-      height: 32px;
-      flex: 0 0 auto;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      inset: 0;
-      border-radius: 999px;
-      background: #475569;
-      transition: .2s;
-    }
-
-    .slider:before {
-      content: "";
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      left: 4px;
-      top: 4px;
-      border-radius: 50%;
-      background: white;
-      transition: .2s;
-    }
-
-    .switch input:checked + .slider {
-      background: var(--warn);
-    }
-
-    .switch input:checked + .slider:before {
-      transform: translateX(22px);
-    }
-
     .bottom-nav {
       position: fixed;
       left: 50%;
@@ -626,14 +593,6 @@
       margin-bottom: env(safe-area-inset-bottom);
     }
 
-    .preflight-ok {
-      color: #bbf7d0;
-    }
-
-    .preflight-warning {
-      color: #fde68a;
-    }
-
     .small-text {
       color: var(--muted);
       font-size: 13px;
@@ -646,21 +605,23 @@
   <div class="app">
     <section id="loginView" class="card">
       <div class="title">Control de entradas</div>
-      <div class="subtitle">Introduce la clave y un nombre reconocible para este móvil.</div>
+      <div class="subtitle">Introduce el usuario de puerta y su contraseña.</div>
 
       <div class="mt">
-        <input id="deviceNameInput" type="text" maxlength="60" placeholder="Ej.: Puerta principal 1">
+        <input id="emailInput" type="text" placeholder="patio1" autocomplete="username" autocapitalize="none" spellcheck="false">
+      </div>
+
+      <div class="small-text mt">No hace falta escribir @graduacion.local</div>
+
+      <div class="mt">
+        <input id="passwordInput" type="password" placeholder="Contraseña" autocomplete="current-password">
       </div>
 
       <div class="mt">
-        <input id="pinInput" type="password" inputmode="numeric" placeholder="Clave de acceso">
+        <button type="button" id="loginButton" class="btn">Entrar</button>
       </div>
 
-      <div class="mt">
-        <button type="button" id="loginButton" class="btn" onclick="login()">Entrar</button>
-      </div>
-
-      <div class="small-text mt">La lista se guarda localmente en este dispositivo para que el escaneo sea instantáneo.</div>
+      <div class="small-text mt">La zona se configura automáticamente según el usuario: patio1, patio2, palco1, etc.</div>
     </section>
 
     <main id="mainApp" class="hidden">
@@ -673,7 +634,7 @@
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
               <div id="modeBadge" class="mode-badge">MODO REAL</div>
-              <div id="accessZoneBadge" class="access-zone-badge">ZONA SIN CONFIGURAR</div>
+              <div id="accessZoneBadge" class="access-zone-badge">ZONA</div>
             </div>
           </div>
 
@@ -695,20 +656,18 @@
           <div class="sync-row">
             <div id="syncBadge" class="sync-badge syncing">
               <span class="sync-dot"></span>
-              <span id="syncText">Sincronizando...</span>
+              <span id="syncText">Conectando...</span>
             </div>
-            <span id="lastSyncText" class="small-text">Sin datos</span>
+            <span id="lastSyncText" class="small-text">Firebase realtime</span>
           </div>
-
-          <div id="pendingNotice" class="notice hidden"></div>
 
           <div class="scanner-wrap">
             <div id="reader"></div>
           </div>
 
           <div class="grid2 mt">
-            <button type="button" id="restartCameraButton" class="btn secondary small" onclick="restartScanner()">Reiniciar cámara</button>
-            <button type="button" class="btn secondary small" onclick="syncNow(true)">Forzar sincronización</button>
+            <button type="button" id="restartCameraButton" class="btn secondary small">Reiniciar cámara</button>
+            <button type="button" class="btn secondary small" onclick="renderStats()">Actualizar</button>
           </div>
         </div>
       </section>
@@ -717,7 +676,7 @@
         <div class="card">
           <div class="title">Buscar entrada</div>
           <div class="subtitle">Busca por nombre, código, zona, fila o butaca.</div>
-          <input id="searchInput" class="mt" type="search" placeholder="Escribe para buscar..." oninput="renderSearchResults()">
+          <input id="searchInput" class="mt" type="search" placeholder="Escribe para buscar...">
           <div id="searchResults" class="mt"></div>
         </div>
       </section>
@@ -729,7 +688,7 @@
               <div class="title">Resumen</div>
               <div class="subtitle">Estado general del acceso.</div>
             </div>
-            <button type="button" class="btn secondary small inline" onclick="loadDashboard()">Actualizar</button>
+            <button type="button" class="btn secondary small inline" onclick="window.renderDashboard()">Actualizar</button>
           </div>
 
           <div class="stats mt">
@@ -742,8 +701,8 @@
               <div class="stat-label">Dentro</div>
             </div>
             <div class="stat">
-              <div id="dashDevices" class="stat-number">-</div>
-              <div class="stat-label">Dispositivos</div>
+              <div id="dashPending" class="stat-number">-</div>
+              <div class="stat-label">Pendientes</div>
             </div>
           </div>
 
@@ -770,58 +729,34 @@
       <section id="settingsTab" class="tab-view hidden">
         <div class="card">
           <div class="title">Ajustes</div>
-          <div class="subtitle">Opciones del dispositivo y herramientas de coordinación.</div>
+          <div class="subtitle">Opciones del dispositivo.</div>
 
           <div class="setting-row mt">
             <div>
-              <div style="font-weight:900">Modo simulacro</div>
-              <div class="small-text">Valida y registra pruebas sin marcar entradas.</div>
+              <div style="font-weight:900">Usuario</div>
+              <div id="settingsUser" class="small-text"></div>
             </div>
-            <label class="switch">
-              <input id="simulationToggle" type="checkbox" onchange="toggleSimulationMode()">
-              <span class="slider"></span>
-            </label>
           </div>
 
           <div class="setting-row">
             <div class="zone-setting">
               <div>
                 <div style="font-weight:900">Zona de acceso</div>
-                <div class="small-text">Este móvil solo aceptará entradas de la zona elegida.</div>
+                <div class="small-text">Patio acepta Salón principal. Palco acepta únicamente Palco.</div>
               </div>
-              <select id="accessZoneSelect" onchange="changeAccessZone()">
-                <option value="">Selecciona una zona...</option>
+              <select id="accessZoneSelect">
                 <option value="PATIO">Patio</option>
                 <option value="PALCO">Palco</option>
                 <option value="TODAS">Todas · solo incidencias</option>
               </select>
-              <div id="accessZoneHelp" class="small-text zone-required">Debes seleccionar Patio o Palco antes de escanear.</div>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div style="font-weight:900">Dispositivo</div>
-              <div id="settingsDeviceName" class="small-text"></div>
+              <div id="accessZoneHelp" class="small-text"></div>
             </div>
           </div>
 
           <div class="grid2 mt">
-            <button type="button" class="btn secondary small" onclick="syncNow(true)">Actualizar lista completa</button>
-            <button type="button" class="btn secondary small" onclick="runPreflight()">Comprobar sistema</button>
+            <button type="button" class="btn secondary small" id="refreshDataButton">Actualizar datos</button>
+            <button type="button" class="btn danger small" id="logoutButton">Cerrar sesión</button>
           </div>
-
-          <div class="grid2 mt">
-            <button type="button" class="btn secondary small" onclick="createBackupFromApp()">Crear copia de seguridad</button>
-            <button type="button" class="btn secondary small" onclick="showUndoModal(lastAcceptedCode)">Deshacer último acceso</button>
-          </div>
-
-          <button type="button" class="btn danger mt" onclick="logout()">Cerrar sesión</button>
-        </div>
-
-        <div id="preflightCard" class="card hidden">
-          <div class="section-title">Comprobación del sistema</div>
-          <div id="preflightContent"></div>
         </div>
       </section>
     </main>
@@ -829,8 +764,8 @@
     <section id="resultView" class="hidden">
       <div id="resultBox" class="result ok"></div>
       <div class="grid2 mt">
-        <button type="button" id="resultUndoButton" class="btn secondary" onclick="showUndoModal(currentResultCode)">Deshacer</button>
-        <button type="button" class="btn" onclick="nextScan()">Siguiente</button>
+        <button type="button" id="resultUndoButton" class="btn secondary">Deshacer</button>
+        <button type="button" class="btn" id="nextScanButton">Siguiente</button>
       </div>
     </section>
   </div>
@@ -846,496 +781,555 @@
     <div class="modal-card">
       <div class="section-title">Deshacer acceso</div>
       <div id="undoDescription" class="small-text"></div>
-      <input id="undoPin" class="mt" type="password" inputmode="numeric" placeholder="Clave de confirmación">
+      <input id="undoPin" class="mt" type="password" placeholder="Clave de confirmación">
       <textarea id="undoReason" class="mt" placeholder="Motivo, por ejemplo: escaneo accidental"></textarea>
       <div class="grid2 mt">
-        <button type="button" class="btn secondary" onclick="closeUndoModal()">Cancelar</button>
-        <button type="button" id="undoConfirmButton" class="btn danger" onclick="confirmUndo()">Deshacer</button>
+        <button type="button" class="btn secondary" id="undoCancelButton">Cancelar</button>
+        <button type="button" id="undoConfirmButton" class="btn danger">Deshacer</button>
       </div>
     </div>
   </div>
 
-  <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXGG5TQd8qmr7yS_HV2OuVGHpf3slXDhi1EJXJPR_hh0kqU7Iyo3Lwz-dLtHwJ4n52/exec'
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
-    const KEYS = {
-      token: 'scanner_token_v2',
-      tokenExpiry: 'scanner_token_expiry_v2',
-      deviceName: 'scanner_device_name_v2',
-      tickets: 'scanner_tickets_v2',
-      queue: 'scanner_queue_v2',
-      lastServerTime: 'scanner_last_server_time_v2',
-      dataVersion: 'scanner_data_version_v2',
-      simulation: 'scanner_simulation_v2',
-      lastAcceptedCode: 'scanner_last_accepted_v2',
-      accessZone: 'scanner_access_zone_v1'
-    }
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    const SYNC_INTERVAL_MS = 8000
-    const FULL_SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000
-    const REPEAT_BLOCK_MS = 4500
+    import {
+      getFirestore,
+      doc,
+      runTransaction,
+      collection,
+      query,
+      orderBy,
+      limit,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    let token = localStorage.getItem(KEYS.token) || ''
-    let tokenExpiry = Number(localStorage.getItem(KEYS.tokenExpiry) || 0)
-    let deviceName = localStorage.getItem(KEYS.deviceName) || ''
-    let dataVersion = localStorage.getItem(KEYS.dataVersion) || ''
-    let lastServerTime = Number(localStorage.getItem(KEYS.lastServerTime) || 0)
-    let simulationMode = localStorage.getItem(KEYS.simulation) === 'true'
-    let lastAcceptedCode = localStorage.getItem(KEYS.lastAcceptedCode) || ''
-    let accessZone = normalizeAccessZone(localStorage.getItem(KEYS.accessZone) || '')
+    const SHEETS_SYNC_URL = "https://script.google.com/macros/s/AKfycbzlh_yy3pi8vtVztFqhBHUkv4WD0MvZQSUsHLhyEyCSJ0jkI8Z4Nz5qI8CQWap8XrXZ/exec";
+    const SHEETS_SYNC_SECRET = "graduacion-realtime-2026";
 
-    let tickets = {}
-    let queue = []
-    let lastFullSnapshotAt = 0
-    let syncTimer = null
-    let syncInProgress = false
-    let html5QrCode = null
-    let scannerStarted = false
-    let scannerPaused = false
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGnL63iINYf-7igUVb_JwaWNoYHiErf2k",
+      authDomain: "control-entradas-64826hfgr.firebaseapp.com",
+      projectId: "control-entradas-64826hfgr",
+      storageBucket: "control-entradas-64826hfgr.firebasestorage.app",
+      messagingSenderId: "779578072302",
+      appId: "1:779578072302:web:57216df153bcb2319767ff"
+    };
 
-    // Motor nativo para Android/Chrome/Samsung.
-    let nativeVideo = null
-    let nativeStream = null
-    let nativeDetector = null
-    let nativeScanFrame = null
-    let nativeLastDetectionAt = 0
-    let scannerEngine = ''
-    let isProcessing = false
-    let lastCode = ''
-    let lastCodeTime = 0
-    let currentResultCode = ''
-    let undoTargetCode = ''
-    let audioCtx = null
-    let scannerTransition = Promise.resolve()
-    let scannerDesiredRunning = false
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    window.addEventListener('load', () => {
-      bindBottomNavigation()
-      initialiseApp()
-    })
-    window.addEventListener('online', () => syncNow(false))
-    window.addEventListener('offline', () => setSyncStatus('offline', 'Sin conexión'))
+    const REPEAT_BLOCK_MS = 4500;
 
-    function bindBottomNavigation() {
-      document.querySelectorAll('.nav-btn[data-tab]').forEach(button => {
-        button.addEventListener('click', event => {
-          event.preventDefault()
-          event.stopPropagation()
-          changeTab(button.dataset.tab)
-        })
-      })
-    }
+    let tickets = {};
+    let recentLogs = [];
+    let currentUser = null;
+    let currentZone = "PATIO";
+    let html5QrCode = null;
+    let scannerStarted = false;
+    let scannerEngine = "";
+    let isProcessing = false;
+    let lastCode = "";
+    let lastCodeTime = 0;
+    let currentResultCode = "";
+    let lastAcceptedCode = "";
+    let undoTargetCode = "";
+    let audioCtx = null;
 
-    function changeTab(tab) {
-      /*
-       * La navegación no espera a que la cámara termine
-       * de pausarse o reanudarse. La sección se abre primero
-       * y cualquier error de cámara se registra sin bloquear
-       * Buscar, Resumen o Ajustes.
-       */
+    let nativeVideo = null;
+    let nativeStream = null;
+    let nativeDetector = null;
+    let nativeScanFrame = null;
+    let nativeLastDetectionAt = 0;
+
+    let unsubscribeTickets = null;
+    let unsubscribeCheckins = null;
+
+    const loginView = document.getElementById("loginView");
+    const mainApp = document.getElementById("mainApp");
+    const bottomNav = document.getElementById("bottomNav");
+    const resultView = document.getElementById("resultView");
+
+    document.getElementById("loginButton").addEventListener("click", login);
+    document.getElementById("passwordInput").addEventListener("keydown", event => {
+      if (event.key === "Enter") login();
+    });
+
+    document.getElementById("restartCameraButton").addEventListener("click", restartScanner);
+    document.getElementById("nextScanButton").addEventListener("click", nextScan);
+    document.getElementById("logoutButton").addEventListener("click", logout);
+    document.getElementById("refreshDataButton").addEventListener("click", () => {
+      renderStats();
+      renderDashboard();
+      renderSearchResults();
+    });
+    document.getElementById("searchInput").addEventListener("input", renderSearchResults);
+    document.getElementById("accessZoneSelect").addEventListener("change", changeAccessZone);
+    document.getElementById("resultUndoButton").addEventListener("click", () => showUndoModal(currentResultCode));
+    document.getElementById("undoCancelButton").addEventListener("click", closeUndoModal);
+    document.getElementById("undoConfirmButton").addEventListener("click", confirmUndo);
+
+    document.querySelectorAll(".nav-btn[data-tab]").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        showTab(button.dataset.tab);
+      });
+    });
+
+    window.renderDashboard = renderDashboard;
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        enterMainApp();
+      } else {
+        currentUser = null;
+        loginView.classList.remove("hidden");
+        mainApp.classList.add("hidden");
+        bottomNav.classList.add("hidden");
+        resultView.classList.add("hidden");
+
+        if (unsubscribeTickets) unsubscribeTickets();
+        if (unsubscribeCheckins) unsubscribeCheckins();
+
+        unsubscribeTickets = null;
+        unsubscribeCheckins = null;
+        stopScanner().catch(() => {});
+      }
+    });
+
+    async function login() {
+      let email = document.getElementById("emailInput").value.trim().toLowerCase();
+      const password = document.getElementById("passwordInput").value;
+      const button = document.getElementById("loginButton");
+
+      if (email && !email.includes("@")) {
+        email = email + "@graduacion.local";
+      }
+
+      if (!email || !password) {
+        alert("Introduce usuario y contraseña.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Entrando...";
+      unlockAudio();
+
       try {
-        showTab(tab)
+        await signInWithEmailAndPassword(auth, email, password);
       } catch (error) {
-        console.error('Error al cambiar de pestaña:', error)
+        alert("No se ha podido iniciar sesión: " + error.message);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Entrar";
       }
     }
 
-    function initialiseApp() {
-      loadLocalState()
-      document.getElementById('deviceNameInput').value = deviceName
-      document.getElementById('simulationToggle').checked = simulationMode
-      document.getElementById('accessZoneSelect').value = accessZone
-      renderMode()
-      renderAccessZone()
-
-      if (token && tokenExpiry > Date.now()) {
-        initialiseWithSession()
-      }
-    }
-
-    function loadLocalState() {
-      try { tickets = JSON.parse(localStorage.getItem(KEYS.tickets) || '{}') || {} } catch (e) { tickets = {} }
-      try { queue = JSON.parse(localStorage.getItem(KEYS.queue) || '[]') || [] } catch (e) { queue = [] }
-      queue.forEach(item => item.sending = false)
-      renderStats()
-      updatePendingNotice()
-    }
-
-    function persistLocalState() {
-      localStorage.setItem(KEYS.tickets, JSON.stringify(tickets))
-      localStorage.setItem(KEYS.queue, JSON.stringify(queue))
-      localStorage.setItem(KEYS.lastServerTime, String(lastServerTime || 0))
-      localStorage.setItem(KEYS.dataVersion, dataVersion || '')
-      localStorage.setItem(KEYS.lastAcceptedCode, lastAcceptedCode || '')
-      localStorage.setItem(KEYS.accessZone, accessZone || '')
-    }
-
-    function login() {
-      const pin = document.getElementById('pinInput').value.trim()
-      const requestedDeviceName = document.getElementById('deviceNameInput').value.trim()
-      const button = document.getElementById('loginButton')
-
-      if (!requestedDeviceName) {
-        alert('Pon un nombre a este dispositivo, por ejemplo: Puerta principal 1.')
-        return
-      }
-
-      if (!pin) {
-        alert('Introduce la clave.')
-        return
-      }
-
-      button.disabled = true
-      button.textContent = 'Entrando...'
-      unlockAudio()
-
-      callAppsScript('login', {
-        pin,
-        deviceName: requestedDeviceName
-      }, res => {
-        button.disabled = false
-        button.textContent = 'Entrar'
-
-        if (!res || res.status !== 'OK') {
-          alert(res && res.message ? res.message : 'No se ha podido iniciar sesión.')
-          return
-        }
-
-        token = res.token
-        tokenExpiry = Number(res.expiresAt || 0)
-        deviceName = res.deviceName
-        dataVersion = String(res.dataVersion || '')
-
-        localStorage.setItem(KEYS.token, token)
-        localStorage.setItem(KEYS.tokenExpiry, String(tokenExpiry))
-        localStorage.setItem(KEYS.deviceName, deviceName)
-        localStorage.setItem(KEYS.dataVersion, dataVersion)
-
-        initialiseWithSession(true)
-      }, () => {
-        button.disabled = false
-        button.textContent = 'Entrar'
-        alert('No se ha podido conectar con el servidor.')
-      })
-    }
-
-    function initialiseWithSession(fromLogin = false) {
-      setSyncStatus('syncing', 'Cargando entradas...')
-
-      callAppsScript('snapshot', { token }, res => {
-        if (!res || res.status !== 'OK') {
-          if (res && res.status === 'UNAUTHORIZED') {
-            clearSessionOnly()
-            if (fromLogin) alert(res.message)
-          }
-          return
-        }
-
-        applySnapshot(res)
-        enterMainApp()
-        startSyncLoop()
-      }, () => {
-        if (Object.keys(tickets).length > 0) {
-          enterMainApp()
-          startSyncLoop()
-          setSyncStatus('offline', 'Modo local')
-        } else {
-          alert('No hay ninguna lista de entradas descargada y no se ha podido conectar.')
-        }
-      })
+    async function logout() {
+      if (!confirm("¿Cerrar sesión?")) return;
+      await stopScanner();
+      await signOut(auth);
     }
 
     function enterMainApp() {
-      document.getElementById('loginView').classList.add('hidden')
-      document.getElementById('mainApp').classList.remove('hidden')
-      document.getElementById('bottomNav').classList.remove('hidden')
-      document.getElementById('deviceLabel').textContent = deviceName
-      document.getElementById('settingsDeviceName').textContent = deviceName
-      document.getElementById('simulationToggle').checked = simulationMode
-      document.getElementById('accessZoneSelect').value = accessZone
-      renderMode()
-      renderAccessZone()
-      renderStats()
-      showTab(accessZone ? 'scanner' : 'settings')
+      loginView.classList.add("hidden");
+      mainApp.classList.remove("hidden");
+      bottomNav.classList.remove("hidden");
 
-      if (!accessZone) {
-        setTimeout(() => {
-          alert('Antes de empezar, selecciona en Ajustes si este móvil está en Patio o en Palco.')
-        }, 150)
-      }
+      const email = currentUser.email || "";
+      document.getElementById("deviceLabel").textContent = getDeviceLabel(email);
+      document.getElementById("settingsUser").textContent = email + " · " + currentUser.uid;
 
-      startScanner().catch(error => {
-        console.error('No se pudo iniciar la cámara:', error)
-      })
+      configureZoneByUser(email);
+      subscribeTickets();
+      subscribeRecentCheckins();
+      showTab("scanner");
+
+      setTimeout(() => {
+        startScanner().catch(error => {
+          console.error("No se pudo iniciar la cámara:", error);
+          setSyncStatus("offline", "Cámara no iniciada");
+        });
+      }, 350);
     }
 
-    function logout() {
-      if (!confirm('¿Cerrar la sesión de este dispositivo? La copia local de entradas se conservará.')) return
-      clearSessionOnly()
-      location.reload()
-    }
+    function configureZoneByUser(email) {
+      const lower = String(email || "").toLowerCase();
+      const select = document.getElementById("accessZoneSelect");
 
-    function clearSessionOnly() {
-      token = ''
-      tokenExpiry = 0
-      localStorage.removeItem(KEYS.token)
-      localStorage.removeItem(KEYS.tokenExpiry)
-    }
-
-    function showTab(tab) {
-      const validTabs = ['scanner', 'search', 'dashboard', 'settings']
-      if (!validTabs.includes(tab)) return
-
-      document.getElementById('resultView').classList.add('hidden')
-      document.getElementById('mainApp').classList.remove('hidden')
-      document.getElementById('bottomNav').classList.remove('hidden')
-
-      validTabs.forEach(name => {
-        const section = document.getElementById(name + 'Tab')
-        const navButton = document.getElementById('nav' + capitalize(name))
-
-        if (section) {
-          section.classList.toggle('hidden', name !== tab)
-        }
-
-        if (navButton) {
-          navButton.classList.toggle('active', name === tab)
-        }
-      })
-
-      window.scrollTo(0, 0)
-
-      /*
-       * La cámara permanece iniciada mientras la sesión está abierta.
-       * Al cambiar de sección solo ocultamos su contenedor.
-       * Esto evita los errores de transición de html5-qrcode
-       * observados en Samsung y Safari.
-       */
-      if (tab === 'search') {
-        renderSearchResults()
+      if (lower.startsWith("palco")) {
+        currentZone = "PALCO";
+        select.value = "PALCO";
+        select.disabled = true;
+      } else if (lower.startsWith("patio")) {
+        currentZone = "PATIO";
+        select.value = "PATIO";
+        select.disabled = true;
+      } else if (lower.startsWith("admin")) {
+        currentZone = "TODAS";
+        select.value = "TODAS";
+        select.disabled = false;
+      } else {
+        currentZone = "PATIO";
+        select.value = "PATIO";
+        select.disabled = false;
       }
 
-      if (tab === 'dashboard') {
-        loadDashboard()
-      }
-    }
-
-    function normalizeAccessZone(value) {
-      const zone = String(value || '').trim().toUpperCase()
-
-      if (zone === 'SALON' || zone === 'SALÓN' || zone === 'PATIO') {
-        return 'PATIO'
-      }
-
-      if (zone === 'PALCO') {
-        return 'PALCO'
-      }
-
-      if (zone === 'TODAS' || zone === 'TODOS' || zone === 'ALL') {
-        return 'TODAS'
-      }
-
-      return ''
-    }
-
-    function getTicketAccessZone(ticket) {
-      const raw = String(
-        ticket && (ticket.zonaId || ticket.zona) || ''
-      ).toUpperCase()
-
-      return raw.includes('PALCO') ? 'PALCO' : 'PATIO'
-    }
-
-    function accessZoneLabel(zone) {
-      if (zone === 'PATIO') return 'PATIO'
-      if (zone === 'PALCO') return 'PALCO'
-      if (zone === 'TODAS') return 'TODAS'
-      return 'ZONA SIN CONFIGURAR'
-    }
-
-    function renderAccessZone() {
-      const badge = document.getElementById('accessZoneBadge')
-      const help = document.getElementById('accessZoneHelp')
-      const select = document.getElementById('accessZoneSelect')
-
-      if (select && select.value !== accessZone) {
-        select.value = accessZone
-      }
-
-      if (badge) {
-        badge.textContent = accessZoneLabel(accessZone)
-        badge.className = 'access-zone-badge' + (
-          accessZone === 'PATIO' ? ' patio' :
-          accessZone === 'PALCO' ? ' palco' :
-          accessZone === 'TODAS' ? ' all' : ''
-        )
-      }
-
-      if (help) {
-        if (!accessZone) {
-          help.textContent = 'Debes seleccionar Patio o Palco antes de escanear.'
-          help.className = 'small-text zone-required'
-        } else if (accessZone === 'TODAS') {
-          help.textContent = 'Este móvil aceptará entradas de ambas zonas. Úsalo solo para incidencias.'
-          help.className = 'small-text'
-        } else {
-          help.textContent = 'Configurado para ' + accessZoneLabel(accessZone) + '. Las entradas de la otra zona serán rechazadas.'
-          help.className = 'small-text'
-        }
-      }
+      renderAccessZone();
     }
 
     function changeAccessZone() {
-      const select = document.getElementById('accessZoneSelect')
-      accessZone = normalizeAccessZone(select ? select.value : '')
-      localStorage.setItem(KEYS.accessZone, accessZone || '')
-      renderAccessZone()
+      currentZone = document.getElementById("accessZoneSelect").value;
+      renderAccessZone();
+      showTab("scanner");
+    }
 
-      if (accessZone) {
-        showTab('scanner')
+    function renderAccessZone() {
+      const badge = document.getElementById("accessZoneBadge");
+      const help = document.getElementById("accessZoneHelp");
+
+      badge.textContent = accessZoneLabel(currentZone);
+      badge.className =
+        "access-zone-badge " +
+        (currentZone === "PATIO" ? "patio" :
+         currentZone === "PALCO" ? "palco" :
+         "all");
+
+      if (currentZone === "TODAS") {
+        help.textContent = "Este móvil aceptará entradas de ambas zonas. Úsalo solo para incidencias.";
+      } else {
+        help.textContent = "Configurado para " + accessZoneLabel(currentZone) + ". Las entradas de la otra zona serán rechazadas.";
       }
     }
 
+    function showTab(tab) {
+      resultView.classList.add("hidden");
+      mainApp.classList.remove("hidden");
+      bottomNav.classList.remove("hidden");
+
+      ["scanner", "search", "dashboard", "settings"].forEach(name => {
+        document.getElementById(name + "Tab").classList.toggle("hidden", name !== tab);
+        document.getElementById("nav" + capitalize(name)).classList.toggle("active", name === tab);
+      });
+
+      if (tab === "search") renderSearchResults();
+      if (tab === "dashboard") renderDashboard();
+
+      window.scrollTo(0, 0);
+    }
+
     function capitalize(value) {
-      return value.charAt(0).toUpperCase() + value.slice(1)
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function subscribeTickets() {
+      if (unsubscribeTickets) unsubscribeTickets();
+
+      setSyncStatus("syncing", "Sincronizando...");
+
+      unsubscribeTickets = onSnapshot(collection(db, "tickets"), snapshot => {
+        tickets = {};
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const code = data.codigo || docSnap.id;
+
+          tickets[code] = {
+            ...data,
+            code,
+            codigo: code,
+            used: data.usado === true,
+            checkinAt: data.checkin_at || "",
+            checkinBy: data.checkin_by || "",
+            zona: data.zona_label || data.zona || "",
+            zonaId: getTicketAccessZone(data)
+          };
+        });
+
+        renderStats();
+        renderDashboard();
+        renderSearchResults();
+        setSyncStatus("online", "Sincronizado");
+        document.getElementById("lastSyncText").textContent = "Ahora";
+      }, error => {
+        console.error(error);
+        setSyncStatus("offline", "Error Firebase");
+      });
+    }
+
+    function subscribeRecentCheckins() {
+      if (unsubscribeCheckins) unsubscribeCheckins();
+
+      const q = query(
+        collection(db, "checkins"),
+        orderBy("checkin_at", "desc"),
+        limit(12)
+      );
+
+      unsubscribeCheckins = onSnapshot(q, snapshot => {
+        recentLogs = [];
+        snapshot.forEach(docSnap => recentLogs.push(docSnap.data()));
+        renderRecentLogs();
+      }, error => console.error(error));
+    }
+
+    function renderStats() {
+      const values = visibleTickets();
+      const total = values.length;
+      const used = values.filter(t => t.used).length;
+
+      document.getElementById("totalStat").textContent = total || "-";
+      document.getElementById("usedStat").textContent = used;
+      document.getElementById("pendingStat").textContent = Math.max(total - used, 0);
+    }
+
+    function renderDashboard() {
+      const values = Object.values(tickets);
+      const total = values.length;
+      const used = values.filter(t => t.used).length;
+
+      const salon = values.filter(t => getTicketAccessZone(t) === "PATIO");
+      const palco = values.filter(t => getTicketAccessZone(t) === "PALCO");
+
+      const salonUsed = salon.filter(t => t.used).length;
+      const palcoUsed = palco.filter(t => t.used).length;
+
+      document.getElementById("dashTotal").textContent = total || "-";
+      document.getElementById("dashUsed").textContent = used;
+      document.getElementById("dashPending").textContent = Math.max(total - used, 0);
+
+      document.getElementById("dashSalon").textContent = `${salonUsed} / ${salon.length}`;
+      document.getElementById("dashSalonPending").textContent = `${salon.length - salonUsed} pendientes`;
+
+      document.getElementById("dashPalco").textContent = `${palcoUsed} / ${palco.length}`;
+      document.getElementById("dashPalcoPending").textContent = `${palco.length - palcoUsed} pendientes`;
+
+      renderRecentLogs();
+    }
+
+    function renderRecentLogs() {
+      const container = document.getElementById("recentLogs");
+
+      if (!recentLogs.length) {
+        container.innerHTML = '<div class="small-text">Todavía no hay movimientos registrados.</div>';
+        return;
+      }
+
+      container.innerHTML = recentLogs.map(log => `
+        <div class="log-item">
+          <div class="log-name">${escapeHtml(log.nombre || "Sin nombre")}</div>
+          <div class="log-meta">
+            ${escapeHtml(log.zona_label || log.zona || "")}
+            · Fila ${escapeHtml(log.fila || "")}
+            · Butaca ${escapeHtml(log.butaca || "")}<br>
+            ${escapeHtml(formatDate(log.checkin_at || ""))}
+            · ${escapeHtml(log.checkin_by || "")}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderSearchResults() {
+      const container = document.getElementById("searchResults");
+      const input = document.getElementById("searchInput");
+
+      if (!container || !input) return;
+
+      const q = normalizeSearch(input.value);
+
+      if (!q) {
+        container.innerHTML = '<div class="small-text">Escribe al menos parte del nombre, código, zona, fila o butaca.</div>';
+        return;
+      }
+
+      const results = Object.values(tickets)
+        .filter(ticket => {
+          const haystack = normalizeSearch([
+            ticket.code,
+            ticket.codigo,
+            ticket.nombre,
+            ticket.estudiante,
+            ticket.zona,
+            ticket.zona_label,
+            "fila " + ticket.fila,
+            "butaca " + ticket.butaca,
+            ticket.fila,
+            ticket.butaca
+          ].join(" "));
+
+          return haystack.includes(q);
+        })
+        .slice(0, 30);
+
+      if (!results.length) {
+        container.innerHTML = '<div class="notice">No se ha encontrado ninguna entrada.</div>';
+        return;
+      }
+
+      container.innerHTML = results.map(ticket => `
+        <div class="search-result">
+          <div class="search-name">${escapeHtml(ticket.nombre || ticket.estudiante || "Sin nombre")}</div>
+          <div class="search-meta">
+            ${escapeHtml(ticket.zona || ticket.zona_label || "")}
+            · Fila ${escapeHtml(ticket.fila || "")}
+            · Butaca ${escapeHtml(ticket.butaca || "")}<br>
+            ${escapeHtml(ticket.code || ticket.codigo || "")}<br>
+            ${ticket.used ? "⚠️ Utilizada" : "✅ Disponible"}
+            ${ticket.checkinAt ? " · " + escapeHtml(formatDate(ticket.checkinAt)) : ""}
+            ${ticket.checkinBy ? " · " + escapeHtml(ticket.checkinBy) : ""}
+          </div>
+          <div class="search-actions">
+            <button type="button" class="btn small ${ticket.used ? "secondary" : ""}" data-code="${escapeHtml(ticket.code || ticket.codigo || "")}">
+              ${ticket.used ? "Ver estado" : "Registrar acceso"}
+            </button>
+            <button type="button" class="btn secondary small" data-undo="${escapeHtml(ticket.code || ticket.codigo || "")}">
+              Deshacer
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      container.querySelectorAll("button[data-code]").forEach(button => {
+        button.addEventListener("click", () => {
+          isProcessing = true;
+          validateCode(button.dataset.code);
+        });
+      });
+
+      container.querySelectorAll("button[data-undo]").forEach(button => {
+        button.addEventListener("click", () => showUndoModal(button.dataset.undo));
+      });
+    }
+
+    function visibleTickets() {
+      const values = Object.values(tickets);
+
+      if (currentZone === "TODAS") return values;
+
+      return values.filter(ticket => getTicketAccessZone(ticket) === currentZone);
+    }
+
+    async function startScanner() {
+      if (scannerStarted) return;
+
+      if (canUseNativeBarcodeDetector()) {
+        try {
+          scannerEngine = "native";
+          await startNativeScanner();
+          scannerStarted = true;
+          return;
+        } catch (error) {
+          console.warn("El lector nativo no ha podido iniciarse. Se prueba html5-qrcode:", error);
+          await stopNativeScanner();
+        }
+      }
+
+      await startHtml5Scanner();
+      scannerEngine = "html5";
+      scannerStarted = true;
     }
 
     function isAndroidDevice() {
-      return /Android/i.test(navigator.userAgent || '')
+      return /Android/i.test(navigator.userAgent || "");
     }
-
 
     function canUseNativeBarcodeDetector() {
       return (
         isAndroidDevice() &&
-        'BarcodeDetector' in window &&
+        "BarcodeDetector" in window &&
         navigator.mediaDevices &&
-        typeof navigator.mediaDevices.getUserMedia === 'function'
-      )
+        typeof navigator.mediaDevices.getUserMedia === "function"
+      );
     }
-
-
-    async function startScanner() {
-      if (scannerStarted) {
-        return
-      }
-
-      /*
-       * En Android usamos primero la API nativa del navegador.
-       * Evita el fallo conocido de pantalla negra de html5-qrcode
-       * en algunos dispositivos Samsung con Chrome.
-       *
-       * En iPhone y en navegadores sin BarcodeDetector se mantiene
-       * html5-qrcode, que es el motor que ya funciona correctamente.
-       */
-      if (canUseNativeBarcodeDetector()) {
-        try {
-          scannerEngine = 'native'
-          await startNativeScanner()
-          scannerStarted = true
-          scannerPaused = false
-          return
-        } catch (error) {
-          console.warn(
-            'El lector nativo no ha podido iniciarse. Se prueba html5-qrcode:',
-            error
-          )
-          await stopNativeScanner()
-        }
-      }
-
-      await startHtml5Scanner()
-      scannerEngine = 'html5'
-      scannerStarted = true
-      scannerPaused = false
-    }
-
 
     async function startNativeScanner() {
-      const reader = document.getElementById('reader')
+      const reader = document.getElementById("reader");
 
       while (reader.firstChild) {
-        reader.removeChild(reader.firstChild)
+        reader.removeChild(reader.firstChild);
       }
 
-      nativeVideo = document.createElement('video')
-      nativeVideo.setAttribute('playsinline', '')
-      nativeVideo.setAttribute('autoplay', '')
-      nativeVideo.setAttribute('muted', '')
-      nativeVideo.muted = true
-      nativeVideo.style.width = '100%'
-      nativeVideo.style.height = '100%'
-      nativeVideo.style.minHeight = '410px'
-      nativeVideo.style.objectFit = 'cover'
-      nativeVideo.style.display = 'block'
-      nativeVideo.style.background = '#000'
+      nativeVideo = document.createElement("video");
+      nativeVideo.setAttribute("playsinline", "");
+      nativeVideo.setAttribute("autoplay", "");
+      nativeVideo.setAttribute("muted", "");
+      nativeVideo.muted = true;
+      nativeVideo.style.width = "100%";
+      nativeVideo.style.height = "100%";
+      nativeVideo.style.minHeight = "410px";
+      nativeVideo.style.objectFit = "cover";
+      nativeVideo.style.display = "block";
+      nativeVideo.style.background = "#000";
 
-      reader.appendChild(nativeVideo)
+      reader.appendChild(nativeVideo);
 
       nativeStream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode: { ideal: 'environment' },
+          facingMode: { ideal: "environment" },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
-      })
+      });
 
-      nativeVideo.srcObject = nativeStream
+      nativeVideo.srcObject = nativeStream;
 
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('La cámara no ha empezado a mostrar imagen.'))
-        }, 7000)
+          reject(new Error("La cámara no ha empezado a mostrar imagen."));
+        }, 7000);
 
         const ready = async () => {
-          clearTimeout(timeout)
+          clearTimeout(timeout);
 
           try {
-            await nativeVideo.play()
-            resolve()
+            await nativeVideo.play();
+            resolve();
           } catch (error) {
-            reject(error)
+            reject(error);
           }
-        }
+        };
 
         if (nativeVideo.readyState >= 2) {
-          ready()
+          ready();
         } else {
-          nativeVideo.onloadedmetadata = ready
+          nativeVideo.onloadedmetadata = ready;
           nativeVideo.onerror = () => {
-            clearTimeout(timeout)
-            reject(new Error('No se ha podido cargar el vídeo de la cámara.'))
-          }
+            clearTimeout(timeout);
+            reject(new Error("No se ha podido cargar el vídeo de la cámara."));
+          };
         }
-      })
+      });
 
       const supportedFormats =
-        typeof BarcodeDetector.getSupportedFormats === 'function'
+        typeof BarcodeDetector.getSupportedFormats === "function"
           ? await BarcodeDetector.getSupportedFormats()
-          : ['qr_code']
+          : ["qr_code"];
 
-      const formats = supportedFormats.includes('qr_code')
-        ? ['qr_code']
-        : supportedFormats
+      const formats = supportedFormats.includes("qr_code")
+        ? ["qr_code"]
+        : supportedFormats;
 
       nativeDetector = new BarcodeDetector({
-        formats: formats.length ? formats : ['qr_code']
-      })
+        formats: formats.length ? formats : ["qr_code"]
+      });
 
-      nativeLastDetectionAt = 0
-      nativeScanLoop()
+      nativeLastDetectionAt = 0;
+      nativeScanLoop();
     }
 
-
     async function nativeScanLoop() {
-      if (
-        !scannerStarted &&
-        scannerEngine !== 'native' &&
-        !nativeVideo
-      ) {
-        return
-      }
+      if (scannerEngine !== "native" || !nativeVideo) return;
 
       if (
         nativeVideo &&
@@ -1343,921 +1337,604 @@
         nativeVideo.readyState >= 2 &&
         !isProcessing
       ) {
-        const now = performance.now()
+        const now = performance.now();
 
         if (now - nativeLastDetectionAt >= 140) {
-          nativeLastDetectionAt = now
+          nativeLastDetectionAt = now;
 
           try {
-            const barcodes = await nativeDetector.detect(nativeVideo)
+            const barcodes = await nativeDetector.detect(nativeVideo);
 
             if (barcodes && barcodes.length > 0) {
               const qr = barcodes.find(item =>
-                !item.format || item.format === 'qr_code'
-              ) || barcodes[0]
+                !item.format || item.format === "qr_code"
+              ) || barcodes[0];
 
               if (qr && qr.rawValue) {
-                onScanSuccess(qr.rawValue)
+                onScanSuccess(qr.rawValue);
               }
             }
-          } catch (error) {
-            console.debug('Lectura nativa sin resultado:', error)
-          }
+          } catch (error) {}
         }
       }
 
-      nativeScanFrame = requestAnimationFrame(nativeScanLoop)
+      nativeScanFrame = requestAnimationFrame(nativeScanLoop);
     }
-
 
     async function stopNativeScanner() {
       if (nativeScanFrame) {
-        cancelAnimationFrame(nativeScanFrame)
-        nativeScanFrame = null
+        cancelAnimationFrame(nativeScanFrame);
+        nativeScanFrame = null;
       }
 
       if (nativeStream) {
         nativeStream.getTracks().forEach(track => {
-          try {
-            track.stop()
-          } catch (error) {}
-        })
+          try { track.stop(); } catch (error) {}
+        });
       }
 
       if (nativeVideo) {
         try {
-          nativeVideo.pause()
-          nativeVideo.srcObject = null
+          nativeVideo.pause();
+          nativeVideo.srcObject = null;
         } catch (error) {}
       }
 
-      nativeVideo = null
-      nativeStream = null
-      nativeDetector = null
+      nativeVideo = null;
+      nativeStream = null;
+      nativeDetector = null;
     }
-
 
     async function startHtml5Scanner() {
       if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode('reader', {
+        html5QrCode = new Html5Qrcode("reader", {
           formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
           verbose: false
-        })
+        });
       }
 
       await html5QrCode.start(
-        { facingMode: 'environment' },
+        { facingMode: "environment" },
         {
           fps: 18,
           disableFlip: true,
           qrbox: (w, h) => {
-            const size = Math.floor(Math.min(w, h) * 0.91)
-
-            return {
-              width: size,
-              height: size
-            }
+            const size = Math.floor(Math.min(w, h) * 0.91);
+            return { width: size, height: size };
           }
         },
         onScanSuccess,
         () => {}
-      )
+      );
     }
 
+    async function stopScanner() {
+      if (scannerEngine === "native") {
+        await stopNativeScanner();
+      }
+
+      if (scannerEngine === "html5" && html5QrCode && scannerStarted) {
+        try {
+          await html5QrCode.stop();
+          await html5QrCode.clear();
+        } catch (error) {}
+      }
+
+      scannerStarted = false;
+      scannerEngine = "";
+      html5QrCode = null;
+    }
 
     async function restartScanner() {
-      const button = document.getElementById('restartCameraButton')
+      const button = document.getElementById("restartCameraButton");
 
       if (button) {
-        button.disabled = true
-        button.textContent = 'Reiniciando...'
+        button.disabled = true;
+        button.textContent = "Reiniciando...";
       }
 
       try {
-        if (scannerEngine === 'native') {
-          await stopNativeScanner()
-        }
+        await stopScanner();
 
-        if (
-          scannerEngine === 'html5' &&
-          html5QrCode &&
-          scannerStarted
-        ) {
-          try {
-            await html5QrCode.stop()
-          } catch (error) {
-            console.warn('No se pudo detener html5-qrcode:', error)
-          }
-
-          html5QrCode = null
-        }
-
-        scannerStarted = false
-        scannerPaused = false
-        scannerEngine = ''
-
-        const reader = document.getElementById('reader')
+        const reader = document.getElementById("reader");
 
         while (reader.firstChild) {
-          reader.removeChild(reader.firstChild)
+          reader.removeChild(reader.firstChild);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 350))
-        await startScanner()
+        await new Promise(resolve => setTimeout(resolve, 350));
+        await startScanner();
 
       } catch (error) {
-        alert(
-          'No se ha podido reiniciar la cámara: ' +
-          (error.message || error)
-        )
+        alert("No se ha podido reiniciar la cámara: " + (error.message || error));
       } finally {
         if (button) {
-          button.disabled = false
-          button.textContent = 'Reiniciar cámara'
+          button.disabled = false;
+          button.textContent = "Reiniciar cámara";
         }
       }
     }
 
-
     function onScanSuccess(decodedText) {
-      const code = normalizeCode(decodedText)
-      const now = Date.now()
+      const code = normalizeCode(decodedText);
+      const now = Date.now();
 
-      if (!code || isProcessing) return
-      if (code === lastCode && now - lastCodeTime < REPEAT_BLOCK_MS) return
+      if (!code || isProcessing) return;
+      if (code === lastCode && now - lastCodeTime < REPEAT_BLOCK_MS) return;
 
-      lastCode = code
-      lastCodeTime = now
-      isProcessing = true
+      lastCode = code;
+      lastCodeTime = now;
+      isProcessing = true;
 
-      // La cámara permanece activa detrás de la pantalla de resultado.
-      // Los nuevos callbacks se ignoran hasta pulsar “Siguiente”.
-      processLocalCheckIn(code, 'SCAN')
+      validateCode(code);
     }
 
-    function processLocalCheckIn(code, source) {
-      currentResultCode = code
-      const ticket = tickets[code]
+    async function validateCode(code) {
+      currentResultCode = code;
 
-      if (!ticket) {
+      try {
+        const result = await validateTicketTransaction(code);
+
+        if (result.status === "OK") {
+          lastAcceptedCode = code;
+
+          showResult({
+            ...result.ticket,
+            status: "OK",
+            message: "Acceso permitido.",
+            localPending: true
+          });
+
+          syncCheckinToSheets(result.ticket);
+
+        } else if (result.status === "ALREADY_USED") {
+          showResult({
+            ...result.ticket,
+            status: "DUPLICATE",
+            message: "Esta entrada ya había sido utilizada."
+          });
+
+        } else if (result.status === "WRONG_ZONE") {
+          const zone = getTicketAccessZone(result.ticket);
+
+          showResult({
+            ...result.ticket,
+            status: "WRONG_ZONE",
+            message: "Esta entrada corresponde a " + accessZoneLabel(zone) + "."
+          });
+
+        } else {
+          showResult({
+            status: "INVALID",
+            code,
+            message: "El código no corresponde a ninguna entrada cargada."
+          });
+        }
+
+      } catch (error) {
         showResult({
-          status: 'INVALID',
+          status: "ERROR",
           code,
-          message: 'El código no corresponde a ninguna entrada cargada.'
-        })
-        return
+          message: "Error validando entrada: " + error.message
+        });
       }
+    }
 
-      if (!accessZone) {
-        showResult({
-          ...ticket,
-          status: 'ZONE_NOT_CONFIGURED',
-          message: 'Selecciona Patio o Palco en Ajustes antes de escanear.'
-        })
-        return
-      }
+    async function validateTicketTransaction(code) {
+      const ticketRef = doc(db, "tickets", code);
+      const checkinRef = doc(db, "checkins", code);
+      const deviceLabel = getDeviceLabel(currentUser.email || "");
 
-      const ticketAccessZone = getTicketAccessZone(ticket)
+      return await runTransaction(db, async transaction => {
+        const snap = await transaction.get(ticketRef);
 
-      if (
-        accessZone !== 'TODAS' &&
-        ticketAccessZone !== accessZone
-      ) {
-        showResult({
-          ...ticket,
-          status: 'WRONG_ZONE',
-          message:
-            'Esta entrada corresponde a ' +
-            ticketAccessZone +
-            '. Diríjase al acceso de ' +
-            (ticketAccessZone === 'PATIO' ? 'Patio' : 'Palco') +
-            '.'
-        })
-        return
-      }
+        if (!snap.exists()) {
+          return { status: "NOT_FOUND" };
+        }
 
-      if (simulationMode) {
-        const requestId = makeRequestId()
-        queue.push({
-          code,
-          requestId,
-          mode: 'SIMULATION',
-          source,
-          accessZone,
-          createdAt: Date.now(),
-          attempts: 0,
-          sending: false
-        })
-        persistLocalState()
-        updatePendingNotice()
-        showResult({
-          ...ticket,
-          status: ticket.used ? 'DUPLICATE' : 'SIMULATION_OK',
-          message: ticket.used
-            ? 'En modo real ya figura como utilizada.'
-            : 'Simulación correcta. No se ha marcado como utilizada.',
-          localPending: true
-        })
-        syncNow(false)
-        return
-      }
+        const ticket = snap.data();
+        const ticketZone = getTicketAccessZone(ticket);
 
-      if (ticket.used || ticket.pending) {
-        showResult({
-          ...ticket,
-          status: 'DUPLICATE',
-          message: ticket.pending
-            ? 'Esta entrada se acaba de registrar en este dispositivo.'
-            : 'Esta entrada ya había sido utilizada.'
-        })
-        return
-      }
+        if (currentZone !== "TODAS" && currentZone !== ticketZone) {
+          return { status: "WRONG_ZONE", ticket: normalizeTicket(ticket, code) };
+        }
 
-      const requestId = makeRequestId()
-      const localNow = new Date()
+        if (ticket.usado === true) {
+          return { status: "ALREADY_USED", ticket: normalizeTicket(ticket, code) };
+        }
 
-      Object.assign(ticket, {
-        used: true,
-        pending: true,
-        checkinAt: formatLocalDate(localNow),
-        checkinEpoch: localNow.getTime(),
-        checkinBy: deviceName,
-        localRequestId: requestId
-      })
+        const nowIso = new Date().toISOString();
 
-      queue.push({
-        code,
-        requestId,
-        mode: 'REAL',
-        source,
-        accessZone,
-        createdAt: Date.now(),
-        attempts: 0,
-        sending: false
-      })
+        const updatedTicket = {
+          usado: true,
+          checkin_at: nowIso,
+          checkin_by: deviceLabel,
+          checkin_uid: currentUser.uid,
+          checkin_email: currentUser.email || "",
+          last_update_source: "scanner_realtime"
+        };
 
-      lastAcceptedCode = code
-      persistLocalState()
-      renderStats()
-      updatePendingNotice()
-      showResult({
+        transaction.update(ticketRef, updatedTicket);
+
+        transaction.set(checkinRef, {
+          codigo: ticket.codigo || code,
+          nombre: ticket.nombre || "",
+          zona: ticket.zona || "",
+          zona_label: ticket.zona_label || "",
+          fila: ticket.fila || "",
+          butaca: ticket.butaca || "",
+          tipo_entrada: ticket.tipo_entrada || "",
+          checkin_at: nowIso,
+          checkin_by: deviceLabel,
+          checkin_uid: currentUser.uid,
+          checkin_email: currentUser.email || "",
+          created_at: nowIso
+        });
+
+        return {
+          status: "OK",
+          ticket: normalizeTicket({ ...ticket, ...updatedTicket }, code)
+        };
+      });
+    }
+
+    function normalizeTicket(ticket, codeFallback = "") {
+      const code = ticket.codigo || ticket.code || codeFallback;
+
+      return {
         ...ticket,
-        status: 'OK',
-        message: 'Acceso permitido.',
-        localPending: true
-      })
-      syncNow(false)
-    }
-
-    function makeRequestId() {
-      return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9)
-    }
-
-    function nextScan() {
-      currentResultCode = ''
-      isProcessing = false
-
-      document.getElementById('resultView').classList.add('hidden')
-      document.getElementById('mainApp').classList.remove('hidden')
-      document.getElementById('bottomNav').classList.remove('hidden')
-
-      showTab('scanner')
+        code,
+        codigo: code,
+        used: ticket.usado === true || ticket.used === true,
+        checkinAt: ticket.checkin_at || ticket.checkinAt || "",
+        checkinBy: ticket.checkin_by || ticket.checkinBy || "",
+        zona: ticket.zona_label || ticket.zona || "",
+        zonaId: getTicketAccessZone(ticket)
+      };
     }
 
     function showResult(res) {
-      document.getElementById('mainApp').classList.add('hidden')
-      document.getElementById('bottomNav').classList.add('hidden')
-      document.getElementById('resultView').classList.remove('hidden')
+      mainApp.classList.add("hidden");
+      bottomNav.classList.add("hidden");
+      resultView.classList.remove("hidden");
 
-      let css = 'error'
-      let icon = '❌'
-      let title = res.message || 'Error'
+      let css = "error";
+      let icon = "❌";
+      let title = res.message || "Error";
 
-      if (res.status === 'OK' || res.status === 'CONFIRMED') {
-        css = 'ok'
-        icon = '✅'
-        title = 'Acceso permitido'
-        playSuccess()
-        vibrate([70])
-      } else if (res.status === 'SIMULATION_OK') {
-        css = 'simulation'
-        icon = '🧪'
-        title = 'Simulación correcta'
-        playSuccess()
-        vibrate([50])
-      } else if (res.status === 'DUPLICATE') {
-        css = 'duplicate'
-        icon = '⚠️'
-        title = 'Entrada ya utilizada'
-        playWarning()
-        vibrate([120, 70, 120])
-      } else if (res.status === 'WRONG_ZONE') {
-        css = 'invalid'
-        icon = '↪️'
-        title = 'Zona incorrecta'
-        playError()
-        vibrate([180, 80, 180])
-      } else if (res.status === 'ZONE_NOT_CONFIGURED') {
-        css = 'invalid'
-        icon = '⚙️'
-        title = 'Configura la zona'
-        playWarning()
-        vibrate([120, 70, 120])
+      if (res.status === "OK" || res.status === "CONFIRMED") {
+        css = "ok";
+        icon = "✅";
+        title = "Acceso permitido";
+        playSuccess();
+        vibrate([70]);
+      } else if (res.status === "DUPLICATE") {
+        css = "duplicate";
+        icon = "⚠️";
+        title = "Entrada ya utilizada";
+        playWarning();
+        vibrate([120, 70, 120]);
+      } else if (res.status === "WRONG_ZONE") {
+        css = "invalid";
+        icon = "↪️";
+        title = "Zona incorrecta";
+        playError();
+        vibrate([180, 80, 180]);
       } else {
-        css = 'invalid'
-        icon = '❌'
-        title = 'Entrada no válida'
-        playError()
-        vibrate([250])
+        css = "invalid";
+        icon = "❌";
+        title = "Entrada no válida";
+        playError();
+        vibrate([250]);
       }
 
-      const zoneClass = String(res.zona || '').includes('PALCO') ? 'palco' : 'salon'
-      const hasSeat = res.fila || res.butaca
+      const zoneClass = getTicketAccessZone(res) === "PALCO" ? "palco" : "salon";
+      const zoneText = zoneClass === "palco" ? "PALCO" : "SALÓN";
+      const hasSeat = res.fila || res.butaca;
       const confirmation = res.localPending
-        ? '<div id="resultConfirmation" class="confirm-badge pending">⏳ Pendiente de guardar</div>'
-        : res.status === 'OK' || res.status === 'CONFIRMED'
-          ? '<div id="resultConfirmation" class="confirm-badge confirmed">☁️ Guardado en Google Sheets</div>'
-          : ''
+        ? '<div id="resultConfirmation" class="confirm-badge pending">⏳ Guardando en Excel...</div>'
+        : res.status === "OK" || res.status === "CONFIRMED"
+          ? '<div id="resultConfirmation" class="confirm-badge confirmed">☁️ Guardado en Excel</div>'
+          : "";
 
-      const undoButton = document.getElementById('resultUndoButton')
+      const undoButton = document.getElementById("resultUndoButton");
       if (undoButton) {
-        undoButton.classList.toggle(
-          'hidden',
-          !['OK', 'CONFIRMED', 'DUPLICATE'].includes(res.status)
-        )
+        undoButton.classList.toggle("hidden", !["OK", "CONFIRMED", "DUPLICATE"].includes(res.status));
       }
 
-      document.getElementById('resultBox').className = 'result ' + css
-      document.getElementById('resultBox').innerHTML = `
+      document.getElementById("resultBox").className = "result " + css;
+      document.getElementById("resultBox").innerHTML = `
         <div class="result-icon">${icon}</div>
         <div class="result-title">${escapeHtml(title)}</div>
-        ${(res.nombre || res.estudiante) ? `<div class="result-name">${escapeHtml(res.nombre || res.estudiante)}</div>` : ''}
-        ${res.zona ? `<div><span class="zone-badge ${zoneClass}">${escapeHtml(res.zona)}</span></div>` : ''}
+        ${(res.nombre || res.estudiante) ? `<div class="result-name">${escapeHtml(res.nombre || res.estudiante)}</div>` : ""}
+        ${res.zona ? `<div><span class="zone-badge ${zoneClass}">${escapeHtml(zoneText)}</span></div>` : ""}
         ${hasSeat ? `
           <div class="seat-grid">
-            <div class="seat-box"><div class="seat-label">Fila</div><div class="seat-value">${escapeHtml(res.fila || '-')}</div></div>
-            <div class="seat-box"><div class="seat-label">Butaca</div><div class="seat-value">${escapeHtml(res.butaca || '-')}</div></div>
-          </div>` : ''}
+            <div class="seat-box"><div class="seat-label">Fila</div><div class="seat-value">${escapeHtml(res.fila || "-")}</div></div>
+            <div class="seat-box"><div class="seat-label">Butaca</div><div class="seat-value">${escapeHtml(res.butaca || "-")}</div></div>
+          </div>` : ""}
         ${res.checkinAt ? `
           <div class="time-box">
-            <div class="time-label">${res.status === 'DUPLICATE' ? 'Escaneada originalmente' : 'Hora de acceso'}</div>
-            <div class="time-value">${escapeHtml(res.checkinAt)}</div>
-          </div>` : ''}
+            <div class="time-label">${res.status === "DUPLICATE" ? "Escaneada originalmente" : "Hora de acceso"}</div>
+            <div class="time-value">${escapeHtml(formatDate(res.checkinAt))}</div>
+          </div>` : ""}
         ${confirmation}
-        <div class="meta">${escapeHtml(res.code || '')}</div>
-        ${res.message && res.message !== title ? `<div class="meta">${escapeHtml(res.message)}</div>` : ''}
-      `
+        <div class="meta">${escapeHtml(res.code || res.codigo || currentResultCode || "")}</div>
+        ${res.message && res.message !== title ? `<div class="meta">${escapeHtml(res.message)}</div>` : ""}
+      `;
     }
 
     function markCurrentResultConfirmed() {
-      const badge = document.getElementById('resultConfirmation')
+      const badge = document.getElementById("resultConfirmation");
       if (badge) {
-        badge.className = 'confirm-badge confirmed'
-        badge.textContent = '☁️ Guardado en Google Sheets'
+        badge.className = "confirm-badge confirmed";
+        badge.textContent = "☁️ Guardado en Excel";
       }
     }
 
-    function startSyncLoop() {
-      if (syncTimer) clearInterval(syncTimer)
-      syncTimer = setInterval(() => syncNow(false), SYNC_INTERVAL_MS)
-      setTimeout(() => syncNow(false), 900)
+    function markCurrentResultSyncError() {
+      const badge = document.getElementById("resultConfirmation");
+      if (badge) {
+        badge.className = "confirm-badge error";
+        badge.textContent = "⚠️ Validado, pero no guardado en Excel";
+      }
     }
 
-    function syncNow(forceSnapshot) {
-      if (syncInProgress || !token) return
-      if (!navigator.onLine) {
-        setSyncStatus('offline', 'Sin conexión')
-        return
-      }
-
-      syncInProgress = true
-      setSyncStatus('syncing', 'Sincronizando...')
-
-      flushQueue(() => {
-        const needsFullSnapshot = forceSnapshot ||
-          !lastServerTime ||
-          Date.now() - lastFullSnapshotAt > FULL_SNAPSHOT_INTERVAL_MS
-
-        const action = needsFullSnapshot ? 'snapshot' : 'changes'
-        const params = needsFullSnapshot
-          ? { token }
-          : { token, since: lastServerTime }
-
-        callAppsScript(action, params, res => {
-          syncInProgress = false
-
-          if (!res || res.status !== 'OK') {
-            handleApiSessionError(res)
-            setSyncStatus('offline', 'Error de sincronización')
-            return
-          }
-
-          if (action === 'snapshot') applySnapshot(res)
-          else applyChanges(res)
-
-          setSyncStatus('online', 'Sincronizado')
-          renderLastSync()
-        }, () => {
-          syncInProgress = false
-          setSyncStatus('offline', 'Sin conexión')
-        })
-      })
+    function nextScan() {
+      currentResultCode = "";
+      isProcessing = false;
+      showTab("scanner");
     }
 
-    function flushQueue(done) {
-      const item = queue.find(q => !q.sending)
-      if (!item) {
-        done()
-        return
-      }
-
-      item.sending = true
-      persistLocalState()
-
-      callAppsScript('checkin', {
-        token,
-        code: item.code,
-        requestId: item.requestId,
-        mode: item.mode,
-        source: item.source,
-        accessZone: item.accessZone || accessZone
-      }, res => {
-        item.sending = false
-        handleServerConfirmation(item, res)
-        setTimeout(() => flushQueue(done), 0)
-      }, () => {
-        item.sending = false
-        item.attempts = Number(item.attempts || 0) + 1
-        persistLocalState()
-        done()
-      })
+    function syncCheckinToSheets(ticket) {
+      syncSheetAction({
+        action: "checkin",
+        codigo: ticket.codigo || ticket.code || "",
+        checkin_at: ticket.checkin_at || ticket.checkinAt || "",
+        checkin_by: ticket.checkin_by || ticket.checkinBy || "",
+        checkin_email: ticket.checkin_email || currentUser.email || ""
+      }, ok => {
+        if (ok) markCurrentResultConfirmed();
+        else markCurrentResultSyncError();
+      });
     }
 
-    function handleServerConfirmation(item, res) {
-      if (res && res.status === 'UNAUTHORIZED') {
-        handleApiSessionError(res)
-        return
+    function syncSheetAction(params, callback) {
+      const callbackName = "__sync_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+
+      window[callbackName] = function(response) {
+        cleanup();
+        callback?.(response && response.status === "OK", response);
+      };
+
+      script.onerror = function() {
+        cleanup();
+        callback?.(false, null);
+      };
+
+      function cleanup() {
+        try { delete window[callbackName]; } catch (error) {}
+        if (script.parentNode) script.parentNode.removeChild(script);
       }
 
-      const ticket = tickets[item.code]
+      const url = new URL(SHEETS_SYNC_URL);
+      url.searchParams.set("secret", SHEETS_SYNC_SECRET);
+      url.searchParams.set("callback", callbackName);
+      url.searchParams.set("_", Date.now());
 
-      if (item.mode === 'SIMULATION') {
-        if (res && ['SIMULATION_OK', 'DUPLICATE'].includes(res.status)) {
-          queue = queue.filter(q => q.requestId !== item.requestId)
-          if (currentResultCode === item.code) markCurrentResultConfirmed()
-        } else {
-          item.attempts = Number(item.attempts || 0) + 1
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          url.searchParams.set(key, params[key] ?? "");
         }
-        persistLocalState()
-        updatePendingNotice()
-        return
       }
 
-      if (!ticket) {
-        queue = queue.filter(q => q.requestId !== item.requestId)
-        persistLocalState()
-        return
-      }
-
-      if (res && ['OK', 'CONFIRMED'].includes(res.status)) {
-        Object.assign(ticket, {
-          used: true,
-          pending: false,
-          checkinAt: res.checkinAt || ticket.checkinAt,
-          checkinEpoch: Number(res.checkinEpoch || ticket.checkinEpoch || Date.now()),
-          checkinBy: res.checkinBy || ticket.checkinBy,
-          localRequestId: ''
-        })
-        queue = queue.filter(q => q.requestId !== item.requestId)
-        if (currentResultCode === item.code) markCurrentResultConfirmed()
-      } else if (res && res.status === 'DUPLICATE') {
-        Object.assign(ticket, {
-          used: true,
-          pending: false,
-          checkinAt: res.checkinAt || ticket.checkinAt,
-          checkinEpoch: Number(res.checkinEpoch || ticket.checkinEpoch || Date.now()),
-          checkinBy: res.checkinBy || ticket.checkinBy,
-          localRequestId: ''
-        })
-        queue = queue.filter(q => q.requestId !== item.requestId)
-
-        if (currentResultCode === item.code) {
-          showResult({ ...ticket, status: 'DUPLICATE', message: 'Conflicto: otro dispositivo ya había registrado esta entrada.' })
-        }
-      } else if (res && ['WRONG_ZONE', 'ZONE_NOT_CONFIGURED'].includes(res.status)) {
-        ticket.used = false
-        ticket.pending = false
-        ticket.checkinAt = ''
-        ticket.checkinEpoch = 0
-        ticket.checkinBy = ''
-        ticket.localRequestId = ''
-        queue = queue.filter(q => q.requestId !== item.requestId)
-
-        if (currentResultCode === item.code) {
-          showResult({
-            ...ticket,
-            ...res,
-            status: res.status,
-            message: res.message
-          })
-        }
-      } else if (res && res.status === 'INVALID') {
-        ticket.used = false
-        ticket.pending = false
-        ticket.localRequestId = ''
-        queue = queue.filter(q => q.requestId !== item.requestId)
-        if (currentResultCode === item.code) showResult({ status: 'INVALID', code: item.code, message: res.message })
-      } else {
-        item.attempts = Number(item.attempts || 0) + 1
-      }
-
-      persistLocalState()
-      renderStats()
-      updatePendingNotice()
-    }
-
-    function applySnapshot(res) {
-      const next = {}
-      ;(res.tickets || []).forEach(serverTicket => {
-        const local = tickets[serverTicket.code]
-        const queued = queue.some(q => q.code === serverTicket.code && q.mode === 'REAL')
-        next[serverTicket.code] = {
-          ...serverTicket,
-          pending: queued && !serverTicket.used,
-          localRequestId: local ? local.localRequestId || '' : ''
-        }
-      })
-
-      tickets = next
-      lastServerTime = Number(res.serverTime || Date.now())
-      dataVersion = String(res.dataVersion || dataVersion)
-      lastFullSnapshotAt = Date.now()
-      queue = queue.filter(item => item.mode === 'SIMULATION' || !tickets[item.code] || !tickets[item.code].used || tickets[item.code].pending)
-      persistLocalState()
-      renderStats()
-      updatePendingNotice()
-      renderSearchResults()
-    }
-
-    function applyChanges(res) {
-      if (String(res.dataVersion || '') && dataVersion && String(res.dataVersion) !== dataVersion) {
-        lastServerTime = 0
-        dataVersion = String(res.dataVersion)
-        persistLocalState()
-        setTimeout(() => syncNow(true), 50)
-        return
-      }
-
-      ;(res.changes || []).forEach(change => {
-        const ticket = tickets[change.code]
-        if (!ticket) return
-        Object.assign(ticket, change, {
-          pending: false,
-          localRequestId: ''
-        })
-        queue = queue.filter(q => q.code !== change.code || q.mode === 'SIMULATION')
-      })
-
-      lastServerTime = Number(res.serverTime || Date.now())
-      dataVersion = String(res.dataVersion || dataVersion)
-      persistLocalState()
-      renderStats()
-      updatePendingNotice()
-      renderSearchResults()
-    }
-
-    function handleApiSessionError(res) {
-      if (res && res.status === 'UNAUTHORIZED') {
-        clearSessionOnly()
-        alert('La sesión ha caducado. Vuelve a entrar. La copia local se conserva.')
-      }
-    }
-
-    function renderStats() {
-      const values = Object.values(tickets)
-      const total = values.length
-      const used = values.filter(t => t.used).length
-      document.getElementById('totalStat').textContent = total || '-'
-      document.getElementById('usedStat').textContent = used
-      document.getElementById('pendingStat').textContent = Math.max(total - used, 0)
-    }
-
-    function setSyncStatus(state, text) {
-      const badge = document.getElementById('syncBadge')
-      if (!badge) return
-      badge.className = 'sync-badge ' + state
-      document.getElementById('syncText').textContent = text
-    }
-
-    function renderLastSync() {
-      const el = document.getElementById('lastSyncText')
-      if (el) el.textContent = 'Ahora'
-    }
-
-    function updatePendingNotice() {
-      const notice = document.getElementById('pendingNotice')
-      if (!notice) return
-      const pending = queue.length
-      notice.classList.toggle('hidden', pending === 0)
-      if (pending > 0) {
-        notice.textContent = pending + (pending === 1 ? ' operación pendiente de sincronizar.' : ' operaciones pendientes de sincronizar.')
-      }
-    }
-
-    function renderSearchResults() {
-      const container = document.getElementById('searchResults')
-      const input = document.getElementById('searchInput')
-      if (!container || !input) return
-      const query = normalizeSearch(input.value)
-
-      if (!query) {
-        container.innerHTML = '<div class="small-text">Escribe al menos parte del nombre, código, zona, fila o butaca.</div>'
-        return
-      }
-
-      const results = Object.values(tickets)
-        .filter(ticket => {
-          const haystack = normalizeSearch([
-            ticket.code,
-            ticket.nombre || ticket.estudiante,
-            ticket.nombre,
-            ticket.zona,
-            'fila ' + ticket.fila,
-            'butaca ' + ticket.butaca,
-            ticket.fila,
-            ticket.butaca
-          ].join(' '))
-          return haystack.includes(query)
-        })
-        .slice(0, 30)
-
-      if (!results.length) {
-        container.innerHTML = '<div class="notice">No se ha encontrado ninguna entrada.</div>'
-        return
-      }
-
-      container.innerHTML = results.map(ticket => `
-        <div class="search-result">
-          <div class="search-name">${escapeHtml(ticket.nombre || ticket.estudiante || 'Sin nombre')}</div>
-          <div class="search-meta">${escapeHtml(ticket.zona)} · Fila ${escapeHtml(ticket.fila)} · Butaca ${escapeHtml(ticket.butaca)}<br>${escapeHtml(ticket.code)}<br>${ticket.used ? '⚠️ Utilizada' : '✅ Disponible'}</div>
-          <div class="search-actions">
-            <button type="button" class="btn small ${ticket.used ? 'secondary' : ''}" onclick="manualCheckIn('${escapeJs(ticket.code)}')">${ticket.used ? 'Ver estado' : 'Registrar acceso'}</button>
-            <button type="button" class="btn secondary small" onclick="showUndoModal('${escapeJs(ticket.code)}')">Deshacer</button>
-          </div>
-        </div>`).join('')
-    }
-
-    function manualCheckIn(code) {
-      processLocalCheckIn(code, 'MANUAL')
-    }
-
-    function loadDashboard() {
-      callAppsScript('dashboard', { token }, res => {
-        if (!res || res.status !== 'OK') {
-          handleApiSessionError(res)
-          return
-        }
-
-        const stats = res.stats || {}
-        document.getElementById('dashTotal').textContent = stats.total ?? '-'
-        document.getElementById('dashUsed').textContent = stats.used ?? '-'
-        document.getElementById('dashDevices').textContent = stats.activeDevices ?? '-'
-        document.getElementById('dashSalon').textContent = `${stats.salon?.used ?? 0} / ${stats.salon?.total ?? 0}`
-        document.getElementById('dashSalonPending').textContent = `${stats.salon?.pending ?? 0} pendientes`
-        document.getElementById('dashPalco').textContent = `${stats.palco?.used ?? 0} / ${stats.palco?.total ?? 0}`
-        document.getElementById('dashPalcoPending').textContent = `${stats.palco?.pending ?? 0} pendientes`
-
-        const logs = res.recentLogs || []
-        document.getElementById('recentLogs').innerHTML = logs.length
-          ? logs.map(log => `
-            <div class="log-item">
-              <div class="log-name">${escapeHtml(log.estudiante || log.result)}</div>
-              <div class="log-meta">${escapeHtml(log.result)} · ${escapeHtml(log.zona)} ${log.fila ? '· Fila ' + escapeHtml(log.fila) : ''} ${log.butaca ? '· Butaca ' + escapeHtml(log.butaca) : ''}<br>${escapeHtml(log.date)} · ${escapeHtml(log.deviceName)}</div>
-            </div>`).join('')
-          : '<div class="small-text">Todavía no hay movimientos registrados.</div>'
-      })
-    }
-
-    function toggleSimulationMode() {
-      simulationMode = document.getElementById('simulationToggle').checked
-      localStorage.setItem(KEYS.simulation, String(simulationMode))
-      renderMode()
-    }
-
-    function renderMode() {
-      const badge = document.getElementById('modeBadge')
-      if (!badge) return
-      badge.textContent = simulationMode ? 'MODO SIMULACRO' : 'MODO REAL'
-      badge.className = 'mode-badge' + (simulationMode ? ' simulation' : '')
+      script.src = url.toString();
+      document.head.appendChild(script);
     }
 
     function showUndoModal(code) {
-      const ticket = tickets[code]
+      const ticket = tickets[code];
+
       if (!code || !ticket) {
-        alert('No hay ninguna entrada seleccionada para deshacer.')
-        return
+        alert("No hay ninguna entrada seleccionada para deshacer.");
+        return;
       }
-      undoTargetCode = code
-      document.getElementById('undoDescription').textContent = `${ticket.nombre || ticket.estudiante} · ${ticket.zona} · Fila ${ticket.fila} · Butaca ${ticket.butaca}`
-      document.getElementById('undoPin').value = ''
-      document.getElementById('undoReason').value = ''
-      document.getElementById('undoModal').classList.remove('hidden')
+
+      if (!currentUser || !String(currentUser.email || "").toLowerCase().startsWith("admin")) {
+        alert("Solo el usuario admin puede deshacer accesos desde el scanner.");
+        return;
+      }
+
+      undoTargetCode = code;
+      document.getElementById("undoDescription").textContent =
+        `${ticket.nombre || ticket.estudiante || "Sin nombre"} · ${ticket.zona || ticket.zona_label || ""} · Fila ${ticket.fila || "-"} · Butaca ${ticket.butaca || "-"}`;
+      document.getElementById("undoPin").value = "";
+      document.getElementById("undoReason").value = "";
+      document.getElementById("undoModal").classList.remove("hidden");
     }
 
     function closeUndoModal() {
-      document.getElementById('undoModal').classList.add('hidden')
-      undoTargetCode = ''
+      document.getElementById("undoModal").classList.add("hidden");
+      undoTargetCode = "";
     }
 
-    function confirmUndo() {
-      const pin = document.getElementById('undoPin').value.trim()
-      const reason = document.getElementById('undoReason').value.trim()
-      const button = document.getElementById('undoConfirmButton')
+    async function confirmUndo() {
+      const reason = document.getElementById("undoReason").value.trim();
+      const button = document.getElementById("undoConfirmButton");
 
-      if (!pin || reason.length < 3) {
-        alert('Introduce la clave y un motivo breve.')
-        return
+      if (reason.length < 3) {
+        alert("Introduce un motivo breve.");
+        return;
       }
 
-      button.disabled = true
-      button.textContent = 'Deshaciendo...'
+      button.disabled = true;
+      button.textContent = "Deshaciendo...";
 
-      callAppsScript('undo', {
-        token,
-        code: undoTargetCode,
-        adminPin: pin,
-        reason
-      }, res => {
-        button.disabled = false
-        button.textContent = 'Deshacer'
+      try {
+        await resetTicketInFirebase(undoTargetCode);
 
-        if (!res || res.status !== 'OK') {
-          alert(res && res.message ? res.message : 'No se ha podido deshacer el acceso.')
-          return
-        }
+        syncSheetAction({
+          action: "reset_ticket",
+          reset_pin: "loquesea",
+          codigo: undoTargetCode
+        }, () => {});
 
-        const ticket = tickets[undoTargetCode]
-        if (ticket) {
-          Object.assign(ticket, {
-            used: false,
-            pending: false,
-            checkinAt: '',
-            checkinEpoch: 0,
-            checkinBy: '',
-            localRequestId: ''
-          })
-        }
-        queue = queue.filter(q => q.code !== undoTargetCode)
-        persistLocalState()
-        renderStats()
-        updatePendingNotice()
-        closeUndoModal()
-        alert('La entrada vuelve a estar disponible.')
-        showTab('search')
-        renderSearchResults()
-      }, () => {
-        button.disabled = false
-        button.textContent = 'Deshacer'
-        alert('No se ha podido conectar con el servidor.')
-      })
-    }
-
-    function runPreflight() {
-      const card = document.getElementById('preflightCard')
-      const content = document.getElementById('preflightContent')
-      card.classList.remove('hidden')
-      content.innerHTML = '<div class="small-text">Comprobando...</div>'
-
-      callAppsScript('preflight', { token }, res => {
-        if (!res) return
-        const cls = res.status === 'OK' ? 'preflight-ok' : 'preflight-warning'
-        content.innerHTML = `
-          <div class="${cls}" style="font-weight:900">${res.status === 'OK' ? '✓ Sistema correcto' : '⚠ Hay incidencias'}</div>
-          <div class="small-text mt">Entradas: ${res.total} · Salón: ${res.salon} · Palco: ${res.palco} · Incidencias: ${res.issueCount}</div>
-          ${(res.issues || []).length ? `<div class="mt">${res.issues.map(issue => `<div class="notice">${escapeHtml(issue)}</div>`).join('')}</div>` : ''}
-        `
-      })
-    }
-
-    function createBackupFromApp() {
-      const pin = prompt('Introduce la clave para crear la copia de seguridad:')
-      if (!pin) return
-
-      callAppsScript('backup', { token, adminPin: pin }, res => {
-        if (!res || res.status !== 'OK') {
-          alert(res && res.message ? res.message : 'No se ha podido crear la copia.')
-          return
-        }
-        alert('Copia creada: ' + res.sheetName)
-      })
-    }
-
-    function callAppsScript(action, params, onSuccess, onError) {
-      const callbackName = '__cb_' + Date.now() + '_' + Math.random().toString(36).slice(2)
-      const script = document.createElement('script')
-      const timeout = setTimeout(() => cleanup(new Error('Tiempo de espera agotado')), 15000)
-
-      function cleanup(error, response) {
-        clearTimeout(timeout)
-        try { delete window[callbackName] } catch (e) {}
-        if (script.parentNode) script.parentNode.removeChild(script)
-        if (error) {
-          if (onError) onError(error)
-        } else if (onSuccess) {
-          onSuccess(response)
-        }
+        closeUndoModal();
+        alert("La entrada vuelve a estar disponible.");
+        showTab("search");
+      } catch (error) {
+        alert("No se ha podido deshacer: " + error.message);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Deshacer";
       }
+    }
 
-      window[callbackName] = response => cleanup(null, response)
-      script.onerror = () => cleanup(new Error('Error de red'))
+    async function resetTicketInFirebase(code) {
+      const ticketRef = doc(db, "tickets", code);
+      const checkinRef = doc(db, "checkins", code);
 
-      const url = new URL(APPS_SCRIPT_URL)
-      url.searchParams.set('action', action)
-      url.searchParams.set('callback', callbackName)
-      url.searchParams.set('_', Date.now())
-      Object.entries(params || {}).forEach(([key, value]) => url.searchParams.set(key, value ?? ''))
-      script.src = url.toString()
-      document.head.appendChild(script)
+      return await runTransaction(db, async transaction => {
+        const snap = await transaction.get(ticketRef);
+
+        if (!snap.exists()) {
+          throw new Error("No existe esa entrada en Firebase.");
+        }
+
+        transaction.update(ticketRef, {
+          usado: false,
+          checkin_at: "",
+          checkin_by: "",
+          checkin_uid: "",
+          checkin_email: "",
+          last_update_source: "scanner_admin_undo"
+        });
+
+        transaction.delete(checkinRef);
+      });
     }
 
     function normalizeCode(raw) {
-      let text = String(raw || '').trim()
+      let text = String(raw || "").trim();
+
       try {
-        const url = new URL(text)
-        const code = url.searchParams.get('code') || url.searchParams.get('codigo')
-        if (code) return code.trim().toUpperCase()
-      } catch (e) {}
-      return text.toUpperCase()
+        const url = new URL(text);
+        const code = url.searchParams.get("code") || url.searchParams.get("codigo");
+        if (code) return code.trim().toUpperCase();
+      } catch (error) {}
+
+      const match = text.match(/EV26-[A-Z0-9-]+/i);
+      if (match) return match[0].toUpperCase();
+
+      return text.toUpperCase();
     }
 
     function normalizeSearch(value) {
-      return String(value || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .trim()
+        .trim();
     }
 
-    function formatLocalDate(date) {
-      return new Intl.DateTimeFormat('es-ES', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      }).format(date)
+    function getTicketAccessZone(ticket) {
+      const raw = String(ticket && (ticket.zonaId || ticket.zona || ticket.zona_label || "") || "").toUpperCase();
+      return raw.includes("PALCO") ? "PALCO" : "PATIO";
+    }
+
+    function accessZoneLabel(zone) {
+      if (zone === "PATIO") return "PATIO";
+      if (zone === "PALCO") return "PALCO";
+      if (zone === "TODAS") return "TODAS";
+      return "ZONA";
+    }
+
+    function getDeviceLabel(email) {
+      const clean = String(email || "").toLowerCase();
+      return clean.includes("@") ? clean.split("@")[0] : clean || "scanner";
+    }
+
+    function setSyncStatus(state, text) {
+      const badge = document.getElementById("syncBadge");
+      if (!badge) return;
+
+      badge.className = "sync-badge " + state;
+      document.getElementById("syncText").textContent = text;
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+
+      try {
+        const date = new Date(value);
+
+        return date.toLocaleString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        });
+      } catch (error) {
+        return value;
+      }
     }
 
     function escapeHtml(value) {
-      return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-    }
-
-    function escapeJs(value) {
-      return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function vibrate(pattern) {
-      try { navigator.vibrate?.(pattern) } catch (e) {}
+      try { navigator.vibrate?.(pattern); } catch (error) {}
     }
 
     function unlockAudio() {
       try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-        if (audioCtx.state === 'suspended') audioCtx.resume()
-      } catch (e) {}
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+      } catch (error) {}
     }
 
     function tone(frequency, duration, volume = .22) {
       try {
-        unlockAudio()
-        if (!audioCtx) return
-        const oscillator = audioCtx.createOscillator()
-        const gain = audioCtx.createGain()
-        oscillator.frequency.value = frequency
-        oscillator.type = 'sine'
-        gain.gain.value = volume
-        oscillator.connect(gain)
-        gain.connect(audioCtx.destination)
-        oscillator.start()
-        gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + duration)
-        oscillator.stop(audioCtx.currentTime + duration)
-      } catch (e) {}
+        unlockAudio();
+        if (!audioCtx) return;
+
+        const oscillator = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = "sine";
+        gain.gain.value = volume;
+
+        oscillator.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscillator.start();
+        gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + duration);
+        oscillator.stop(audioCtx.currentTime + duration);
+      } catch (error) {}
     }
 
     function playSuccess() {
-      tone(880, .13)
-      setTimeout(() => tone(1175, .16), 120)
+      tone(880, .13);
+      setTimeout(() => tone(1175, .16), 120);
     }
 
     function playWarning() {
-      tone(520, .2)
-      setTimeout(() => tone(420, .25), 180)
+      tone(520, .2);
+      setTimeout(() => tone(420, .25), 180);
     }
 
     function playError() {
-      tone(250, .34, .25)
+      tone(250, .34, .25);
     }
   </script>
 </body>
